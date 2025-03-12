@@ -3,11 +3,17 @@ package ca.mcgill.ecse.grocerymanagementsystem.feature;
 import java.util.List;
 import java.util.Map;
 
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 public class OrderStepDefinitions extends StepDefinitions {
+	@Before
+	public void before() {
+		super.before();
+	}
+
 	@Given("the following orders exist in the system")
 	public void the_following_orders_exist_in_the_system(List<Map<String, String>> orders) {
 		throw new io.cucumber.java.PendingException();

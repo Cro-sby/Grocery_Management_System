@@ -2,6 +2,7 @@ package ca.mcgill.ecse.grocerymanagementsystem.feature;
 
 import ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryManagementSystemController;
 import ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryStoreException;
+import ca.mcgill.ecse.grocerymanagementsystem.model.GroceryManagementSystem;
 
 public class StepDefinitions {
 	/**
@@ -12,5 +13,9 @@ public class StepDefinitions {
 	protected void before() {
 		GroceryManagementSystemController.resetSystem();
 		error = null;
+	}
+
+	protected GroceryManagementSystem getSystem() {
+		return GroceryManagementSystemController.getGroceryManagementSystem();
 	}
 }

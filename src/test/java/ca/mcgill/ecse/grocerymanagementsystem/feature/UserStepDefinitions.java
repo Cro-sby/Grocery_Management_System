@@ -8,12 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.Map;
 
-import ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryManagementSystemController;
 import ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryStoreException;
 import ca.mcgill.ecse.grocerymanagementsystem.controller.UserController;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Customer;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Employee;
-import ca.mcgill.ecse.grocerymanagementsystem.model.GroceryManagementSystem;
 import ca.mcgill.ecse.grocerymanagementsystem.model.User;
 import ca.mcgill.ecse.grocerymanagementsystem.model.UserRole;
 import io.cucumber.java.Before;
@@ -37,7 +35,6 @@ public class UserStepDefinitions extends StepDefinitions {
 
 	@Given("the following employees exist in the system")
 	public void the_following_employees_exist_in_the_system(List<Map<String, String>> employees) {
-		GroceryManagementSystem sys = GroceryManagementSystemController.getGroceryManagementSystem();
 		for (Map<String, String> example : employees) {
 			String username = example.get("username");
 			User u = User.getWithUsername(username);
@@ -47,15 +44,14 @@ public class UserStepDefinitions extends StepDefinitions {
 						example.get("password"),
 						example.get("name"),
 						example.get("phone"),
-						sys);
+						this.getSystem());
 			}
-			new Employee(u, sys);
+			new Employee(u, this.getSystem());
 		}
 	}
 
 	@Given("the following customers exist in the system")
 	public void the_following_customers_exist_in_the_system(List<Map<String, String>> customers) {
-		GroceryManagementSystem sys = GroceryManagementSystemController.getGroceryManagementSystem();
 		for (Map<String, String> example : customers) {
 			String username = example.get("username");
 			User u = User.getWithUsername(username);
@@ -65,13 +61,13 @@ public class UserStepDefinitions extends StepDefinitions {
 						example.get("password"),
 						example.get("name"),
 						example.get("phone"),
-						sys);
+						this.getSystem());
 			}
 			new Customer(
 					u,
 					example.get("address"),
 					Integer.parseInt(example.get("points")),
-					sys);
+					this.getSystem());
 		}
 	}
 
@@ -245,26 +241,22 @@ public class UserStepDefinitions extends StepDefinitions {
 	
 	@Then("the total number of users shall be {int}")
 	public void the_total_number_of_users_shall_be(Integer n) {
-		GroceryManagementSystem sys = GroceryManagementSystemController.getGroceryManagementSystem();
-		assertEquals(n, sys.getUsers().size());
+		assertEquals(n, this.getSystem().getUsers().size());
 	}
 
 	@Then("the total number of customers shall be {int}")
 	public void the_total_number_of_customers_shall_be(Integer n) {
-		GroceryManagementSystem sys = GroceryManagementSystemController.getGroceryManagementSystem();
-		assertEquals(n, sys.getCustomers().size());
+		assertEquals(n, this.getSystem().getCustomers().size());
 	}
 
 	@Then("the total number of employees shall be {int}")
 	public void the_total_number_of_employees_shall_be(Integer n) {
-		GroceryManagementSystem sys = GroceryManagementSystemController.getGroceryManagementSystem();
-		assertEquals(n, sys.getEmployees().size());
+		assertEquals(n, this.getSystem().getEmployees().size());
 	}
 
 	@Then("there shall be one manager")
 	public void there_shall_be_one_manager() {
-		GroceryManagementSystem sys = GroceryManagementSystemController.getGroceryManagementSystem();
-		assertNotNull(sys.getManager(), "the manager should exist");
+		assertNotNull(this.getSystem().getManager(), "the manager should exist");
 	}
 	
 	private Customer getCustomerAccount(User u) {

@@ -7,10 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.util.List;
 import java.util.Map;
 
-import ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryManagementSystemController;
 import ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryStoreException;
 import ca.mcgill.ecse.grocerymanagementsystem.controller.ItemController;
-import ca.mcgill.ecse.grocerymanagementsystem.model.GroceryManagementSystem;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Item;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -28,7 +26,6 @@ public class ItemStepDefinitions extends StepDefinitions {
 
 	@Given("the following items exist in the system")
 	public void the_following_items_exist_in_the_system(List<Map<String, String>> table) {
-		GroceryManagementSystem sys = GroceryManagementSystemController.getGroceryManagementSystem();
 		for (Map<String, String> example : table) {
 			new Item(
 					example.get("name"),
@@ -36,7 +33,7 @@ public class ItemStepDefinitions extends StepDefinitions {
 					Integer.parseInt(example.get("price")),
 					parsePerishable(example.get("perishableOrNot")),
 					Integer.parseInt(example.get("points")),
-					sys);
+					this.getSystem());
 		}
 	}
 
@@ -112,8 +109,7 @@ public class ItemStepDefinitions extends StepDefinitions {
 
 	@Then("the total number of items shall be {int}")
 	public void the_total_number_of_items_shall_be(Integer n) {
-		GroceryManagementSystem sys = GroceryManagementSystemController.getGroceryManagementSystem();
-		assertEquals(n, sys.getItems());
+		assertEquals(n, this.getSystem().getItems());
 	}
 
 	private boolean parsePerishable(String perishableOrNot) {
