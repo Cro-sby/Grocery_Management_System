@@ -1,0 +1,12 @@
+# Files from Gradle
+.gradle/
+build/
+
+# Files from Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# Files from Cucumber
+.cucumber/

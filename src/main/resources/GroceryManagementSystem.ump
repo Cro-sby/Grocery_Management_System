@@ -1,0 +1,81 @@
+namespace ca.mcgill.ecse.grocerymanagementsystem.model;
+
+class GroceryManagementSystem {
+  1 <@>- * User users;
+  1 <@>- * Employee employees;
+  1 <@>- * Customer customers;
+  1 <@>- 0..1 Manager manager;
+  1 <@>- * Order orders;
+  1 <@>- * Item items;
+  1 <@>- * Shipment shipments;
+  1 <@>- * OrderItem orderItems;
+  1 <@>- * ShipmentItem shipmentItems;
+}
+
+class User {
+  unique username;
+  password;
+  name;
+  phoneNumber;
+}
+
+class UserRole {
+}
+
+class Customer {
+  isA UserRole;
+  address;
+  Integer numberOfPoints;
+}
+
+class Employee {
+  isA UserRole;
+}
+
+class Manager {
+  isA UserRole;
+}
+
+class Order {
+  autounique orderNumber;
+  Date datePlaced;
+  enum DeliveryDeadline { sameDay, inOneDay, inTwoDays, inThreeDays}
+  DeliveryDeadline deadline;
+}
+
+class Item {
+  unique name;
+  Integer quantityInInventory;
+  Integer price; // in cents
+  Boolean isPerishable;
+  Integer numberOfPoints;
+}
+
+class Shipment {
+  autounique shipmentNumber;
+  Date dateOrdered;
+}
+
+associationClass OrderItem {
+  Integer quantity;
+  * Order order;
+  * Item item;
+}
+
+associationClass ShipmentItem {
+  Integer quantity;
+  * Shipment shipment;
+  * Item item;
+}
+
+association {
+  1 User user -- 0..2 UserRole roles;
+}
+
+association {
+  1 Customer orderPlacer -- * Order ordersPlaced;
+}
+
+association {
+  0..1 Employee orderAssignee -- * Order ordersAssigned;
+}
