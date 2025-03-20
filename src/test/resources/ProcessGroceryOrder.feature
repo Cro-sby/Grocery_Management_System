@@ -4,11 +4,16 @@ Feature: Process order
   As an employee, I want to mark orders as completed once I have finished assembling them.
 
   Background: 
-    Given the following customers exist in the system
+    Given the following employees exist in the system
+      | username | password | name           | phone          |
+      | alice    | alice123 | Alice Allisson | (514) 555-1111 |
+      | bob      | password | Bob Robertson  | (514) 555-2222 |
+      | claire   | password | Claire Clark   | (514) 555-3333 |
+    And the following customers exist in the system
       | username  | password         | name             | phone          | address                | points |
       | obiwan212 | highground       | Obi-Wan Kenobi   | (438) 555-1234 | Jedi Temple, Coruscant |    212 |
       | anakin501 | i-dont-like-sand | Anakin Skywalker | (514) 555-9876 | Jedi Temple, Coruscant |    501 |
-      | alice     | alice123         | Alice Allisson   | (514) 555-1111 | 123 Alice Avenue       |      2 |
+      | alice     | ---              | ---              | ---            | 123 Alice Avenue       |      2 |
     And the following items exist in the system
       | name                | price | perishableOrNot | quantity | points |
       | Eggs                |   549 | perishable      |       20 |      5 |
@@ -20,22 +25,23 @@ Feature: Process order
       # The controller should still identify orders by their order number.
       # You'll need to create a map from string IDs to order numbers.
       # Also, please convert the string "NULL" to null, "today" to the current date, "yesterday" to yesterday's date, etc.
-      | id    | datePlaced | deadline    | customer  | state              |
-      | a     | NULL       | SameDay     | alice     | under construction |
-      | b1    | NULL       | InOneDay    | obiwan212 | under construction |
-      | b2    | NULL       | InOneDay    | obiwan212 | under construction |
-      | b3    | NULL       | InOneDay    | obiwan212 | under construction |
-      | b9    | NULL       | InOneDay    | obiwan212 | under construction |
-      | b10   | NULL       | InOneDay    | obiwan212 | under construction |
-      | b11   | NULL       | InOneDay    | obiwan212 | under construction |
-      | empty | NULL       | InTwoDays   | anakin501 | under construction |
-      | d     | NULL       | InThreeDays | alice     | under construction |
-      | e     | NULL       | SameDay     | alice     | pending            |
-      | f     | today      | InOneDay    | obiwan212 | placed             |
-      | g     | yesterday  | InTwoDays   | anakin501 | in preparation     |
-      | h     | yesterday  | InOneDay    | anakin501 | ready for delivery |
-      | i     | yesterday  | SameDay     | alice     | delivered          |
-      | j     | today      | InOneDay    | alice     | cancelled          |
+      # TODO: Need to specify assignee as well?
+      | id    | datePlaced | deadline    | customer  | assignee | state              |
+      | a     | NULL       | SameDay     | alice     | NULL     | under construction |
+      | b1    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
+      | b2    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
+      | b3    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
+      | b9    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
+      | b10   | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
+      | b11   | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
+      | empty | NULL       | InTwoDays   | anakin501 | NULL     | under construction |
+      | d     | NULL       | InThreeDays | alice     | NULL     | under construction |
+      | e     | NULL       | SameDay     | alice     | NULL     | pending            |
+      | f     | today      | InOneDay    | obiwan212 | NULL     | placed             |
+      | g     | yesterday  | InTwoDays   | anakin501 | bob      | in preparation     |
+      | h     | yesterday  | InOneDay    | anakin501 | claire   | ready for delivery |
+      | i     | yesterday  | SameDay     | alice     | alice    | delivered          |
+      | j     | today      | InOneDay    | alice     | bob      | cancelled          |
     And the following items are part of orders
       | order | item                | quantity |
       | a     | Eggs                |        1 |
@@ -61,6 +67,7 @@ Feature: Process order
     Then the system shall not raise any errors
     And the total cost of the order shall be <cost> cents
     And the order shall be "pending"
+    And the order's assignee shall be "NULL"
 
     Examples: 
       | id  | cost |
@@ -89,17 +96,18 @@ Feature: Process order
     When the user attempts to check out the order with ID "<id>"
     Then the system shall raise the error "<error>"
     And the order shall be "<state>"
+    And the order's assignee shall be "<assignee>"
 
     Examples: 
-      | id    | state              | error                                        |
-      | empty | under construction | cannot check out an empty order              |
-      | b11   | under construction | insufficient inventory for item \\"Banana\\" |
-      | e     | pending            | order has already been checked out           |
-      | f     | placed             | order has already been checked out           |
-      | g     | in preparation     | order has already been checked out           |
-      | h     | ready for delivery | order has already been checked out           |
-      | i     | delivered          | order has already been checked out           |
-      | j     | cancelled          | order has already been checked out           |
+      | id    | state              | assignee | error                                        |
+      | empty | under construction | NULL     | cannot check out an empty order              |
+      | b11   | under construction | NULL     | insufficient inventory for item \\"Banana\\" |
+      | e     | pending            | NULL     | order has already been checked out           |
+      | f     | placed             | NULL     | order has already been checked out           |
+      | g     | in preparation     | bob      | order has already been checked out           |
+      | h     | ready for delivery | claire   | order has already been checked out           |
+      | i     | delivered          | alice    | order has already been checked out           |
+      | j     | cancelled          | bob      | order has already been checked out           |
 
   Scenario Outline: Successfully pay for order
     When the user attempts to pay for the order with ID "<orderId>" <usingOrNotUsing> their points
@@ -107,6 +115,7 @@ Feature: Process order
     And the final cost of the order, after considering points, shall be <cost> cents
     And the order shall be "placed"
     And the order's date placed shall be today
+    And the order's assignee shall be "NULL"
     And "<username>" shall have <points> points
 
     # TODO: How are points calculated?
@@ -123,6 +132,7 @@ Feature: Process order
     And the user attempts to pay for the order with ID "<orderId>" <usingOrNotUsing> their points
     And the final cost of the order, after considering points, shall be <cost> cents
     And the order shall be "placed"
+    And the order's assignee shall be "NULL"
     And the order's date placed shall be today
     And "<username>" shall have <points> points
 
@@ -150,18 +160,55 @@ Feature: Process order
     When the user attempts to pay for the order with ID "<orderId>" <usingOrNotUsing> their points
     Then the system shall raise the error "<error>"
     And the order shall be "<state>"
-    And "<username>" shall have <points> points
+    And the order's assignee shall be "<assignee>"
+    And "<customer>" shall have <points> points
 
     Examples: 
-      | orderId | usingOrNotUsing | state              | username  | points | error                                                  |
-      | a       | using           | under construction | alice     |      2 | cannot pay for an order which has not been checked out |
-      | a       | without using   | under construction | alice     |      2 | cannot pay for an order which has not been checked out |
-      | f       | using           | placed             | obiwan212 |    212 | order has already been paid for                        |
-      | f       | without using   | placed             | obiwan212 |    212 | order has already been paid for                        |
-      | g       | using           | in preparation     | anakin501 |    501 | order has already been paid for                        |
-      | g       | without using   | in preparation     | anakin501 |    501 | order has already been paid for                        |
-      | h       | using           | ready for delivery | anakin501 |    501 | order has already been paid for                        |
-      | h       | without using   | ready for delivery | anakin501 |    501 | order has already been paid for                        |
-      | i       | using           | delivered          | alice     |      2 | order has already been paid for                        |
-      | i       | without using   | delivered          | alice     |      2 | order has already been paid for                        |
-      | j       | using           | cancelled          | alice     |      2 | order has already been paid for                        |
+      | orderId | usingOrNotUsing | state              | customer  | points | assignee | error                                                  |
+      | a       | using           | under construction | alice     |      2 | NULL     | cannot pay for an order which has not been checked out |
+      | a       | without using   | under construction | alice     |      2 | NULL     | cannot pay for an order which has not been checked out |
+      | f       | using           | placed             | obiwan212 |    212 | NULL     | cannot pay for order that has already been paid for    |
+      | f       | without using   | placed             | obiwan212 |    212 | NULL     | cannot pay for order that has already been paid for    |
+      | g       | using           | in preparation     | anakin501 |    501 | bob      | cannot pay for order that has already been paid for    |
+      | g       | without using   | in preparation     | anakin501 |    501 | bob      | cannot pay for order that has already been paid for    |
+      | h       | using           | ready for delivery | anakin501 |    501 | claire   | cannot pay for order that has already been paid for    |
+      | h       | without using   | ready for delivery | anakin501 |    501 | claire   | cannot pay for order that has already been paid for    |
+      | i       | using           | delivered          | alice     |      2 | alice    | cannot pay for order that has already been paid for    |
+      | i       | without using   | delivered          | alice     |      2 | alice    | cannot pay for order that has already been paid for    |
+      | j       | using           | cancelled          | alice     |      2 | bob      | cannot pay for order that has already been paid for    |
+      | j       | without using   | cancelled          | alice     |      2 | bob      | cannot pay for order that has already been paid for    |
+
+  Scenario Outline: Successfully assign order to employee
+    When the manager attempts to assign the order with ID "<orderId>" to "<employee>"
+    Then the system shall not raise any errors
+    And the order shall be "in preparation"
+    And the order's assignee shall be "<employee>"
+
+    Examples: 
+      | orderId | employee |
+      | f       | alice    |
+      | f       | bob      |
+      | f       | claire   |
+      # Change assignee
+      | g       | alice    |
+      | g       | bob      |
+      | g       | claire   |
+
+  Scenario Outline: Unsuccessfully assign order to employee
+    When the manager attempts to assign the order with ID "<orderId>" to "<newAssignee>"
+    Then the system shall raise the error "<error>"
+    And the order shall be "<oldState>"
+    And the order's assignee shall be "<oldAssignee>"
+
+    Examples: 
+      | orderId | newAssignee | oldAssignee | oldState           | error                                                           |
+      | a       | alice       | NULL        | under construction | cannot assign employee to order that has not been placed        |
+      | b1      | bob         | NULL        | under construction | cannot assign employee to order that has not been placed        |
+      | e       | claire      | NULL        | pending            | cannot assign employee to order that has not been placed        |
+      | h       | alice       | claire      | ready for delivery | cannot assign employee to an order that has already been placed |
+      | i       | bob         | alice       | delivered          | cannot assign employee to an order that has already been placed |
+      | j       | claire      | bob         | cancelled          | cannot assign employee to an order that has been cancelled      |
+      | f       | nonexistent | NULL        | placed             | there is no user with username \\"nonexistent\\"                |
+      | f       | ghost       | NULL        | placed             | there is no user with username \\"ghost\\"                      |
+      | f       | obiwan212   | NULL        | placed             | \\"obiwan212\\" is not an employee                              |
+      | f       | anakin501   | NULL        | placed             | \\"anakin501\\" is not an employee                              |
