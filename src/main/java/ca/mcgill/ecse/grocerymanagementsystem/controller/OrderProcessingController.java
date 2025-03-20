@@ -1,7 +1,7 @@
 package ca.mcgill.ecse.grocerymanagementsystem.controller;
 
 public class OrderProcessingController {
-	public static int calculateTotalOrderCost(int orderNumber, int usePoints) {
+	public static void checkOut(int orderNumber) {
 		throw new RuntimeException("TODO");
 	}
 
