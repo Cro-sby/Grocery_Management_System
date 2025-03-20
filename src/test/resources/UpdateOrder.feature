@@ -17,7 +17,8 @@ Feature: Update order
     And the following items exist in the system
       | name                | price | perishableOrNot | quantity | points |
       | Eggs                |   549 | perishable      |       20 |      5 |
-      | Chicken noodle soup |   179 | non-perishable  |        0 |      2 |
+      | Chicken noodle soup |   179 | non-perishable  |        5 |      2 |
+      | Vegetable soup      |   179 | non-perishable  |        0 |      2 |
     And the following orders exist in the system
       # There's no way to set the autounique order number, so refer to orders here using a separate ID.
       # The controller should still identify orders by their order number.
@@ -82,6 +83,12 @@ Feature: Update order
     And the order with ID "d" shall not include any items called "Eggs"
     And the order with ID "d" shall include 1 distinct item
 
+	Scenario: Try to add an unavailable item to an order
+		When the user attempts to add item "Vegetable soup" to the order with ID "a"
+		Then the system shall raise the error "item \"Vegetable soup\" is out of stock"
+		And the order with ID "a" shall not include any items called "Vegetable soup"
+		And the order with ID "a" shall include 1 distinct item
+
   Scenario Outline: Successfully update quantity of item in order
     When the user attempts to set the quantity of item "<item>" in the order with ID "<orderId>" to <newQty>
     Then the system shall not raise any errors
@@ -92,7 +99,7 @@ Feature: Update order
       | item | orderId | newQty |
       | Eggs | a       |      1 |
       | Eggs | a       |      3 |
-      | Eggs | a       |     42 |
+      | Eggs | a       |     10 |
 
   Scenario: Successfully remove item from order by setting its quantity to zero
     When the user attempts to set the quantity of item "Eggs" in the order with ID "a" to 0
@@ -132,5 +139,7 @@ Feature: Update order
       | item                | orderId | newQty | oldQty | numItems | error                         |
       | Eggs                | a       |     -1 |      2 |        1 | quantity must be non-negative |
       | Eggs                | a       |     -2 |      2 |        1 | quantity must be non-negative |
+      | Eggs                | b       |     11 |      2 |        1 | quantity cannot exceed 10     |
+      | Eggs                | b       |     12 |      2 |        1 | quantity cannot exceed 10     |
       | Eggs                | b       |     10 |      1 |        2 | order has already been placed |
       | Chicken noodle soup | b       |      7 |      3 |        2 | order has already been placed |
