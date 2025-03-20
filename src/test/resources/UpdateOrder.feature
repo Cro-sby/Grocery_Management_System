@@ -2,7 +2,6 @@ Feature: Update order
   As a customer, I want to be able to add an item to an order so that I can buy the item.
   As a customer, I want to be able to change the quantity of an item in my order.
 
-	# TODO: Need to update this file
   Background: 
     Given the following employees exist in the system
       | username | password | name           | phone          |

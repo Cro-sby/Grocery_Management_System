@@ -17,8 +17,8 @@ Feature: Process order
     And the following items exist in the system
       | name                | price | perishableOrNot | quantity | points |
       | Eggs                |   549 | perishable      |       20 |      5 |
-      | Chicken noodle soup |   179 | non-perishable  |        0 |      2 |
-      | Banana              |   100 | perishable      |       10 |      1 |
+      | Chicken noodle soup |   179 | non-perishable  |        2 |      2 |
+      | Banana              |   100 | perishable      |        8 |      1 |
       | Grain of rice       |     1 | perishable      |      100 |      1 |
     And the following orders exist in the system
       # There's no way to set the autounique order number, so refer to orders here using a separate ID.
@@ -30,13 +30,14 @@ Feature: Process order
       | b1    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
       | b2    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
       | b3    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
+      | b8    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
       | b9    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
       | b10   | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
-      | b11   | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
-      | b12   | NULL       | InOneDay    | obiwan212 | NULL     | pending            |
       | empty | NULL       | InTwoDays   | anakin501 | NULL     | under construction |
       | d     | NULL       | InThreeDays | alice     | NULL     | under construction |
       | e     | NULL       | SameDay     | alice     | NULL     | pending            |
+      | e1    | NULL       | InOneDay    | anakin501 | NULL     | pending            |
+      | e2    | NULL       | InTwoDays   | anakin501 | NULL     | pending            |
       | f     | today      | InOneDay    | obiwan212 | NULL     | placed             |
       | g     | yesterday  | InTwoDays   | anakin501 | bob      | in preparation     |
       | g1    | yesterday  | InOneDay    | anakin501 | bob      | in preparation     |
@@ -53,15 +54,17 @@ Feature: Process order
       | b1    | Banana              |        1 |
       | b2    | Banana              |        2 |
       | b3    | Banana              |        3 |
+      | b8    | Banana              |        8 |
       | b9    | Banana              |        9 |
+      | b9    | Eggs                |        1 |
       | b10   | Banana              |       10 |
-      | b11   | Banana              |       11 |
-      | b12   | Banana              |       12 |
-      | b12   | Eggs                |        1 |
       | d     | Eggs                |        1 |
       | d     | Chicken noodle soup |        3 |
       | d     | Banana              |        1 |
       | e     | Grain of rice       |        1 |
+      | e1    | Eggs                |        2 |
+      | e1    | Banana              |        9 |
+      | e2    | Chicken noodle soup |        4 |
       | f     | Banana              |        3 |
       | g     | Eggs                |        1 |
       | g     | Chicken noodle soup |        3 |
@@ -93,12 +96,14 @@ Feature: Process order
       | b2  |  190 |
       # (3 bananas)($0.90/banana) = $2.70
       | b3  |  270 |
-      # (9 bananas)($0.60/banana) = $5.40
-      | b9  |  540 |
+      # (8 bananas)($0.65/banana) = $5.20
+      | b8  |  520 |
+      # Bananas: (9 bananas)($0.60/banana) = $5.40
+      #    Eggs: $5.49
+      #   Total: $10.89
+      | b9  | 1089 |
       # (10 bananas)($0.55/banana) = $5.50
       | b10 |  550 |
-      # (11 bananas)($0.55/banana) = $6.05
-      | b11 |  605 |
       #   Eggs: $5.49
       #   Soup: (3 cans)(90%)($1.79/can) = $4.833
       # Banana: $1.00
@@ -112,62 +117,69 @@ Feature: Process order
     And the order's assignee shall be "<assignee>"
 
     Examples: 
-      | id    | state              | assignee | error                                        |
-      | empty | under construction | NULL     | cannot check out an empty order              |
-      | b11   | under construction | NULL     | insufficient inventory for item \\"Banana\\" |
-      | e     | pending            | NULL     | order has already been checked out           |
-      | f     | placed             | NULL     | order has already been checked out           |
-      | g     | in preparation     | bob      | order has already been checked out           |
-      | h     | ready for delivery | claire   | order has already been checked out           |
-      | i     | delivered          | alice    | order has already been checked out           |
-      | j     | cancelled          | bob      | order has already been checked out           |
+      | id    | state              | assignee | error                              |
+      | empty | under construction | NULL     | cannot check out an empty order    |
+      | e     | pending            | NULL     | order has already been checked out |
+      | f     | placed             | NULL     | order has already been checked out |
+      | g     | in preparation     | bob      | order has already been checked out |
+      | h     | ready for delivery | claire   | order has already been checked out |
+      | i     | delivered          | alice    | order has already been checked out |
+      | j     | cancelled          | bob      | order has already been checked out |
 
   Scenario Outline: Successfully pay for order
-    When the user attempts to pay for the order with ID "<orderId>" <usingOrNotUsing> their points
+    When the user attempts to pay for the order with ID "e" <usingOrNotUsing> their points
     Then the system shall not raise any errors
     And the final cost of the order, after considering points, shall be <cost> cents
     And the order shall be "placed"
     And the order's date placed shall be today
     And the order's assignee shall be "NULL"
-    And "<username>" shall have <points> points
+    And "alice" shall have <points> points
+    And the quantity of item "Grain of rice" shall be 99
 
-    # TODO: How are points calculated?
     # TODO: Watch out for id vs orderId! Check column names
     Examples: 
-      | orderId | usingOrNotUsing | cost | username | points |
+      | usingOrNotUsing | cost | points |
       # Rice: (1 grain)($0.01/grain) = $0.01
       # Can use one point to bring order down to $0
-      | e       | without using   |    1 | alice    |        |
-      | e       | using           |    0 | alice    |        |
+      # In either case, earn 1 point
+      | without using   |    1 |      3 |
+      | using           |    0 |      2 |
 
   Scenario Outline: Successfully check out and pay for order
     When the user attempts to check out the order with ID "<orderId>"
     And the user attempts to pay for the order with ID "<orderId>" <usingOrNotUsing> their points
-    And the final cost of the order, after considering points, shall be <cost> cents
+    Then the final cost of the order, after considering points, shall be <cost> cents
     And the order shall be "placed"
     And the order's assignee shall be "NULL"
     And the order's date placed shall be today
     And "<username>" shall have <points> points
+    And the quantity of item "Eggs" shall be <newEggsQty>
+    And the quantity of item "Chicken noodle soup" shall be <newSoupQty>
+    And the quantity of item "Banana" shall be <newBananaQty>
 
-    # See above for costs before considering points
+    # See above for the costs before considering points
     Examples: 
-      | orderId | usingOrNotUsing | cost | username  | points |
-      | a       | without using   |  728 | alice     |        |
-      | a       | using           |  726 | alice     |        |
-      | b1      | without using   |  100 | obiwan212 |        |
-      | b1      | using           |    0 | obiwan212 |        |
-      | b2      | without using   |  190 | obiwan212 |        |
-      | b2      | using           |    0 | obiwan212 |        |
-      | b3      | without using   |  270 | obiwan212 |        |
-      | b3      | using           |   58 | obiwan212 |        |
-      | b9      | without using   |  540 | obiwan212 |        |
-      | b9      | using           |  328 | obiwan212 |        |
-      | b10     | without using   |  550 | obiwan212 |        |
-      | b10     | using           |  338 | obiwan212 |        |
-      | b11     | without using   |  605 | obiwan212 |        |
-      | b11     | using           |  605 | obiwan212 |        |
-      | d       | without using   | 1132 | alice     |        |
-      | d       | using           | 1130 | alice     |        |
+      | orderId | usingOrNotUsing | cost | username  | points | newEggsQty | newSoupQty | newBananaQty |
+      # Earn 1*5 + 1*2 = 7 points
+      # Possibly use 2 points
+      | a       | without using   |  728 | alice     |      9 |         19 |          1 |            8 |
+      | a       | using           |  726 | alice     |      7 |         19 |          1 |            8 |
+      # Earn 1*1 = 1 point
+      # Possibly use 100 points
+      | b1      | without using   |  100 | obiwan212 |    213 |         20 |          2 |            7 |
+      | b1      | using           |    0 | obiwan212 |    113 |         20 |          2 |            7 |
+      # Earn 2*1 = 2 points
+      # Possibly use 190 points
+      | b2      | without using   |  190 | obiwan212 |    214 |         20 |          2 |            6 |
+      | b2      | using           |    0 | obiwan212 |     24 |         20 |          2 |            6 |
+      # Earn 3*1 = 3 points
+      # Possibly use 212 points
+      | b3      | without using   |  270 | obiwan212 |    215 |         20 |          2 |            5 |
+      | b3      | using           |   58 | obiwan212 |      3 |         20 |          2 |            5 |
+      # Earn 8*1 = 8 points
+      # Possibly use 212 points
+      | b8      | without using   |  520 | obiwan212 |    220 |         20 |          2 |            0 |
+      | b8      | using           |  308 | obiwan212 |      8 |         20 |          2 |            0 |
 
   Scenario Outline: Unsuccessfully pay for order
     When the user attempts to pay for the order with ID "<orderId>" <usingOrNotUsing> their points
@@ -175,9 +187,16 @@ Feature: Process order
     And the order shall be "<state>"
     And the order's assignee shall be "<assignee>"
     And "<customer>" shall have <points> points
+    And the quantity of item "Eggs" shall be 20
+    And the quantity of item "Chicken noodle soup" shall be 2
+    And the quantity of item "Banana" shall be 8
 
     Examples: 
       | orderId | usingOrNotUsing | state              | customer  | points | assignee | error                                                  |
+      | e1      | using           | pending            | anakin501 |    501 | NULL     | insufficient stock of item \\"Banana\\"                |
+      | e1      | without using   | pending            | anakin501 |    501 | NULL     | insufficient stock of item \\"Banana\\"                |
+      | e2      | using           | pending            | anakin501 |    501 | NULL     | insufficient stock if item \\"Chicken noodle soup\\"   |
+      | e2      | without using   | pending            | anakin501 |    501 | NULL     | insufficient stock if item \\"Chicken noodle soup\\"   |
       | a       | using           | under construction | alice     |      2 | NULL     | cannot pay for an order which has not been checked out |
       | a       | without using   | under construction | alice     |      2 | NULL     | cannot pay for an order which has not been checked out |
       | f       | using           | placed             | obiwan212 |    212 | NULL     | cannot pay for order that has already been paid for    |
