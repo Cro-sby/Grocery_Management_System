@@ -39,6 +39,7 @@ Feature: Process order
       | e1    | NULL       | InOneDay    | anakin501 | NULL     | pending            |
       | e2    | NULL       | InTwoDays   | anakin501 | NULL     | pending            |
       | f     | today      | InOneDay    | obiwan212 | NULL     | placed             |
+      | f1    | yesterday  | InTwoDays   | alice     | NULL     | placed             |
       | g     | yesterday  | InTwoDays   | anakin501 | bob      | in preparation     |
       | g1    | yesterday  | InOneDay    | anakin501 | bob      | in preparation     |
       | g2    | today      | InThreeDays | alice     | bob      | in preparation     |
@@ -65,7 +66,11 @@ Feature: Process order
       | e1    | Eggs                |        2 |
       | e1    | Banana              |        9 |
       | e2    | Chicken noodle soup |        4 |
+      | f     | Eggs                |        1 |
+      | f     | Chicken noodle soup |        4 |
       | f     | Banana              |        3 |
+      | f     | Grain of rice       |        2 |
+      | f1    | Chicken noodle soup |       10 |
       | g     | Eggs                |        1 |
       | g     | Chicken noodle soup |        3 |
       | g1    | Eggs                |        1 |
@@ -273,3 +278,38 @@ Feature: Process order
       | h       | ready for delivery | cannot finish assembling order that has already been assembled                                    |
       | i       | delivered          | cannot finish assembling order that has already been assembled                                    |
       | j       | cancelled          | cannot finish assembling order because it was cancelled                                           |
+
+  Scenario Outline: Successfully cancel order
+    When the user attempts to cancel the order with ID "<orderId>"
+    Then the system shall not raise any errors
+    And the order shall be "cancelled"
+    And the quantity of item "Eggs" shall be <newEggsQty>
+    And the quantity of item "Chicken noodle soup" shall be <newSoupQty>
+    And the quantity of item "Banana" shall be <newBananaQty>
+    And the quantity of item "Grain of rice" shall be <newRiceQty>
+    # No change to their points
+    And "<customer>" shall have <points> points
+
+    Examples: 
+      | orderId | newEggsQty | newSoupQty | newBananaQty | newRiceQty | customer  | points |
+      | f       |         21 |          6 |           11 |        102 | obiwan212 |    212 |
+      | f1      |         20 |         12 |            8 |        100 | alice     |      2 |
+      # No change in inventory if the order has not yet been placed
+      | b8      |         20 |          2 |            8 |        100 | obiwan212 |    212 |
+      | e       |         20 |          2 |            8 |        100 | alice     |      2 |
+
+  Scenario Outline: Unsuccessfully cancel order
+    When the user attempts to cancel the order with ID "<orderId>"
+    Then the system shall raise the error "<error>"
+    And the order shall be "<oldState>"
+    And the quantity of item "Eggs" shall be 20
+    And the quantity of item "Chicken noodle soup" shall be 2
+    And the quantity of item "Banana" shall be 8
+    And the quantity of item "Grain of rice" shall be 100
+
+    Examples: 
+      | orderId | oldState           | error                                                                |
+      | g       | in preparation     | cannot cancel an order that has already been assigned to an employee |
+      | h       | ready for delivery | cannot cancel an order that has already been assigned to an employee |
+      | i       | delivered          | cannot cancel an order that has already been assigned to an employee |
+      | j       | cancelled          | order was already cancelled                                          |
