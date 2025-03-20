@@ -63,28 +63,27 @@ Feature: Process order
     And the order shall be "pending"
 
     Examples: 
-      | id    | cost |
+      | id  | cost |
       #  Eggs: $5.49
       #  Soup: $1.79
       # Total: $7.28
-      | a     |  728 |
-      | b1    |  100 |
+      | a   |  728 |
+      | b1  |  100 |
       # (2 bananas)($0.95/banana) = $1.90
-      | b2    |  190 |
+      | b2  |  190 |
       # (3 bananas)($0.90/banana) = $2.70
-      | b3    |  270 |
+      | b3  |  270 |
       # (9 bananas)($0.60/banana) = $5.40
-      | b9    |  540 |
+      | b9  |  540 |
       # (10 bananas)($0.55/banana) = $5.50
-      | b10   |  550 |
+      | b10 |  550 |
       # (11 bananas)($0.55/banana) = $6.05
-      | b11   |  605 |
-      | empty |    0 |
+      | b11 |  605 |
       #   Eggs: $5.49
       #   Soup: (3 cans)(90%)($1.79/can) = $4.833
       # Banana: $1.00
       #  Total: $11.323 --> $11.32
-      | d     | 1132 |
+      | d   | 1132 |
 
   Scenario Outline: Unsuccessfully check out
     When the user attempts to check out the order with ID "<id>"
@@ -101,3 +100,68 @@ Feature: Process order
       | h     | ready for delivery | order has already been checked out           |
       | i     | delivered          | order has already been checked out           |
       | j     | cancelled          | order has already been checked out           |
+
+  Scenario Outline: Successfully pay for order
+    When the user attempts to pay for the order with ID "<orderId>" <usingOrNotUsing> their points
+    Then the system shall not raise any errors
+    And the final cost of the order, after considering points, shall be <cost> cents
+    And the order shall be "placed"
+    And the order's date placed shall be today
+    And "<username>" shall have <points> points
+
+    # TODO: How are points calculated?
+    # TODO: Watch out for id vs orderId! Check column names
+    Examples: 
+      | orderId | usingOrNotUsing | cost | username | points |
+      # Rice: (1 grain)($0.01/grain) = $0.01
+      # Can use one point to bring order down to $0
+      | e       | without using   |    1 | alice    |        |
+      | e       | using           |    0 | alice    |        |
+
+  Scenario Outline: Successfully check out and pay for order
+    When the user attempts to check out the order with ID "<orderId>"
+    And the user attempts to pay for the order with ID "<orderId>" <usingOrNotUsing> their points
+    And the final cost of the order, after considering points, shall be <cost> cents
+    And the order shall be "placed"
+    And the order's date placed shall be today
+    And "<username>" shall have <points> points
+
+    # See above for costs before considering points
+    Examples: 
+      | orderId | usingOrNotUsing | cost | username  | points |
+      | a       | without using   |  728 | alice     |        |
+      | a       | using           |  726 | alice     |        |
+      | b1      | without using   |  100 | obiwan212 |        |
+      | b1      | using           |    0 | obiwan212 |        |
+      | b2      | without using   |  190 | obiwan212 |        |
+      | b2      | using           |    0 | obiwan212 |        |
+      | b3      | without using   |  270 | obiwan212 |        |
+      | b3      | using           |   58 | obiwan212 |        |
+      | b9      | without using   |  540 | obiwan212 |        |
+      | b9      | using           |  328 | obiwan212 |        |
+      | b10     | without using   |  550 | obiwan212 |        |
+      | b10     | using           |  338 | obiwan212 |        |
+      | b11     | without using   |  605 | obiwan212 |        |
+      | b11     | using           |  605 | obiwan212 |        |
+      | d       | without using   | 1132 | alice     |        |
+      | d       | using           | 1130 | alice     |        |
+
+  Scenario Outline: Unsuccessfully pay for order
+    When the user attempts to pay for the order with ID "<orderId>" <usingOrNotUsing> their points
+    Then the system shall raise the error "<error>"
+    And the order shall be "<state>"
+    And "<username>" shall have <points> points
+
+    Examples: 
+      | orderId | usingOrNotUsing | state              | username  | points | error                                                  |
+      | a       | using           | under construction | alice     |      2 | cannot pay for an order which has not been checked out |
+      | a       | without using   | under construction | alice     |      2 | cannot pay for an order which has not been checked out |
+      | f       | using           | placed             | obiwan212 |    212 | order has already been paid for                        |
+      | f       | without using   | placed             | obiwan212 |    212 | order has already been paid for                        |
+      | g       | using           | in preparation     | anakin501 |    501 | order has already been paid for                        |
+      | g       | without using   | in preparation     | anakin501 |    501 | order has already been paid for                        |
+      | h       | using           | ready for delivery | anakin501 |    501 | order has already been paid for                        |
+      | h       | without using   | ready for delivery | anakin501 |    501 | order has already been paid for                        |
+      | i       | using           | delivered          | alice     |      2 | order has already been paid for                        |
+      | i       | without using   | delivered          | alice     |      2 | order has already been paid for                        |
+      | j       | using           | cancelled          | alice     |      2 | order has already been paid for                        |
