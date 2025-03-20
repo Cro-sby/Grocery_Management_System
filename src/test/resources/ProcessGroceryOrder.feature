@@ -25,7 +25,6 @@ Feature: Process order
       # The controller should still identify orders by their order number.
       # You'll need to create a map from string IDs to order numbers.
       # Also, please convert the string "NULL" to null, "today" to the current date, "yesterday" to yesterday's date, etc.
-      # TODO: Need to specify assignee as well?
       | id    | datePlaced | deadline    | customer  | assignee | state              |
       | a     | NULL       | SameDay     | alice     | NULL     | under construction |
       | b1    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
@@ -34,11 +33,16 @@ Feature: Process order
       | b9    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
       | b10   | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
       | b11   | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
+      | b12   | NULL       | InOneDay    | obiwan212 | NULL     | pending            |
       | empty | NULL       | InTwoDays   | anakin501 | NULL     | under construction |
       | d     | NULL       | InThreeDays | alice     | NULL     | under construction |
       | e     | NULL       | SameDay     | alice     | NULL     | pending            |
       | f     | today      | InOneDay    | obiwan212 | NULL     | placed             |
       | g     | yesterday  | InTwoDays   | anakin501 | bob      | in preparation     |
+      | g1    | yesterday  | InOneDay    | anakin501 | bob      | in preparation     |
+      | g2    | today      | InThreeDays | alice     | bob      | in preparation     |
+      | g3    | today      | InThreeDays | alice     | bob      | in preparation     |
+      | g4    | today      | SameDay     | alice     | bob      | in preparation     |
       | h     | yesterday  | InOneDay    | anakin501 | claire   | ready for delivery |
       | i     | yesterday  | SameDay     | alice     | alice    | delivered          |
       | j     | today      | InOneDay    | alice     | bob      | cancelled          |
@@ -52,12 +56,21 @@ Feature: Process order
       | b9    | Banana              |        9 |
       | b10   | Banana              |       10 |
       | b11   | Banana              |       11 |
+      | b12   | Banana              |       12 |
+      | b12   | Eggs                |        1 |
       | d     | Eggs                |        1 |
       | d     | Chicken noodle soup |        3 |
       | d     | Banana              |        1 |
       | e     | Grain of rice       |        1 |
       | f     | Banana              |        3 |
       | g     | Eggs                |        1 |
+      | g     | Chicken noodle soup |        3 |
+      | g1    | Eggs                |        1 |
+      | g1    | Chicken noodle soup |        1 |
+      | g2    | Eggs                |        1 |
+      | g3    | Chicken noodle soup |        1 |
+      | g3    | Chicken noodle soup |        2 |
+      | g4    | Chicken noodle soup |        1 |
       | h     | Chicken noodle soup |        2 |
       | i     | Eggs                |        3 |
       | j     | Eggs                |        3 |
@@ -212,3 +225,32 @@ Feature: Process order
       | f       | ghost       | NULL        | placed             | there is no user with username \\"ghost\\"                      |
       | f       | obiwan212   | NULL        | placed             | \\"obiwan212\\" is not an employee                              |
       | f       | anakin501   | NULL        | placed             | \\"anakin501\\" is not an employee                              |
+
+  Scenario Outline: Successfully finish order assembly
+    When the user attempts to indicate that assembly of the order with ID "<orderId>" is finished
+    Then the system shall not raise any errors
+    And the order shall be "ready for delivery"
+
+    Examples: 
+      | orderId |
+      | g1      |
+      | g3      |
+      | g4      |
+
+  Scenario Outline: Unsuccessfully finish order assembly
+    When the user attempts to indicate that assembly of the order with ID "<orderId>" is finished
+    Then the system shall raise the error "<error>"
+    And the order shall be "<oldState>"
+
+    Examples: 
+      | orderId | oldState           | error                                                                                             |
+      | g       | in preparation     | cannot finish assembling order because it contains perishable items and today is not the deadline |
+      | g2      | in preparation     | cannot finish assembling order because it contains perishable items and today is not the deadline |
+      | a       | under construction | cannot finish assembling order because it has not been assigned to an employee                    |
+      | b2      | under construction | cannot finish assembling order because it has not been assigned to an employee                    |
+      | b9      | under construction | cannot finish assembling order because it has not been assigned to an employee                    |
+      | e       | pending            | cannot finish assembling order because it has not been assigned to an employee                    |
+      | f       | placed             | cannot finish assembling order because it has not been assigned to an employee                    |
+      | h       | ready for delivery | cannot finish assembling order that has already been assembled                                    |
+      | i       | delivered          | cannot finish assembling order that has already been assembled                                    |
+      | j       | cancelled          | cannot finish assembling order because it was cancelled                                           |
