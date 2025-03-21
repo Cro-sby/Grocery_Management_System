@@ -40,6 +40,11 @@ public class OrderProcessingStepDefinitions {
 		throw new io.cucumber.java.PendingException();
 	}
 
+	@Then("the order's placer shall be {string}")
+	public void the_order_s_placer_shall_be(String customerUsername) {
+		throw new io.cucumber.java.PendingException();
+	}
+
 	@Then("the order's assignee shall be {string}")
 	public void the_order_s_assignee_shall_be(String employeeUsername) {
 		throw new io.cucumber.java.PendingException();

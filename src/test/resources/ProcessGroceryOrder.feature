@@ -20,330 +20,416 @@ Feature: Process order
       | Chicken noodle soup |   179 | non-perishable  |        2 |      2 |
       | Banana              |   100 | perishable      |        8 |      1 |
       | Grain of rice       |     1 | perishable      |      100 |      1 |
-    And the following orders exist in the system
-      # There's no way to set the autounique order number, so refer to orders here using a separate ID.
-      # The controller should still identify orders by their order number.
-      # You'll need to create a map from string IDs to order numbers.
-      # Also, please convert the string "NULL" to null, "today" to the current date, "yesterday" to yesterday's date, etc.
-      | id    | datePlaced | deadline    | customer  | assignee | state              |
-      | a     | NULL       | SameDay     | alice     | NULL     | under construction |
-      | b1    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
-      | b2    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
-      | b3    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
-      | b8    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
-      | b9    | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
-      | b10   | NULL       | InOneDay    | obiwan212 | NULL     | under construction |
-      | empty | NULL       | InTwoDays   | anakin501 | NULL     | under construction |
-      | d     | NULL       | InThreeDays | alice     | NULL     | under construction |
-      | e     | NULL       | SameDay     | alice     | NULL     | pending            |
-      | e1    | NULL       | InOneDay    | anakin501 | NULL     | pending            |
-      | e2    | NULL       | InTwoDays   | anakin501 | NULL     | pending            |
-      | f     | today      | InOneDay    | obiwan212 | NULL     | placed             |
-      | f1    | yesterday  | InTwoDays   | alice     | NULL     | placed             |
-      | g     | yesterday  | InTwoDays   | anakin501 | bob      | in preparation     |
-      | g1    | yesterday  | InOneDay    | anakin501 | bob      | in preparation     |
-      | g2    | today      | InThreeDays | alice     | bob      | in preparation     |
-      | g3    | today      | InThreeDays | alice     | bob      | in preparation     |
-      | g4    | today      | SameDay     | alice     | bob      | in preparation     |
-      | h     | yesterday  | InOneDay    | anakin501 | claire   | ready for delivery |
-      | h1    | yesterday  | InTwoDays   | anakin501 | claire   | ready for delivery |
-      | h2    | today      | SameDay     | obiwan212 | bob      | ready for delivery |
-      | h3    | today      | InThreeDays | obiwan212 | bob      | ready for delivery |
-      | h4    | yesterday  | SameDay     | obiwan212 | bob      | ready for delivery |
-      | i     | yesterday  | SameDay     | alice     | alice    | delivered          |
-      | j     | today      | InOneDay    | alice     | bob      | cancelled          |
-    And the following items are part of orders
-      | order | item                | quantity |
-      | a     | Eggs                |        1 |
-      | a     | Chicken noodle soup |        1 |
-      | b1    | Banana              |        1 |
-      | b2    | Banana              |        2 |
-      | b3    | Banana              |        3 |
-      | b8    | Banana              |        8 |
-      | b9    | Banana              |        9 |
-      | b9    | Eggs                |        1 |
-      | b10   | Banana              |       10 |
-      | d     | Eggs                |        1 |
-      | d     | Chicken noodle soup |        3 |
-      | d     | Banana              |        1 |
-      | e     | Grain of rice       |        1 |
-      | e1    | Eggs                |        2 |
-      | e1    | Banana              |        9 |
-      | e2    | Chicken noodle soup |        4 |
-      | f     | Eggs                |        1 |
-      | f     | Chicken noodle soup |        4 |
-      | f     | Banana              |        3 |
-      | f     | Grain of rice       |        2 |
-      | f1    | Chicken noodle soup |       10 |
-      | g     | Eggs                |        1 |
-      | g     | Chicken noodle soup |        3 |
-      | g1    | Eggs                |        1 |
-      | g1    | Chicken noodle soup |        1 |
-      | g2    | Eggs                |        1 |
-      | g3    | Chicken noodle soup |        1 |
-      | g3    | Chicken noodle soup |        2 |
-      | g4    | Chicken noodle soup |        1 |
-      | h     | Chicken noodle soup |        2 |
-      | h1    | Chicken noodle soup |        2 |
-      | h2    | Chicken noodle soup |        2 |
-      | h3    | Chicken noodle soup |        2 |
-      | h4    | Chicken noodle soup |        2 |
-      | i     | Eggs                |        3 |
-      | j     | Eggs                |        3 |
 
-  Scenario Outline: Successfully check out
+  Scenario Outline: Successfully check out a bulk order of bananas
+    Given the following orders exist in the system
+      | id   | datePlaced | deadline   | customer   |
+      | <id> | NULL       | <deadline> | <customer> |
+    And the following items are part of orders
+      | order | item   | quantity     |
+      | <id>  | Banana | <numBananas> |
     When the user attempts to check out the order with ID "<id>"
     Then the system shall not raise any errors
     And the total cost of the order shall be <cost> cents
     And the order shall be "pending"
+    And the order's placer shall be "<customer>"
+    # No change yet in points, inventory, assignee, etc.
+    And the order's assignee shall be "NULL"
+    And "<customer>" shall have <points> points
+    And the quantity of item "Banana" shall be 8
+
+    Examples: 
+      | id | deadline    | customer  | points | numBananas | cost |
+      | a  | SameDay     | alice     |      2 |          1 |  100 |
+      # (2 bananas)($0.95/banana) = $1.90
+      | b  | InOneDay    | anakin501 |    501 |          2 |  190 |
+      # (3 bananas)($0.90/banana) = $2.70
+      | c  | InTwoDays   | obiwan212 |    212 |          3 |  270 |
+      # (8 bananas)($0.65/banana) = $5.20
+      | d  | InThreeDays | obiwan212 |    212 |          8 |  520 |
+      # (9 bananas)($0.60/banana) = $5.40
+      | e  | SameDay     | obiwan212 |    212 |          9 |  540 |
+      # (10 bananas)($0.55/banana) = $5.50
+      | f  | InOneDay    | obiwan212 |    212 |         10 |  550 |
+
+  Scenario Outline: Successfully check out an order with multiple items
+    Given the following orders exist in the system
+      | id | datePlaced | deadline | customer |
+      | g  | NULL       | InOneDay | alice    |
+    And the following items are part of orders
+      | order | item                | quantity         |
+      | g     | Eggs                | <qtyEggsInOrder> |
+      | g     | Chicken noodle soup | <qtySoupInOrder> |
+    When the user attempts to check out the order with ID "g"
+    Then the system shall not raise any errors
+    And the total cost of the order shall be <cost> cents
+    And the order shall be "pending"
+    And the order's placer shall be "alice"
+    # No change yet in points, inventory, assignee, etc.
+    And the order's assignee shall be "NULL"
+    And "alice" shall have 2 points
+    And the quantity of item "Eggs" shall be 20
+    And the quantity of item "Chicken noodle soup" shall be 2
+
+    Examples: 
+      | qtyEggsInOrder | qtySoupInOrder | cost |
+      |              1 |              1 |  728 |
+      #  Eggs: (5 units)(0.8)($5.49/unit) = $21.96
+      #  Soup: (3 units)(0.9)($1.79/unit) = $4.833
+      # Total: $26.793 --> $26.79
+      |              5 |              3 | 2679 |
+
+  Scenario: Try to check out an empty order
+    Given the following orders exist in the system
+      | id    | datePlaced | deadline  | customer |
+      | empty | NULL       | InTwoDays | alice    |
+    When the user attempts to check out the order with ID "empty"
+    Then the system shall raise the error "cannot check out an empty order"
+    And the order shall be "under construction"
     And the order's assignee shall be "NULL"
 
-    Examples: 
-      | id  | cost |
-      #  Eggs: $5.49
-      #  Soup: $1.79
-      # Total: $7.28
-      | a   |  728 |
-      | b1  |  100 |
-      # (2 bananas)($0.95/banana) = $1.90
-      | b2  |  190 |
-      # (3 bananas)($0.90/banana) = $2.70
-      | b3  |  270 |
-      # (8 bananas)($0.65/banana) = $5.20
-      | b8  |  520 |
-      # Bananas: (9 bananas)($0.60/banana) = $5.40
-      #    Eggs: $5.49
-      #   Total: $10.89
-      | b9  | 1089 |
-      # (10 bananas)($0.55/banana) = $5.50
-      | b10 |  550 |
-      #   Eggs: $5.49
-      #   Soup: (3 cans)(90%)($1.79/can) = $4.833
-      # Banana: $1.00
-      #  Total: $11.323 --> $11.32
-      | d   | 1132 |
-
-  Scenario Outline: Unsuccessfully check out
-    When the user attempts to check out the order with ID "<id>"
-    Then the system shall raise the error "<error>"
+  Scenario Outline: Try to check out an order in the wrong state
+    Given the following orders exist in the system
+      | id       | datePlaced   | deadline  | customer  | assignee   | state   |
+      | badstate | <datePlaced> | InTwoDays | anakin501 | <assignee> | <state> |
+    And the following items are part of orders
+      | order    | item                | quantity |
+      | badstate | Eggs                |        5 |
+      | badstate | Chicken noodle soup |        2 |
+    When the user attempts to check out the order with ID "badstate"
+    Then the system shall raise the error "order has already been checked out"
     And the order shall be "<state>"
     And the order's assignee shall be "<assignee>"
+    And "anakin501" shall have 501 points
+    And the quantity of item "Eggs" shall be 20
+    And the quantity of item "Chicken noodle soup" shall be 2
 
     Examples: 
-      | id    | state              | assignee | error                              |
-      | empty | under construction | NULL     | cannot check out an empty order    |
-      | e     | pending            | NULL     | order has already been checked out |
-      | f     | placed             | NULL     | order has already been checked out |
-      | g     | in preparation     | bob      | order has already been checked out |
-      | h     | ready for delivery | claire   | order has already been checked out |
-      | i     | delivered          | alice    | order has already been checked out |
-      | j     | cancelled          | bob      | order has already been checked out |
+      | state              | datePlaced | assignee |
+      | pending            | NULL       | NULL     |
+      | placed             | today      | NULL     |
+      | in preparation     | yesterday  | bob      |
+      | ready for delivery | yesterday  | claire   |
+      | delivered          | yesterday  | alice    |
+      | cancelled          | yesterday  | bob      |
 
-  Scenario Outline: Successfully pay for order
-    When the user attempts to pay for the order with ID "e" "<usingOrNotUsing>" their points
+  Scenario Outline: Successfully pay for an order
+    Given the following orders exist in the system
+      | id      | datePlaced | deadline    | customer   | assignee | state   |
+      | eggsoup | NULL       | InThreeDays | <customer> | NULL     | pending |
+      | bananas | NULL       | SameDay     | <customer> | NULL     | pending |
+      | smol    | NULL       | InOneDay    | <customer> | NULL     | pending |
+    And the following items are part of orders
+      | order   | item                | quantity |
+      | eggsoup | Eggs                |        1 |
+      | eggsoup | Chicken noodle soup |        1 |
+      | bananas | Banana              |        8 |
+      | smol    | Grain of rice       |        1 |
+    When the user attempts to pay for the order with ID "<orderId>" "<usingOrWithoutUsing>" their points
     Then the system shall not raise any errors
     And the final cost of the order, after considering points, shall be <cost> cents
     And the order shall be "placed"
     And the order's date placed shall be today
     And the order's assignee shall be "NULL"
-    And "alice" shall have <points> points
-    And the quantity of item "Grain of rice" shall be 99
+    And "<customer>" shall have <points> points
+    And the quantity of item "Eggs" shall be <newQtyEggs>
+    And the quantity of item "Chicken noodle soup" shall be <newQtySoup>
+    And the quantity of item "Bananas" shall be <newQtyBananas>
+    And the quantity of item "Grain of rice" shall be <newQtyRice>
 
     Examples: 
-      | usingOrNotUsing | cost | points |
-      # Rice: (1 grain)($0.01/grain) = $0.01
-      # Can use one point to bring order down to $0
-      # In either case, earn 1 point
-      | without using   |    1 |      3 |
-      | using           |    0 |      2 |
+      | orderId | customer  | usingOrWithoutUsing | cost | points | newQtyEggs | newQtySoup | newQtyBananas | newQtyRice |
+      # 1 carton of eggs + 1 can of soup = 7 points
+      | eggsoup | alice     | without using       |  728 |      9 |         19 |          1 |             8 |        100 |
+      | eggsoup | alice     | using               |  726 |      7 |         19 |          1 |             8 |        100 |
+      | eggsoup | anakin501 | without using       |  728 |    508 |         19 |          1 |             8 |        100 |
+      | eggsoup | anakin501 | using               |  227 |      7 |         19 |          1 |             8 |        100 |
+      # 8 bananas = 8 points
+      | bananas | obiwan212 | without using       |  520 |    220 |         20 |          2 |             0 |        100 |
+      | bananas | obiwan212 | using               |  308 |      8 |         20 |          2 |             0 |        100 |
+      # 1 grain of rice = 1 point
+      | smol    | alice     | without using       |    1 |      3 |         20 |          2 |             8 |         99 |
+      | smol    | alice     | using               |    0 |      2 |         20 |          2 |             8 |         99 |
 
-  Scenario Outline: Successfully check out and pay for order
-    When the user attempts to check out the order with ID "<orderId>"
-    And the user attempts to pay for the order with ID "<orderId>" "<usingOrNotUsing>" their points
-    Then the final cost of the order, after considering points, shall be <cost> cents
-    And the order shall be "placed"
+  Scenario Outline: Unsuccessfully pay for order due to insufficient stock
+    Given the following orders exist in the system
+      | id      | datePlaced | deadline    | customer  | assignee | state   |
+      | eggsoup | NULL       | InThreeDays | obiwan212 | NULL     | pending |
+      | bananas | NULL       | SameDay     | obiwan212 | NULL     | pending |
+    And the following items are part of orders
+      | order   | item                | quantity |
+      | eggsoup | Eggs                |        1 |
+      | eggsoup | Chicken noodle soup |        5 |
+      | bananas | Banana              |        9 |
+    When the user attempts to pay for the order with ID "<orderId>" "<usingOrWithoutUsing>" their points
+    Then the system shall raise the error "<error>"
+    And the order shall be "pending"
     And the order's assignee shall be "NULL"
-    And the order's date placed shall be today
-    And "<username>" shall have <points> points
-    And the quantity of item "Eggs" shall be <newEggsQty>
-    And the quantity of item "Chicken noodle soup" shall be <newSoupQty>
-    And the quantity of item "Banana" shall be <newBananaQty>
-
-    # See above for the costs before considering points
-    Examples: 
-      | orderId | usingOrNotUsing | cost | username  | points | newEggsQty | newSoupQty | newBananaQty |
-      # Earn 1*5 + 1*2 = 7 points
-      # Possibly use 2 points
-      | a       | without using   |  728 | alice     |      9 |         19 |          1 |            8 |
-      | a       | using           |  726 | alice     |      7 |         19 |          1 |            8 |
-      # Earn 1*1 = 1 point
-      # Possibly use 100 points
-      | b1      | without using   |  100 | obiwan212 |    213 |         20 |          2 |            7 |
-      | b1      | using           |    0 | obiwan212 |    113 |         20 |          2 |            7 |
-      # Earn 2*1 = 2 points
-      # Possibly use 190 points
-      | b2      | without using   |  190 | obiwan212 |    214 |         20 |          2 |            6 |
-      | b2      | using           |    0 | obiwan212 |     24 |         20 |          2 |            6 |
-      # Earn 3*1 = 3 points
-      # Possibly use 212 points
-      | b3      | without using   |  270 | obiwan212 |    215 |         20 |          2 |            5 |
-      | b3      | using           |   58 | obiwan212 |      3 |         20 |          2 |            5 |
-      # Earn 8*1 = 8 points
-      # Possibly use 212 points
-      | b8      | without using   |  520 | obiwan212 |    220 |         20 |          2 |            0 |
-      | b8      | using           |  308 | obiwan212 |      8 |         20 |          2 |            0 |
-
-  Scenario Outline: Unsuccessfully pay for order
-    When the user attempts to pay for the order with ID "<orderId>" "<usingOrNotUsing>" their points
-    Then the system shall raise the error "<error>"
-    And the order shall be "<state>"
-    And the order's assignee shall be "<assignee>"
-    And "<customer>" shall have <points> points
-    And the quantity of item "Eggs" shall be 20
-    And the quantity of item "Chicken noodle soup" shall be 2
-    And the quantity of item "Banana" shall be 8
-
-    Examples: 
-      | orderId | usingOrNotUsing | state              | customer  | points | assignee | error                                                  |
-      | e1      | using           | pending            | anakin501 |    501 | NULL     | insufficient stock of item \\"Banana\\"                |
-      | e1      | without using   | pending            | anakin501 |    501 | NULL     | insufficient stock of item \\"Banana\\"                |
-      | e2      | using           | pending            | anakin501 |    501 | NULL     | insufficient stock if item \\"Chicken noodle soup\\"   |
-      | e2      | without using   | pending            | anakin501 |    501 | NULL     | insufficient stock if item \\"Chicken noodle soup\\"   |
-      | a       | using           | under construction | alice     |      2 | NULL     | cannot pay for an order which has not been checked out |
-      | a       | without using   | under construction | alice     |      2 | NULL     | cannot pay for an order which has not been checked out |
-      | f       | using           | placed             | obiwan212 |    212 | NULL     | cannot pay for order that has already been paid for    |
-      | f       | without using   | placed             | obiwan212 |    212 | NULL     | cannot pay for order that has already been paid for    |
-      | g       | using           | in preparation     | anakin501 |    501 | bob      | cannot pay for order that has already been paid for    |
-      | g       | without using   | in preparation     | anakin501 |    501 | bob      | cannot pay for order that has already been paid for    |
-      | h       | using           | ready for delivery | anakin501 |    501 | claire   | cannot pay for order that has already been paid for    |
-      | h       | without using   | ready for delivery | anakin501 |    501 | claire   | cannot pay for order that has already been paid for    |
-      | i       | using           | delivered          | alice     |      2 | alice    | cannot pay for order that has already been paid for    |
-      | i       | without using   | delivered          | alice     |      2 | alice    | cannot pay for order that has already been paid for    |
-      | j       | using           | cancelled          | alice     |      2 | bob      | cannot pay for order that has already been paid for    |
-      | j       | without using   | cancelled          | alice     |      2 | bob      | cannot pay for order that has already been paid for    |
-
-  Scenario Outline: Successfully assign order to employee
-    When the manager attempts to assign the order with ID "<orderId>" to "<employee>"
-    Then the system shall not raise any errors
-    And the order shall be "in preparation"
-    And the order's assignee shall be "<employee>"
-
-    Examples: 
-      | orderId | employee |
-      | f       | alice    |
-      | f       | bob      |
-      | f       | claire   |
-      # Change assignee
-      | g       | alice    |
-      | g       | bob      |
-      | g       | claire   |
-
-  Scenario Outline: Unsuccessfully assign order to employee
-    When the manager attempts to assign the order with ID "<orderId>" to "<newAssignee>"
-    Then the system shall raise the error "<error>"
-    And the order shall be "<oldState>"
-    And the order's assignee shall be "<oldAssignee>"
-
-    Examples: 
-      | orderId | newAssignee | oldAssignee | oldState           | error                                                           |
-      | a       | alice       | NULL        | under construction | cannot assign employee to order that has not been placed        |
-      | b1      | bob         | NULL        | under construction | cannot assign employee to order that has not been placed        |
-      | e       | claire      | NULL        | pending            | cannot assign employee to order that has not been placed        |
-      | h       | alice       | claire      | ready for delivery | cannot assign employee to an order that has already been placed |
-      | i       | bob         | alice       | delivered          | cannot assign employee to an order that has already been placed |
-      | j       | claire      | bob         | cancelled          | cannot assign employee to an order that has been cancelled      |
-      | f       | nonexistent | NULL        | placed             | there is no user with username \\"nonexistent\\"                |
-      | f       | ghost       | NULL        | placed             | there is no user with username \\"ghost\\"                      |
-      | f       | obiwan212   | NULL        | placed             | \\"obiwan212\\" is not an employee                              |
-      | f       | anakin501   | NULL        | placed             | \\"anakin501\\" is not an employee                              |
-
-  Scenario Outline: Successfully finish order assembly
-    When the user attempts to indicate that assembly of the order with ID "<orderId>" is finished
-    Then the system shall not raise any errors
-    And the order shall be "ready for delivery"
-
-    Examples: 
-      | orderId |
-      | g1      |
-      | g3      |
-      | g4      |
-
-  Scenario Outline: Unsuccessfully finish order assembly
-    When the user attempts to indicate that assembly of the order with ID "<orderId>" is finished
-    Then the system shall raise the error "<error>"
-    And the order shall be "<oldState>"
-
-    Examples: 
-      | orderId | oldState           | error                                                                                             |
-      | g       | in preparation     | cannot finish assembling order because it contains perishable items and today is not the deadline |
-      | g2      | in preparation     | cannot finish assembling order because it contains perishable items and today is not the deadline |
-      | a       | under construction | cannot finish assembling order because it has not been assigned to an employee                    |
-      | b2      | under construction | cannot finish assembling order because it has not been assigned to an employee                    |
-      | b9      | under construction | cannot finish assembling order because it has not been assigned to an employee                    |
-      | e       | pending            | cannot finish assembling order because it has not been assigned to an employee                    |
-      | f       | placed             | cannot finish assembling order because it has not been assigned to an employee                    |
-      | h       | ready for delivery | cannot finish assembling order that has already been assembled                                    |
-      | i       | delivered          | cannot finish assembling order that has already been assembled                                    |
-      | j       | cancelled          | cannot finish assembling order because it was cancelled                                           |
-
-  Scenario Outline: Successfully cancel order
-    When the user attempts to cancel the order with ID "<orderId>"
-    Then the system shall not raise any errors
-    And the order shall be "cancelled"
-    And the quantity of item "Eggs" shall be <newEggsQty>
-    And the quantity of item "Chicken noodle soup" shall be <newSoupQty>
-    And the quantity of item "Banana" shall be <newBananaQty>
-    And the quantity of item "Grain of rice" shall be <newRiceQty>
-    # No change to their points
-    And "<customer>" shall have <points> points
-
-    Examples: 
-      | orderId | newEggsQty | newSoupQty | newBananaQty | newRiceQty | customer  | points |
-      | f       |         21 |          6 |           11 |        102 | obiwan212 |    212 |
-      | f1      |         20 |         12 |            8 |        100 | alice     |      2 |
-      # No change in inventory if the order has not yet been placed
-      | b8      |         20 |          2 |            8 |        100 | obiwan212 |    212 |
-      | e       |         20 |          2 |            8 |        100 | alice     |      2 |
-
-  Scenario Outline: Unsuccessfully cancel order
-    When the user attempts to cancel the order with ID "<orderId>"
-    Then the system shall raise the error "<error>"
-    And the order shall be "<oldState>"
+    And the customer shall have 212 points
     And the quantity of item "Eggs" shall be 20
     And the quantity of item "Chicken noodle soup" shall be 2
     And the quantity of item "Banana" shall be 8
     And the quantity of item "Grain of rice" shall be 100
 
     Examples: 
-      | orderId | oldState           | error                                                                |
-      | g       | in preparation     | cannot cancel an order that has already been assigned to an employee |
-      | h       | ready for delivery | cannot cancel an order that has already been assigned to an employee |
-      | i       | delivered          | cannot cancel an order that has already been assigned to an employee |
-      | j       | cancelled          | order was already cancelled                                          |
+      | orderId | usingOrWithoutUsing | error                                                |
+      | eggsoup | using               | insufficient stock of item \\"Chicken noodle soup\\" |
+      | eggsoup | without using       | insufficient stock of item \\"Chicken noodle soup\\" |
+      | bananas | using               | insufficient stock of item \\"Banana\\"              |
+      | bananas | without using       | insufficient stock of item \\"Banana\\"              |
 
-  Scenario Outline: Successfully deliver order
-    When the manager attempts to mark the order with ID "<orderId>" as delivered
-    Then the system shall not raise any errors
-    And the order shall be "delivered"
+  Scenario Outline: Unsuccessfully pay for order due to wrong state
+    Given the following orders exist in the system
+      | id       | datePlaced | deadline    | customer | assignee   | state   |
+      | badstate | NULL       | InThreeDays | alice    | <assignee> | <state> |
+    And the following items are part of orders
+      | order    | item | quantity |
+      | badstate | Eggs |        1 |
+    When the user attempts to pay for the order with ID "badstate" "<usingOrWithoutUsing>" their points
+    Then the system shall raise the error "<error>"
+    And the order shall be "<state>"
+    And the order's assignee shall be "<assignee>"
+    And "alice" shall have 2 points
+    And the quantity of item "Eggs" shall be 20
+    And the quantity of item "Chicken noodle soup" shall be 2
+    And the quantity of item "Banana" shall be 8
+    And the quantity of item "Grain of rice" shall be 100
 
     Examples: 
-      | orderId |
-      | h       |
-      | h2      |
-      # Better late than never
-      | h4      |
+      | state              | assignee | usingOrWithoutUsing | error                                                   |
+      | under construction | NULL     | without using       | cannot pay for an order which has not been checked out  |
+      | under construction | NULL     | using               | cannot pay for an order which has not been checked out  |
+      | placed             | NULL     | without using       | cannot pay for an order which has already been paid for |
+      | placed             | NULL     | using               | cannot pay for an order which has already been paid for |
+      | in preparation     | bob      | without using       | cannot pay for an order which has already been paid for |
+      | in preparation     | bob      | using               | cannot pay for an order which has already been paid for |
+      | ready for delivery | claire   | without using       | cannot pay for an order which has already been paid for |
+      | ready for delivery | claire   | using               | cannot pay for an order which has already been paid for |
+      | delivered          | alice    | without using       | cannot pay for an order which has already been paid for |
+      | delivered          | alice    | using               | cannot pay for an order which has already been paid for |
+      | cancelled          | alice    | without using       | cannot pay for an order which has been cancelled        |
+      | cancelled          | alice    | using               | cannot pay for an order which has been cancelled        |
 
-  Scenario Outline: Unsuccessfully mark order as delivered
-    When the manager attempts to mark the order with ID "<orderId>" as delivered
+  Scenario Outline: Successfully assign order to employee
+    Given the following orders exist in the system
+      | id         | datePlaced | deadline    | customer  | assignee | state          |
+      | unassigned | today      | InThreeDays | alice     | NULL     | placed         |
+      | assigned   | yesterday  | InTwoDays   | anakin501 | bob      | in preparation |
+    And the following items are part of orders
+      | order      | item                | quantity |
+      | unassigned | Eggs                |        1 |
+      | assigned   | Chicken noodle soup |        1 |
+    When the manager attempts to assign the order with ID "<orderId>" to "<employee>"
+    Then the system shall not raise any errors
+    And the order shall be "in preparation"
+    And the order's assignee shall be "<employee>"
+
+    Examples: 
+      | orderId    | employee |
+      | unassigned | alice    |
+      | unassigned | bob      |
+      | unassigned | claire   |
+      # Change assignee of already-assigned order.
+      | assigned   | alice    |
+      | assigned   | claire   |
+
+  Scenario Outline: Unsuccessfully assign order to employee
+    Given the following orders exist in the system
+      | id | datePlaced | deadline    | customer | assignee      | state      |
+      | m  | today      | InThreeDays | alice    | <oldAssignee> | <oldState> |
+    And the following items are part of orders
+      | order | item | quantity |
+      | m     | Eggs |        1 |
+    When the manager attempts to assign the order with ID "m" to "<newAssignee>"
+    Then the system shall raise the error "<error>"
+    And the order shall be "<oldState>"
+    And the order's assignee shall be "<oldAssignee>"
+
+    Examples: 
+      | newAssignee | oldAssignee | oldState           | error                                                             |
+      | alice       | NULL        | under construction | cannot assign employee to order that has not been placed          |
+      | bob         | NULL        | under construction | cannot assign employee to order that has not been placed          |
+      | claire      | NULL        | pending            | cannot assign employee to order that has not been placed          |
+      | alice       | claire      | ready for delivery | cannot assign employee to an order that has already been prepared |
+      | bob         | alice       | delivered          | cannot assign employee to an order that has already been prepared |
+      | claire      | bob         | cancelled          | cannot assign employee to an order that has been cancelled        |
+      | nonexistent | NULL        | placed             | there is no user with username \\"nonexistent\\"                  |
+      | ghost       | NULL        | placed             | there is no user with username \\"ghost\\"                        |
+      | obiwan212   | NULL        | placed             | \\"obiwan212\\" is not an employee                                |
+      | anakin501   | NULL        | placed             | \\"anakin501\\" is not an employee                                |
+
+  Scenario Outline: Successfully finish order assembly
+    Given the following orders exist in the system
+      | id                 | datePlaced   | deadline   | customer  | assignee | state          |
+      | with_perishable    | <datePlaced> | <deadline> | obiwan212 | alice    | in preparation |
+      | without_perishable | <datePlaced> | <deadline> | anakin212 | bob      | in preparation |
+    And the following items are part of orders
+      | order              | item                | quantity |
+      | with_perishable    | Chicken noodle soup |        1 |
+      | with_perishable    | Eggs                |        1 |
+      | without_perishable | Chicken noodle soup |        1 |
+    When the user attempts to indicate that assembly of the order with ID "<orderId>" is finished
+    Then the system shall not raise any errors
+    And the order shall be "ready for delivery"
+
+    Examples: 
+      | orderId            | datePlaced | deadline    |
+      # Can always assemble order on the day it is due
+      | with_perishable    | yesterday  | InOneDay    |
+      | with_perishable    | today      | SameDay     |
+      | without_perishable | yesterday  | InOneDay    |
+      | without_perishable | today      | SameDay     |
+      # No perishable items: can assemble early
+      | without_perishable | yesterday  | InTwoDays   |
+      | without_perishable | yesterday  | InThreeDays |
+      | without_perishable | today      | InOneDay    |
+      | without_perishable | today      | InTwoDays   |
+      | without_perishable | today      | InThreeDays |
+      # Better late than never
+      | with_perishable    | yesterday  | SameDay     |
+      | without_perishable | yesterday  | SameDay     |
+
+  Scenario Outline: Try to assemble perishable order before deadline
+    Given the following orders exist in the system
+      | id         | datePlaced   | deadline   | customer  | assignee | state          |
+      | perishable | <datePlaced> | <deadline> | obiwan212 | alice    | in preparation |
+    And the following items are part of orders
+      | order      | item                | quantity |
+      | perishable | Chicken noodle soup |        2 |
+      | perishable | Eggs                |        1 |
+    When the user attempts to indicate that assembly of the order with ID "perishable" is finished
+    Then the system shall raise the error "cannot finish assembling an order with perishable items before the deadline"
+    And the order shall be "in preparation"
+
+    Examples: 
+      | datePlaced | deadline    |
+      | yesterday  | InTwoDays   |
+      | yesterday  | InThreeDays |
+      | today      | InOneDay    |
+      | today      | InTwoDays   |
+      | today      | InThreeDays |
+
+  Scenario Outline: Unsuccessfully finish order assembly
+    Given the following orders exist in the system
+      | id        | datePlaced | deadline | customer | assignee      | state      |
+      | bad_state | yesterday  | InOneDay | alice    | <oldAssignee> | <oldState> |
+    And the following items are part of orders
+      | order     | item                | quantity |
+      | bad_state | Chicken noodle soup |        1 |
+    When the user attempts to indicate that assembly of the order with ID "bad_state" is finished
     Then the system shall raise the error "<error>"
     And the order shall be "<oldState>"
 
     Examples: 
-      | orderId | oldState           | error                                                             |
-      | h1      | ready for delivery | cannot mark order as delivered before the delivery date           |
-      | h3      | ready for delivery | cannot mark order as delivered before the delivery date           |
-      | b1      | under construction | cannot mark an order as delivered if it is not ready for delivery |
-      | e       | pending            | cannot mark an order as delivered if it is not ready for delivery |
-      | f       | placed             | cannot mark an order as delivered if it is not ready for delivery |
-      | g       | in preparation     | cannot mark an order as delivered if it is not ready for delivery |
-      | j       | cancelled          | cannot mark an order as delivered if it is not ready for delivery |
+      | oldState           | oldAssignee | error                                                                          |
+      | under construction | NULL        | cannot finish assembling order because it has not been assigned to an employee |
+      | pending            | NULL        | cannot finish assembling order because it has not been assigned to an employee |
+      | placed             | NULL        | cannot finish assembling order because it has not been assigned to an employee |
+      | ready for delivery | bob         | cannot finish assembling order that has already been assembled                 |
+      | delivered          | bob         | cannot finish assembling order that has already been assembled                 |
+      | cancelled          | bob         | cannot finish assembling order because it was cancelled                        |
+
+  Scenario Outline: Successfully cancel order
+    Given the following orders exist in the system
+      | id   | datePlaced | deadline | customer   | assignee | state      |
+      | all  | yesterday  | InOneDay | <customer> | NULL     | <oldState> |
+      | some | today      | SameDay  | <customer> | NULL     | <oldState> |
+    And the following items are part of orders
+      | order | item                | quantity |
+      | all   | Eggs                |        1 |
+      | all   | Chicken noodle soup |        2 |
+      | all   | Banana              |        3 |
+      | all   | Grain of rice       |        4 |
+      | some  | Chicken noodle soup |       10 |
+      | some  | Banana              |        9 |
+    When the user attempts to cancel the order with ID "<orderId>"
+    Then the system shall not raise any errors
+    And the order shall be "cancelled"
+    # Need to add back inventory that was "reserved" for this order (if it was already placed)
+    And the quantity of item "Eggs" shall be <newEggsQty>
+    And the quantity of item "Chicken noodle soup" shall be <newSoupQty>
+    And the quantity of item "Banana" shall be <newBananaQty>
+    And the quantity of item "Grain of rice" shall be <newRiceQty>
+    # No change to the customer's points
+    And "<customer>" shall have <points> points
+
+    Examples: 
+      | orderId | oldState           | newEggsQty | newSoupQty | newBananaQty | newRiceQty | customer  | points |
+      | all     | placed             |         21 |          4 |           11 |        104 | obiwan212 |    212 |
+      | all     | placed             |         21 |          4 |           11 |        104 | alice     |      2 |
+      | some    | placed             |         20 |         12 |           17 |        100 | obiwan212 |    212 |
+      # No change in inventory if the order has not yet been placed
+      | all     | under construction |         20 |          2 |            8 |        100 | obiwan212 |    212 |
+      | some    | pending            |         20 |          2 |            8 |        100 | alice     |      2 |
+
+  Scenario Outline: Unsuccessfully cancel order
+    Given the following orders exist in the system
+      | id        | datePlaced | deadline | customer  | assignee      | state      |
+      | bad_state | yesterday  | InOneDay | anakin501 | <oldAssignee> | <oldState> |
+    And the following items are part of orders
+      | order     | item | quantity |
+      | bad_state | Eggs |        1 |
+    When the user attempts to cancel the order with ID "bad_state"
+    Then the system shall raise the error "<error>"
+    And the order shall be "<oldState>"
+    And the quantity of item "Eggs" shall be 20
+    And the quantity of item "Chicken noodle soup" shall be 2
+    And the quantity of item "Banana" shall be 8
+    And the quantity of item "Grain of rice" shall be 100
+    And "anakin501" shall have 501 points
+
+    Examples: 
+      | oldState           | oldAssignee | error                                                                |
+      | in preparation     | alice       | cannot cancel an order that has already been assigned to an employee |
+      | ready for delivery | bob         | cannot cancel an order that has already been assigned to an employee |
+      | delivered          | claire      | cannot cancel an order that has already been assigned to an employee |
+      | cancelled          | NULL        | order was already cancelled                                          |
+      | cancelled          | alice       | order was already cancelled                                          |
+
+  Scenario Outline: Successfully deliver order
+    Given the following orders exist in the system
+      | id    | datePlaced   | deadline   | customer  | assignee | state              |
+      | ready | <datePlaced> | <deadline> | obiwan212 | claire   | ready for delivery |
+    And the following items are part of orders
+      | order | item | quantity |
+      | ready | Eggs |        1 |
+    When the manager attempts to mark the order with ID "ready" as delivered
+    Then the system shall not raise any errors
+    And the order shall be "delivered"
+
+    Examples: 
+      | datePlaced     | deadline    |
+      | today          | SameDay     |
+      | yesterday      | InOneDay    |
+      | two days ago   | InTwoDays   |
+      | three days ago | InThreeDays |
+      # Better late than never
+      | yesterday      | SameDay     |
+      | two days ago   | SameDay     |
+      | two days ago   | InOneDay    |
+
+  Scenario Outline: Unsuccessfully mark order as delivered
+    Given the following orders exist in the system
+      | id        | datePlaced   | deadline   | customer  | assignee      | state      |
+      | not_ready | <datePlaced> | <deadline> | anakin501 | <oldAssignee> | <oldState> |
+    And the following items are part of orders
+      | order     | item | quantity |
+      | not_ready | Eggs |        1 |
+    When the manager attempts to mark the order with ID "not_ready" as delivered
+    Then the system shall raise the error "<error>"
+    And the order shall be "<oldState>"
+
+    Examples: 
+      | datePlaced   | deadline    | oldState           | oldAssignee | error                                                             |
+      | today        | InOneDay    | ready for delivery | alice       | cannot mark order as delivered before the delivery date           |
+      | today        | InTwoDays   | ready for delivery | bob         | cannot mark order as delivered before the delivery date           |
+      | today        | InThreeDays | ready for delivery | charlie     | cannot mark order as delivered before the delivery date           |
+      | yesterday    | InTwoDays   | ready for delivery | charlie     | cannot mark order as delivered before the delivery date           |
+      | yesterday    | InThreeDays | ready for delivery | charlie     | cannot mark order as delivered before the delivery date           |
+      | two days ago | InThreeDays | ready for delivery | charlie     | cannot mark order as delivered before the delivery date           |
+      | NULL         | SameDay     | under construction | NULL        | cannot mark an order as delivered if it is not ready for delivery |
+      | NULL         | InOneDay    | pending            | NULL        | cannot mark an order as delivered if it is not ready for delivery |
+      | today        | SameDay     | placed             | NULL        | cannot mark an order as delivered if it is not ready for delivery |
+      | yesterday    | InOneDay    | in preparation     | bob         | cannot mark an order as delivered if it is not ready for delivery |
+      | NULL         | InOneDay    | cancelled          | NULL        | cannot mark an order as delivered if it is not ready for delivery |
+      | yesterday    | InOneDay    | cancelled          | NULL        | cannot mark an order as delivered if it is not ready for delivery |
