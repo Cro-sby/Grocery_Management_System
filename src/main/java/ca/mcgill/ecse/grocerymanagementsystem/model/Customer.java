@@ -6,7 +6,7 @@ import java.util.*;
 import java.sql.Date;
 
 // line 26 "../../../../../../model.ump"
-// line 103 "../../../../../../model.ump"
+// line 108 "../../../../../../model.ump"
 public class Customer extends UserRole
 {
 

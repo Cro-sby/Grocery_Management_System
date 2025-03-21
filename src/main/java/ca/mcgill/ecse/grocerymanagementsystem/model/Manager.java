@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.grocerymanagementsystem.model;
 
 // line 36 "../../../../../../model.ump"
-// line 113 "../../../../../../model.ump"
+// line 118 "../../../../../../model.ump"
 public class Manager extends UserRole
 {
 
