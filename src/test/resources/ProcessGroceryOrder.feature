@@ -40,7 +40,7 @@ Feature: Process order
 
     Examples: 
       | id | deadline    | customer  | points | numBananas | cost |
-      | a  | SameDay     | alice     |      2 |          1 |  100 |
+      | a  | InOneDay    | alice     |      2 |          1 |  100 |
       # (2 bananas)($0.95/banana) = $1.90
       | b  | InOneDay    | anakin501 |    501 |          2 |  190 |
       # (3 bananas)($0.90/banana) = $2.70
@@ -48,14 +48,14 @@ Feature: Process order
       # (8 bananas)($0.65/banana) = $5.20
       | d  | InThreeDays | obiwan212 |    212 |          8 |  520 |
       # (9 bananas)($0.60/banana) = $5.40
-      | e  | SameDay     | obiwan212 |    212 |          9 |  540 |
+      | e  | InTwoDays   | obiwan212 |    212 |          9 |  540 |
       # (10 bananas)($0.55/banana) = $5.50
       | f  | InOneDay    | obiwan212 |    212 |         10 |  550 |
 
   Scenario Outline: Successfully check out an order with multiple items
     Given the following orders exist in the system
-      | id | datePlaced | deadline | customer | assignee | state              |
-      | g  | NULL       | InOneDay | alice    | NULL     | under construction |
+      | id | datePlaced | deadline   | customer | assignee | state              |
+      | g  | NULL       | <deadline> | alice    | NULL     | under construction |
     And the following items are part of orders
       | order | item                | quantity         |
       | g     | Eggs                | <qtyEggsInOrder> |
@@ -72,12 +72,16 @@ Feature: Process order
     And the quantity of item "Chicken noodle soup" shall be 2
 
     Examples: 
-      | qtyEggsInOrder | qtySoupInOrder | cost |
-      |              1 |              1 |  728 |
+      | deadline    | qtyEggsInOrder | qtySoupInOrder | cost |
+      | InOneDay    |              1 |              1 |  728 |
       #  Eggs: (5 units)(0.8)($5.49/unit) = $21.96
       #  Soup: (3 units)(0.9)($1.79/unit) = $4.833
       # Total: $26.793 --> $26.79
-      |              5 |              3 | 2679 |
+      | InTwoDays   |              5 |              3 | 2679 |
+      | InThreeDays |              5 |              3 | 2679 |
+      # Extra fee for same-day delivery
+      | SameDay     |              1 |              1 | 1228 |
+      | SameDay     |              5 |              3 | 3179 |
 
   Scenario: Try to check out an empty order
     Given the following orders exist in the system
@@ -115,10 +119,10 @@ Feature: Process order
 
   Scenario Outline: Successfully pay for an order
     Given the following orders exist in the system
-      | id      | datePlaced | deadline    | customer   | assignee | state   |
-      | eggsoup | NULL       | InThreeDays | <customer> | NULL     | pending |
-      | bananas | NULL       | SameDay     | <customer> | NULL     | pending |
-      | smol    | NULL       | InOneDay    | <customer> | NULL     | pending |
+      | id      | datePlaced | deadline   | customer   | assignee | state   |
+      | eggsoup | NULL       | <deadline> | <customer> | NULL     | pending |
+      | bananas | NULL       | <deadline> | <customer> | NULL     | pending |
+      | smol    | NULL       | <deadline> | <customer> | NULL     | pending |
     And the following items are part of orders
       | order   | item                | quantity |
       | eggsoup | Eggs                |        1 |
@@ -138,18 +142,27 @@ Feature: Process order
     And the quantity of item "Grain of rice" shall be <newQtyRice>
 
     Examples: 
-      | orderId | customer  | usingOrWithoutUsing | cost | points | newQtyEggs | newQtySoup | newQtyBananas | newQtyRice |
+      | orderId | deadline    | customer  | usingOrWithoutUsing | cost | points | newQtyEggs | newQtySoup | newQtyBananas | newQtyRice |
       # 1 carton of eggs + 1 can of soup = 7 points
-      | eggsoup | alice     | without using       |  728 |      9 |         19 |          1 |             8 |        100 |
-      | eggsoup | alice     | using               |  726 |      7 |         19 |          1 |             8 |        100 |
-      | eggsoup | anakin501 | without using       |  728 |    508 |         19 |          1 |             8 |        100 |
-      | eggsoup | anakin501 | using               |  227 |      7 |         19 |          1 |             8 |        100 |
+      | eggsoup | InOneDay    | alice     | without using       |  728 |      9 |         19 |          1 |             8 |        100 |
+      | eggsoup | InTwoDays   | alice     | using               |  726 |      7 |         19 |          1 |             8 |        100 |
+      | eggsoup | InThreeDays | anakin501 | without using       |  728 |    508 |         19 |          1 |             8 |        100 |
+      | eggsoup | InOneDay    | anakin501 | using               |  227 |      7 |         19 |          1 |             8 |        100 |
       # 8 bananas = 8 points
-      | bananas | obiwan212 | without using       |  520 |    220 |         20 |          2 |             0 |        100 |
-      | bananas | obiwan212 | using               |  308 |      8 |         20 |          2 |             0 |        100 |
+      | bananas | InTwoDays   | obiwan212 | without using       |  520 |    220 |         20 |          2 |             0 |        100 |
+      | bananas | InThreeDays | obiwan212 | using               |  308 |      8 |         20 |          2 |             0 |        100 |
       # 1 grain of rice = 1 point
-      | smol    | alice     | without using       |    1 |      3 |         20 |          2 |             8 |         99 |
-      | smol    | alice     | using               |    0 |      2 |         20 |          2 |             8 |         99 |
+      | smol    | InOneDay    | alice     | without using       |    1 |      3 |         20 |          2 |             8 |         99 |
+      | smol    | InTwoDays   | alice     | using               |    0 |      2 |         20 |          2 |             8 |         99 |
+      # Extra fee for same-day delivery
+      | eggsoup | SameDay     | alice     | without using       | 1228 |      9 |         19 |          1 |             8 |        100 |
+      | eggsoup | SameDay     | alice     | using               | 1226 |      7 |         19 |          1 |             8 |        100 |
+      | bananas | SameDay     | obiwan212 | without using       | 1020 |    220 |         20 |          2 |             0 |        100 |
+      | bananas | SameDay     | obiwan212 | using               |  808 |      8 |         20 |          2 |             0 |        100 |
+      | smol    | SameDay     | alice     | without using       |  501 |      3 |         20 |          2 |             8 |         99 |
+      | smol    | SameDay     | alice     | using               |  499 |      1 |         20 |          2 |             8 |         99 |
+      | smol    | SameDay     | anakin501 | without using       |  501 |    502 |         20 |          2 |             8 |         99 |
+      | smol    | SameDay     | anakin501 | using               |    0 |      1 |         20 |          2 |             8 |         99 |
 
   Scenario Outline: Unsuccessfully pay for order due to insufficient stock
     Given the following orders exist in the system
