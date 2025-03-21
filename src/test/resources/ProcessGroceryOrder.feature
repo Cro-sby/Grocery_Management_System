@@ -140,7 +140,7 @@ Feature: Process order
       | j     | cancelled          | bob      | order has already been checked out |
 
   Scenario Outline: Successfully pay for order
-    When the user attempts to pay for the order with ID "e" <usingOrNotUsing> their points
+    When the user attempts to pay for the order with ID "e" "<usingOrNotUsing>" their points
     Then the system shall not raise any errors
     And the final cost of the order, after considering points, shall be <cost> cents
     And the order shall be "placed"
@@ -159,7 +159,7 @@ Feature: Process order
 
   Scenario Outline: Successfully check out and pay for order
     When the user attempts to check out the order with ID "<orderId>"
-    And the user attempts to pay for the order with ID "<orderId>" <usingOrNotUsing> their points
+    And the user attempts to pay for the order with ID "<orderId>" "<usingOrNotUsing>" their points
     Then the final cost of the order, after considering points, shall be <cost> cents
     And the order shall be "placed"
     And the order's assignee shall be "NULL"
@@ -194,7 +194,7 @@ Feature: Process order
       | b8      | using           |  308 | obiwan212 |      8 |         20 |          2 |            0 |
 
   Scenario Outline: Unsuccessfully pay for order
-    When the user attempts to pay for the order with ID "<orderId>" <usingOrNotUsing> their points
+    When the user attempts to pay for the order with ID "<orderId>" "<usingOrNotUsing>" their points
     Then the system shall raise the error "<error>"
     And the order shall be "<state>"
     And the order's assignee shall be "<assignee>"
