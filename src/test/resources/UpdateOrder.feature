@@ -26,14 +26,16 @@ Feature: Update order
       | id | datePlaced | deadline    | customer  | assignee | state              |
       | a  | NULL       | SameDay     | alice     | NULL     | under construction |
       | b  | 2025-02-24 | InOneDay    | obiwan212 | NULL     | placed             |
-      | c  | NULL       | InTwoDays   | anakin501 | NULL     | pending            |
+      | c  | NULL       | InTwoDays   | anakin501 | NULL     | under construction |
       | d  | 2025-02-24 | InThreeDays | alice     | bob      | delivered          |
+      | e  | NULL       | InOneDay    | alice     | NULL     | pending            |
     And the following items are part of orders
       | order | item                | quantity |
       | a     | Eggs                |        2 |
       | b     | Eggs                |        1 |
       | b     | Chicken noodle soup |        3 |
       | d     | Chicken noodle soup |        5 |
+      | e     | Chicken noodle soup |        1 |
 
   Scenario Outline: Successfully add a new item to an order
     When the user attempts to add item "<item>" to the order with ID "<orderId>"
@@ -81,6 +83,12 @@ Feature: Update order
     Then the system shall raise the error "order has already been placed"
     And the order with ID "d" shall not include any items called "Eggs"
     And the order with ID "d" shall include 1 distinct item
+
+  Scenario: Try to add an item to an order that's already been placed
+    When the user attempts to add item "Eggs" to the order with ID "e"
+    Then the system shall raise the error "order has already been checked out"
+    And the order with ID "e" shall not include any items called "Eggs"
+    And the order with ID "e" shall include 1 distinct item
 
   Scenario: Try to add an unavailable item to an order
     When the user attempts to add item "Vegetable soup" to the order with ID "a"
@@ -135,10 +143,12 @@ Feature: Update order
     And the order with ID "<orderId>" shall include <numItems> distinct items
 
     Examples: 
-      | item                | orderId | newQty | oldQty | numItems | error                         |
-      | Eggs                | a       |     -1 |      2 |        1 | quantity must be non-negative |
-      | Eggs                | a       |     -2 |      2 |        1 | quantity must be non-negative |
-      | Eggs                | b       |     11 |      2 |        1 | quantity cannot exceed 10     |
-      | Eggs                | b       |     12 |      2 |        1 | quantity cannot exceed 10     |
-      | Eggs                | b       |     10 |      1 |        2 | order has already been placed |
-      | Chicken noodle soup | b       |      7 |      3 |        2 | order has already been placed |
+      | item                | orderId | newQty | oldQty | numItems | error                              |
+      | Eggs                | a       |     -1 |      2 |        1 | quantity must be non-negative      |
+      | Eggs                | a       |     -2 |      2 |        1 | quantity must be non-negative      |
+      | Eggs                | c       |     11 |      2 |        1 | quantity cannot exceed 10          |
+      | Eggs                | c       |     12 |      2 |        1 | quantity cannot exceed 10          |
+      | Eggs                | b       |     10 |      1 |        2 | order has already been placed      |
+      | Chicken noodle soup | b       |      7 |      3 |        2 | order has already been placed      |
+      | Chicken noodle soup | e       |      2 |      1 |        1 | order has already been checked out |
+      | Chicken noodle soup | e       |      0 |      1 |        1 | order has already been checked out |
