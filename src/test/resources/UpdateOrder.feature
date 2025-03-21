@@ -23,11 +23,11 @@ Feature: Update order
       # The controller should still identify orders by their order number.
       # You'll need to create a map from string IDs to order numbers.
       # Also, please convert the string "NULL" to null.
-      | id | datePlaced | deadline    | customer  |
-      | a  | NULL       | SameDay     | alice     |
-      | b  | 2025-02-24 | InOneDay    | obiwan212 |
-      | c  | NULL       | InTwoDays   | anakin501 |
-      | d  | 2025-02-24 | InThreeDays | alice     |
+      | id | datePlaced | deadline    | customer  | assignee | state              |
+      | a  | NULL       | SameDay     | alice     | NULL     | under construction |
+      | b  | 2025-02-24 | InOneDay    | obiwan212 | NULL     | placed             |
+      | c  | NULL       | InTwoDays   | anakin501 | NULL     | pending            |
+      | d  | 2025-02-24 | InThreeDays | alice     | bob      | delivered          |
     And the following items are part of orders
       | order | item                | quantity |
       | a     | Eggs                |        2 |
@@ -82,11 +82,11 @@ Feature: Update order
     And the order with ID "d" shall not include any items called "Eggs"
     And the order with ID "d" shall include 1 distinct item
 
-	Scenario: Try to add an unavailable item to an order
-		When the user attempts to add item "Vegetable soup" to the order with ID "a"
-		Then the system shall raise the error "item \"Vegetable soup\" is out of stock"
-		And the order with ID "a" shall not include any items called "Vegetable soup"
-		And the order with ID "a" shall include 1 distinct item
+  Scenario: Try to add an unavailable item to an order
+    When the user attempts to add item "Vegetable soup" to the order with ID "a"
+    Then the system shall raise the error "item \"Vegetable soup\" is out of stock"
+    And the order with ID "a" shall not include any items called "Vegetable soup"
+    And the order with ID "a" shall include 1 distinct item
 
   Scenario Outline: Successfully update quantity of item in order
     When the user attempts to set the quantity of item "<item>" in the order with ID "<orderId>" to <newQty>

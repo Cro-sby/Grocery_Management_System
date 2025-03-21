@@ -23,8 +23,8 @@ Feature: Process order
 
   Scenario Outline: Successfully check out a bulk order of bananas
     Given the following orders exist in the system
-      | id   | datePlaced | deadline   | customer   |
-      | <id> | NULL       | <deadline> | <customer> |
+      | id   | datePlaced | deadline   | customer   | assignee | state              |
+      | <id> | NULL       | <deadline> | <customer> | NULL     | under construction |
     And the following items are part of orders
       | order | item   | quantity     |
       | <id>  | Banana | <numBananas> |
@@ -54,8 +54,8 @@ Feature: Process order
 
   Scenario Outline: Successfully check out an order with multiple items
     Given the following orders exist in the system
-      | id | datePlaced | deadline | customer |
-      | g  | NULL       | InOneDay | alice    |
+      | id | datePlaced | deadline | customer | assignee | state              |
+      | g  | NULL       | InOneDay | alice    | NULL     | under construction |
     And the following items are part of orders
       | order | item                | quantity         |
       | g     | Eggs                | <qtyEggsInOrder> |
@@ -81,8 +81,8 @@ Feature: Process order
 
   Scenario: Try to check out an empty order
     Given the following orders exist in the system
-      | id    | datePlaced | deadline  | customer |
-      | empty | NULL       | InTwoDays | alice    |
+      | id    | datePlaced | deadline  | customer | assignee | state              |
+      | empty | NULL       | InTwoDays | alice    | NULL     | under construction |
     When the user attempts to check out the order with ID "empty"
     Then the system shall raise the error "cannot check out an empty order"
     And the order shall be "under construction"
