@@ -46,6 +46,10 @@ Feature: Process order
       | g3    | today      | InThreeDays | alice     | bob      | in preparation     |
       | g4    | today      | SameDay     | alice     | bob      | in preparation     |
       | h     | yesterday  | InOneDay    | anakin501 | claire   | ready for delivery |
+      | h1    | yesterday  | InTwoDays   | anakin501 | claire   | ready for delivery |
+      | h2    | today      | SameDay     | obiwan212 | bob      | ready for delivery |
+      | h3    | today      | InThreeDays | obiwan212 | bob      | ready for delivery |
+      | h4    | yesterday  | SameDay     | obiwan212 | bob      | ready for delivery |
       | i     | yesterday  | SameDay     | alice     | alice    | delivered          |
       | j     | today      | InOneDay    | alice     | bob      | cancelled          |
     And the following items are part of orders
@@ -80,6 +84,10 @@ Feature: Process order
       | g3    | Chicken noodle soup |        2 |
       | g4    | Chicken noodle soup |        1 |
       | h     | Chicken noodle soup |        2 |
+      | h1    | Chicken noodle soup |        2 |
+      | h2    | Chicken noodle soup |        2 |
+      | h3    | Chicken noodle soup |        2 |
+      | h4    | Chicken noodle soup |        2 |
       | i     | Eggs                |        3 |
       | j     | Eggs                |        3 |
 
@@ -141,7 +149,6 @@ Feature: Process order
     And "alice" shall have <points> points
     And the quantity of item "Grain of rice" shall be 99
 
-    # TODO: Watch out for id vs orderId! Check column names
     Examples: 
       | usingOrNotUsing | cost | points |
       # Rice: (1 grain)($0.01/grain) = $0.01
@@ -313,3 +320,30 @@ Feature: Process order
       | h       | ready for delivery | cannot cancel an order that has already been assigned to an employee |
       | i       | delivered          | cannot cancel an order that has already been assigned to an employee |
       | j       | cancelled          | order was already cancelled                                          |
+
+  Scenario Outline: Successfully deliver order
+    When the manager attempts to mark the order with ID "<orderId>" as delivered
+    Then the system shall not raise any errors
+    And the order shall be "delivered"
+
+    Examples: 
+      | orderId |
+      | h       |
+      | h2      |
+      # Better late than never
+      | h4      |
+
+  Scenario Outline: Unsuccessfully mark order as delivered
+    When the manager attempts to mark the order with ID "<orderId>" as delivered
+    Then the system shall raise the error "<error>"
+    And the order shall be "<oldState>"
+
+    Examples: 
+      | orderId | oldState           | error                                                             |
+      | h1      | ready for delivery | cannot mark order as delivered before the delivery date           |
+      | h3      | ready for delivery | cannot mark order as delivered before the delivery date           |
+      | b1      | under construction | cannot mark an order as delivered if it is not ready for delivery |
+      | e       | pending            | cannot mark an order as delivered if it is not ready for delivery |
+      | f       | placed             | cannot mark an order as delivered if it is not ready for delivery |
+      | g       | in preparation     | cannot mark an order as delivered if it is not ready for delivery |
+      | j       | cancelled          | cannot mark an order as delivered if it is not ready for delivery |
