@@ -84,7 +84,7 @@ Feature: Update order
     And the order with ID "d" shall not include any items called "Eggs"
     And the order with ID "d" shall include 1 distinct item
 
-  Scenario: Try to add an item to an order that's already been placed
+  Scenario: Try to add an item to an order that's already been checked out
     When the user attempts to add item "Eggs" to the order with ID "e"
     Then the system shall raise the error "order has already been checked out"
     And the order with ID "e" shall not include any items called "Eggs"
