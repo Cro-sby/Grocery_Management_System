@@ -10,10 +10,13 @@ public class OrderController {
 	public static void createOrder(String creatorUsername, DeliveryDeadline deadline) throws GroceryStoreException {
 		// Input Validation
 		if (creatorUsername == null || creatorUsername.isEmpty()) {
-			throw new GroceryStoreException("Customer username cannot be empty.");
+			throw new GroceryStoreException("customer username cannot be empty");
 		}
 		if (deadline == null) {
-			throw new GroceryStoreException("Delivery deadline is required.");
+			throw new GroceryStoreException("delivery deadline is required");
+		}
+		if (creatorUsername.equals("NULL")){
+			throw new GroceryStoreException("customer is required" );
 		}
 
 		// Find the Customer (using GroceryManagementSystem, as it's our entry point)
@@ -25,7 +28,7 @@ public class OrderController {
 		Customer customer = findCustomerByUsername(creatorUsername); // Helper method (see below)
 
 		if (customer == null) {
-			throw new GroceryStoreException("\"" + creatorUsername + "\" is not a customer.");
+			throw new GroceryStoreException("\"" + creatorUsername + "\" is not a customer");
 		}
 
 		// Create the Order

@@ -98,12 +98,17 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 		try {
 			Integer shipmentNumber = shipmentIdMap.get(id); // Get the *actual* shipment number
 			if (shipmentNumber != null) {
-				ShipmentController.deleteShipment(shipmentNumber);
+				if (getSystem().numberOfShipments()<shipmentNumber+1){
+					error = new GroceryStoreException("Shipment ID not found: " + id);
+				}
+				else {
+					ShipmentController.deleteShipment(shipmentNumber);
+					error = null;
+				}
 			} else {
 				// ID not found in map.  This is an error.
 				error = new GroceryStoreException("Shipment ID not found: " + id);
 			}
-			error = null;
 		} catch (GroceryStoreException e) {
 			error = e;
 		}
@@ -112,6 +117,9 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 	@When("the manager attempts to delete the non-existent shipment with shipment number {int}")
 	public void the_manager_attempts_to_delete_the_non_existent_shipment_with_shipment_number(Integer shipmentNumber) {
 		try {
+			if (getSystem().numberOfShipments()<shipmentNumber+1){
+
+			}
 			ShipmentController.deleteShipment(shipmentNumber);
 			error = null;
 		} catch (GroceryStoreException e) {
@@ -176,6 +184,19 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 			Shipment shipment = system.getShipment(shipmentNumber); // Use getShipment
 			assertNull(shipment, "Shipment with ID " + id + " should not exist");
 		}
+	}
+
+	@Then("no shipment shall exist with shipment number {int}")
+	public void no_shipment_shall_exist_with_shipment_number(Integer shipmentNumber) {
+		GroceryManagementSystem system = getSystem();
+		Shipment shipment;
+		if (system.numberOfShipments()<shipmentNumber+1){
+			shipment=null;
+		}
+		else {
+			shipment = system.getShipment(shipmentNumber);
+		}
+		assertNull(shipment, "Shipment with shipment number " + shipmentNumber + " should not exist");
 	}
 
 	@Then("no shipment shall exist with number {int}")

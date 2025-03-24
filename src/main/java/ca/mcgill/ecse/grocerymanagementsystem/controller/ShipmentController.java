@@ -17,12 +17,16 @@ public class ShipmentController {
 
 	public static void deleteShipment(int shipmentNumber) throws GroceryStoreException {
 		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
-		Shipment shipment = system.getShipment(shipmentNumber);  // Assumes a getShipment method
-		if (shipment == null) {
+		Shipment shipment;
+		if (system.numberOfShipments()<shipmentNumber+1){
+
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
 		}
-		if (system.numberOfShipments()<shipmentNumber+1){
-			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
+		else {
+			shipment = system.getShipment(shipmentNumber);
+			if (shipment == null) {
+				throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
+			}
 		}
 
 		//ADD THIS NULL CHECK:

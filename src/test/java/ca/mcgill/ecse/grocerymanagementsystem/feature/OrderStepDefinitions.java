@@ -116,9 +116,17 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@When("{string} attempts to create an order with deadline {string}")
 	public void attempts_to_create_an_order_with_deadline(String username, String deadline) {
 		try {
-			DeliveryDeadline deliveryDeadline = DeliveryDeadline.valueOf(deadline);
-			OrderController.createOrder(username, deliveryDeadline); // Call OrderController
-			error = null; // Clear previous errors
+			if (!(Objects.equals(deadline, "NULL"))){
+				DeliveryDeadline deliveryDeadline = DeliveryDeadline.valueOf(deadline);
+				OrderController.createOrder(username, deliveryDeadline); // Call OrderController
+				error = null;
+			}
+			else {
+				DeliveryDeadline deliveryDeadline = null;
+				OrderController.createOrder(username, deliveryDeadline); // Call OrderController
+				error = null;
+			}
+
 		} catch (GroceryStoreException e) {
 			error = e;
 		}
@@ -204,7 +212,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 				orderCount++;//CORRECTED
 			}
 		}
-		assertEquals(1, orderCount-1); // Assuming only creating one order at a time
+		assertEquals(1, orderCount -1); // Assuming only creating one order at a time
 	}
 
 	@Then("an order shall exist with ID {string}")
@@ -212,7 +220,14 @@ public class OrderStepDefinitions extends StepDefinitions {
 		Integer orderNumber = orderIdMap.get(id);
 		assertNotNull(orderNumber, "Order ID " + id + " not found in map");
 		GroceryManagementSystem system = getSystem();
-		Order order = system.getOrder(orderNumber); // Use a getOrder method (by order number)
+		Order order;
+		if (system.numberOfOrders()<orderNumber+1){
+			order = null;
+		}
+		else {
+			order = system.getOrder(orderNumber);
+		}
+		 // Use a getOrder method (by order number)
 		assertNotNull(order, "Order with ID " + id + " does not exist in the system");
 	}
 
@@ -221,10 +236,13 @@ public class OrderStepDefinitions extends StepDefinitions {
 		Integer orderNumber = orderIdMap.get(id);
 		if (orderNumber != null) { // Only check if the ID was ever used
 			GroceryManagementSystem system = getSystem();
+			Order order;
 			if (system.numberOfOrders()<orderNumber+1){
-
+				order = null;
 			}
-			Order order = system.getOrder(orderNumber);  // Use getOrder method
+			else {
+				order = system.getOrder(orderNumber);
+			}
 			assertNull(order, "Order with ID " + id + " should not exist");
 		}
 	}
@@ -232,7 +250,13 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("no order shall exist with order number {int}")
 	public void no_order_shall_exist_with_order_number(Integer orderNumber) {
 		GroceryManagementSystem system = getSystem();
-		Order order = system.getOrder(orderNumber); // Use getOrder method
+		Order order;
+		if (system.numberOfOrders()<orderNumber+1){
+			order = null;
+		}
+		else {
+			order = system.getOrder(orderNumber);
+		}
 		assertNull(order, "Order with number " + orderNumber + " should not exist");
 	}
 
