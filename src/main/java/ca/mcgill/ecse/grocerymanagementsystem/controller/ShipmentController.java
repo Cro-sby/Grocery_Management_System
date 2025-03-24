@@ -11,13 +11,12 @@ public class ShipmentController {
 	private static GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
 
 	public static void createShipment() throws GroceryStoreException {
-		// Create a new shipment with the current date.
 		new Shipment(null, system);
 	}
 
 	public static void deleteShipment(int shipmentNumber) throws GroceryStoreException {
 		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
-		Shipment shipment = system.getShipment(shipmentNumber);  // Assumes a getShipment method
+		Shipment shipment = system.getShipment(shipmentNumber); 
 		if (shipment == null) {
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
 		}
@@ -25,12 +24,11 @@ public class ShipmentController {
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
 		}
 
-		//ADD THIS NULL CHECK:
-		if (shipment != null) { // Add null check here!
+		if (shipment != null) { 
 			if (shipment.getDateOrdered() != null) {
 				throw new GroceryStoreException("cannot delete a shipment which has already been ordered");
 			}
-			shipment.delete(); // Umple generated delete
+			shipment.delete(); 
 		}
 	}
 
@@ -45,12 +43,11 @@ public class ShipmentController {
 	}
 
 	public static void addItemToShipment(int shipmentNumber, String itemName) throws GroceryStoreException {
-		Shipment shipment = system.getShipment(shipmentNumber); // Assumes you have a getShipment method
+		Shipment shipment = system.getShipment(shipmentNumber); 
 		if (shipment == null) {
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
 		}
 
-		// Check if the shipment has already been ordered (assuming dateOrdered != null means ordered)
 		if (shipment.getDateOrdered() != null) {
 			throw new GroceryStoreException("shipment has already been ordered");
 		}
@@ -60,7 +57,6 @@ public class ShipmentController {
 			throw new GroceryStoreException("there is no item called \"" + itemName + "\"");
 		}
 
-		// Check if the item is already in the shipment
 		for (ShipmentItem shipmentItem : shipment.getShipmentItems()) {
 			if (shipmentItem.getItem().getName().equals(item.getName())) {
 				throw new GroceryStoreException("shipment already includes item \"" + itemName + "\"");
@@ -68,7 +64,7 @@ public class ShipmentController {
 		}
 
 		// Add the item to the shipment with quantity 1
-		new ShipmentItem(1,  system, shipment, item); //CORRECT constructor call
+		new ShipmentItem(1,  system, shipment, item); 
 	}
 
 
@@ -77,7 +73,7 @@ public class ShipmentController {
 			throw new GroceryStoreException("quantity must be non-negative");
 		}
 
-		Shipment shipment = system.getShipment(shipmentNumber); // Assumes you have a getShipment method
+		Shipment shipment = system.getShipment(shipmentNumber); 
 		if (shipment == null) {
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
 		}
@@ -103,11 +99,11 @@ public class ShipmentController {
 		}
 
 		if (newQuantity == 0 && shipmentItem != null) {
-			shipmentItem.delete();  // Remove the ShipmentItem if quantity is 0
+			shipmentItem.delete(); 
 		} else if(shipmentItem != null){
 			shipmentItem.setQuantity(newQuantity);
 		} else{
-			new ShipmentItem(newQuantity, system, shipment, item); //CORRECT constructor call
+			new ShipmentItem(newQuantity, system, shipment, item); 
 		}
 	}
 }
