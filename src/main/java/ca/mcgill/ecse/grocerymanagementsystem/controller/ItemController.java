@@ -6,7 +6,6 @@ import ca.mcgill.ecse.grocerymanagementsystem.model.Item;
 public class ItemController {
 
 	public static void create(String name, boolean isPerishable, int points, int price) throws GroceryStoreException {
-		// Input Validation and Error Messages (using correct exception constructor)
 		if (name == null || name.trim().isEmpty()) {
 			throw new GroceryStoreException("name is required"); // Correct exception
 		}
