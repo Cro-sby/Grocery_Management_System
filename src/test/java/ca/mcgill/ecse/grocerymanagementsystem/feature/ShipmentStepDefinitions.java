@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryStoreException;
-import ca.mcgill.ecse.grocerymanagementsystem.controller.ShipmentController; // Using ShipmentController
+import ca.mcgill.ecse.grocerymanagementsystem.controller.ShipmentController; 
 import ca.mcgill.ecse.grocerymanagementsystem.model.GroceryManagementSystem;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Shipment;
 import ca.mcgill.ecse.grocerymanagementsystem.model.ShipmentItem;
@@ -26,14 +26,14 @@ import java.util.Map;
 
 public class ShipmentStepDefinitions extends StepDefinitions {
 
-	private Map<String, Integer> shipmentIdMap = new HashMap<>(); // Map string IDs to shipment numbers
+	private Map<String, Integer> shipmentIdMap = new HashMap<>(); 
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
 
 	@Before
 	public void before() {
 		super.before();
-		shipmentIdMap.clear();  // Clear the map
+		shipmentIdMap.clear();  
 	}
 
 	@Given("the following shipments exist")
@@ -69,11 +69,11 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 			String quantityStr = shipmentItemData.get("quantity");
 			int quantity = Integer.parseInt(quantityStr);
 
-			Item item = Item.getWithName(itemName); // Use Umple-generated static method
-			Shipment shipment = system.getShipment(shipmentIdMap.get(shipmentId)); // Use shipmentIdMap and getShipment
+			Item item = Item.getWithName(itemName); 
+			Shipment shipment = system.getShipment(shipmentIdMap.get(shipmentId)); 
 
 			if (item != null && shipment != null) {
-				new ShipmentItem(quantity,  system, shipment, item); // Create the association class, include system
+				new ShipmentItem(quantity,  system, shipment, item); 
 			} else {
 				throw new IllegalArgumentException("Invalid item or shipment ID in 'the_following_items_are_part_of_shipments'");
 			}
@@ -96,11 +96,10 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 	@When("the manager attempts to delete the shipment with ID {string}")
 	public void the_manager_attempts_to_delete_the_shipment_with_id(String id) {
 		try {
-			Integer shipmentNumber = shipmentIdMap.get(id); // Get the *actual* shipment number
+			Integer shipmentNumber = shipmentIdMap.get(id); 
 			if (shipmentNumber != null) {
 				ShipmentController.deleteShipment(shipmentNumber);
 			} else {
-				// ID not found in map.  This is an error.
 				error = new GroceryStoreException("Shipment ID not found: " + id);
 			}
 			error = null;
@@ -163,7 +162,6 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 
 	@Then("a new shipment shall exist")
 	public void a_new_shipment_shall_exist() {
-		// Check if *any* new shipment exists. This is the simplest approach.
 		GroceryManagementSystem system = getSystem();
 		assertTrue(system.getShipments().size() > 0, "A new shipment should exist");
 	}
@@ -171,9 +169,9 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 	@Then("no shipment shall exist with ID {string}")
 	public void no_shipment_shall_exist_with_id(String id) {
 		Integer shipmentNumber = shipmentIdMap.get(id);
-		if (shipmentNumber != null) { // Only check if the ID was ever mapped
+		if (shipmentNumber != null) { 
 			GroceryManagementSystem system = getSystem();
-			Shipment shipment = system.getShipment(shipmentNumber); // Use getShipment
+			Shipment shipment = system.getShipment(shipmentNumber); 
 			assertNull(shipment, "Shipment with ID " + id + " should not exist");
 		}
 	}
@@ -185,7 +183,7 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 		assertNull(shipment, "Shipment with number " + shipmentNumber + " should not exist");
 	}
 
-	@Then("a shipment shall exist with ID {string}") //Added by me
+	@Then("a shipment shall exist with ID {string}") 
 	public void a_shipment_shall_exist_with_id(String id) {
 		Integer shipmentNumber = shipmentIdMap.get(id);
 		assertNotNull(shipmentNumber, "Shipment ID " + id + " not found in map");
@@ -198,7 +196,7 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 	@Then("the newly-created shipment shall have {int} items")
 	public void the_newly_created_shipment_shall_have_items(Integer n) {
 		GroceryManagementSystem system = getSystem();
-		Shipment latestShipment = system.getShipments().get(system.getShipments().size() - 1); // Assuming last shipment is the latest
+		Shipment latestShipment = system.getShipments().get(system.getShipments().size() - 1); 
 		assertNotNull(latestShipment);
 		assertEquals(n.intValue(), latestShipment.getShipmentItems().size());
 	}
@@ -219,7 +217,7 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 	@Then("the shipment with ID {string} shall include {int} {string}")
 	public void the_shipment_with_id_shall_include(String shipmentId, Integer quantity, String item) {
 		GroceryManagementSystem system = getSystem();
-		Shipment shipment = system.getShipment(shipmentIdMap.get(shipmentId)); // Use shipmentIdMap and getShipment
+		Shipment shipment = system.getShipment(shipmentIdMap.get(shipmentId));
 		assertNotNull(shipment, "Shipment with ID " + shipmentId + " not found");
 
 		boolean found = false;
@@ -237,7 +235,7 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 	@Then("the shipment with ID {string} shall not include any items called {string}")
 	public void the_shipment_with_id_shall_not_include_any_items_called(String shipmentId, String item) {
 		GroceryManagementSystem system = getSystem();
-		Shipment shipment = system.getShipment(shipmentIdMap.get(shipmentId)); // Use shipmentIdMap and getShipment
+		Shipment shipment = system.getShipment(shipmentIdMap.get(shipmentId)); 
 		assertNotNull(shipment, "Shipment with ID " + shipmentId + " not found");
 
 		for (ShipmentItem shipmentItem : shipment.getShipmentItems()) {
