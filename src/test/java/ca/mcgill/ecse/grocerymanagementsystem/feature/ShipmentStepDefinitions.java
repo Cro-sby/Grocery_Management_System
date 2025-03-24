@@ -87,7 +87,7 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 	public void the_manager_attempts_to_create_a_new_shipment() {
 		try {
 			ShipmentController.createShipment();
-			error = null; //Clear error
+			error = null; 
 		} catch (GroceryStoreException e) {
 			error = e;
 		}
@@ -200,7 +200,7 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 	@Then("no shipment shall exist with number {int}")
 	public void no_shipment_shall_exist_with_number(Integer shipmentNumber) {
 		GroceryManagementSystem system = getSystem();
-		Shipment shipment = system.getShipment(shipmentNumber); // Use getShipment
+		Shipment shipment = system.getShipment(shipmentNumber); 
 		assertNull(shipment, "Shipment with number " + shipmentNumber + " should not exist");
 	}
 
@@ -209,7 +209,7 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 		Integer shipmentNumber = shipmentIdMap.get(id);
 		assertNotNull(shipmentNumber, "Shipment ID " + id + " not found in map");
 		GroceryManagementSystem system = getSystem();
-		Shipment shipment = system.getShipment(shipmentNumber); // Use getShipment
+		Shipment shipment = system.getShipment(shipmentNumber);
 		assertNotNull(shipment, "Shipment with ID " + id + " does not exist");
 	}
 
