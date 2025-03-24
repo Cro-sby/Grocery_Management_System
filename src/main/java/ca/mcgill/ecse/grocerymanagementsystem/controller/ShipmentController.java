@@ -11,7 +11,6 @@ public class ShipmentController {
 	private static GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
 
 	public static void createShipment() throws GroceryStoreException {
-		// Create a new shipment with the current date.
 		new Shipment(null, system);
 	}
 
@@ -29,7 +28,6 @@ public class ShipmentController {
 			}
 		}
 
-		//ADD THIS NULL CHECK:
 		if (shipment != null) { // Add null check here!
 			if (shipment.getDateOrdered() != null) {
 				throw new GroceryStoreException("cannot delete a shipment which has already been ordered");
@@ -38,7 +36,6 @@ public class ShipmentController {
 		}
 	}
 
-	// Helper method to find a shipment by shipmentNumber
 	private static Shipment findShipmentByShipmentNumber(int shipmentNumber) {
 		for (Shipment shipment : system.getShipments()) {
 			if (shipment.getShipmentNumber() == shipmentNumber) {
@@ -54,7 +51,6 @@ public class ShipmentController {
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
 		}
 
-		// Check if the shipment has already been ordered (assuming dateOrdered != null means ordered)
 		if (shipment.getDateOrdered() != null) {
 			throw new GroceryStoreException("shipment has already been ordered");
 		}
@@ -64,15 +60,13 @@ public class ShipmentController {
 			throw new GroceryStoreException("there is no item called \"" + itemName + "\"");
 		}
 
-		// Check if the item is already in the shipment
 		for (ShipmentItem shipmentItem : shipment.getShipmentItems()) {
 			if (shipmentItem.getItem().getName().equals(item.getName())) {
 				throw new GroceryStoreException("shipment already includes item \"" + itemName + "\"");
 			}
 		}
 
-		// Add the item to the shipment with quantity 1
-		new ShipmentItem(1,  system, shipment, item); //CORRECT constructor call
+		new ShipmentItem(1,  system, shipment, item); 
 	}
 
 
@@ -107,7 +101,7 @@ public class ShipmentController {
 		}
 
 		if (newQuantity == 0 && shipmentItem != null) {
-			shipmentItem.delete();  // Remove the ShipmentItem if quantity is 0
+			shipmentItem.delete(); 
 		} else if(shipmentItem != null){
 			shipmentItem.setQuantity(newQuantity);
 		} else{
