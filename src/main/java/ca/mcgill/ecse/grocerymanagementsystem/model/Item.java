@@ -277,7 +277,7 @@ public class Item
   }
   /* Code from template association_AddIndexControlFunctions */
   public boolean addOrderItemAt(OrderItem aOrderItem, int index)
-  {  
+  {
     boolean wasAdded = false;
     if(addOrderItem(aOrderItem))
     {
@@ -300,8 +300,8 @@ public class Item
       orderItems.remove(aOrderItem);
       orderItems.add(index, aOrderItem);
       wasAdded = true;
-    } 
-    else 
+    }
+    else
     {
       wasAdded = addOrderItemAt(aOrderItem, index);
     }
@@ -349,7 +349,7 @@ public class Item
   }
   /* Code from template association_AddIndexControlFunctions */
   public boolean addShipmentItemAt(ShipmentItem aShipmentItem, int index)
-  {  
+  {
     boolean wasAdded = false;
     if(addShipmentItem(aShipmentItem))
     {
@@ -372,8 +372,8 @@ public class Item
       shipmentItems.remove(aShipmentItem);
       shipmentItems.add(index, aShipmentItem);
       wasAdded = true;
-    } 
-    else 
+    }
+    else
     {
       wasAdded = addShipmentItemAt(aShipmentItem, index);
     }

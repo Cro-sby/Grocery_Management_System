@@ -163,7 +163,7 @@ public class Shipment
   }
   /* Code from template association_AddIndexControlFunctions */
   public boolean addShipmentItemAt(ShipmentItem aShipmentItem, int index)
-  {  
+  {
     boolean wasAdded = false;
     if(addShipmentItem(aShipmentItem))
     {
@@ -186,8 +186,8 @@ public class Shipment
       shipmentItems.remove(aShipmentItem);
       shipmentItems.add(index, aShipmentItem);
       wasAdded = true;
-    } 
-    else 
+    }
+    else
     {
       wasAdded = addShipmentItemAt(aShipmentItem, index);
     }

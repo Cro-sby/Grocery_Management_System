@@ -109,7 +109,7 @@ public class ItemStepDefinitions extends StepDefinitions {
 
 	@Then("the total number of items shall be {int}")
 	public void the_total_number_of_items_shall_be(Integer n) {
-		assertEquals(n, this.getSystem().getItems());
+		assertEquals(n, this.getSystem().numberOfItems());
 	}
 
 	private boolean parsePerishable(String perishableOrNot) {

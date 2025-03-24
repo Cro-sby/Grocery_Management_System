@@ -170,7 +170,7 @@ public class ShipmentItem
     if (!getClass().equals(obj.getClass())) { return false; }
 
     ShipmentItem compareTo = (ShipmentItem)obj;
-  
+
     if (getShipment() == null && compareTo.getShipment() != null)
     {
       return false;

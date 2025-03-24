@@ -337,7 +337,7 @@ public class GroceryManagementSystem
   }
   /* Code from template association_AddIndexControlFunctions */
   public boolean addUserAt(User aUser, int index)
-  {  
+  {
     boolean wasAdded = false;
     if(addUser(aUser))
     {
@@ -360,8 +360,8 @@ public class GroceryManagementSystem
       users.remove(aUser);
       users.add(index, aUser);
       wasAdded = true;
-    } 
-    else 
+    }
+    else
     {
       wasAdded = addUserAt(aUser, index);
     }
@@ -409,7 +409,7 @@ public class GroceryManagementSystem
   }
   /* Code from template association_AddIndexControlFunctions */
   public boolean addEmployeeAt(Employee aEmployee, int index)
-  {  
+  {
     boolean wasAdded = false;
     if(addEmployee(aEmployee))
     {
@@ -432,8 +432,8 @@ public class GroceryManagementSystem
       employees.remove(aEmployee);
       employees.add(index, aEmployee);
       wasAdded = true;
-    } 
-    else 
+    }
+    else
     {
       wasAdded = addEmployeeAt(aEmployee, index);
     }
@@ -481,7 +481,7 @@ public class GroceryManagementSystem
   }
   /* Code from template association_AddIndexControlFunctions */
   public boolean addCustomerAt(Customer aCustomer, int index)
-  {  
+  {
     boolean wasAdded = false;
     if(addCustomer(aCustomer))
     {
@@ -504,8 +504,8 @@ public class GroceryManagementSystem
       customers.remove(aCustomer);
       customers.add(index, aCustomer);
       wasAdded = true;
-    } 
-    else 
+    }
+    else
     {
       wasAdded = addCustomerAt(aCustomer, index);
     }
@@ -580,7 +580,7 @@ public class GroceryManagementSystem
   }
   /* Code from template association_AddIndexControlFunctions */
   public boolean addOrderAt(Order aOrder, int index)
-  {  
+  {
     boolean wasAdded = false;
     if(addOrder(aOrder))
     {
@@ -603,8 +603,8 @@ public class GroceryManagementSystem
       orders.remove(aOrder);
       orders.add(index, aOrder);
       wasAdded = true;
-    } 
-    else 
+    }
+    else
     {
       wasAdded = addOrderAt(aOrder, index);
     }
@@ -652,7 +652,7 @@ public class GroceryManagementSystem
   }
   /* Code from template association_AddIndexControlFunctions */
   public boolean addItemAt(Item aItem, int index)
-  {  
+  {
     boolean wasAdded = false;
     if(addItem(aItem))
     {
@@ -675,8 +675,8 @@ public class GroceryManagementSystem
       items.remove(aItem);
       items.add(index, aItem);
       wasAdded = true;
-    } 
-    else 
+    }
+    else
     {
       wasAdded = addItemAt(aItem, index);
     }
@@ -724,7 +724,7 @@ public class GroceryManagementSystem
   }
   /* Code from template association_AddIndexControlFunctions */
   public boolean addShipmentAt(Shipment aShipment, int index)
-  {  
+  {
     boolean wasAdded = false;
     if(addShipment(aShipment))
     {
@@ -747,8 +747,8 @@ public class GroceryManagementSystem
       shipments.remove(aShipment);
       shipments.add(index, aShipment);
       wasAdded = true;
-    } 
-    else 
+    }
+    else
     {
       wasAdded = addShipmentAt(aShipment, index);
     }
@@ -796,7 +796,7 @@ public class GroceryManagementSystem
   }
   /* Code from template association_AddIndexControlFunctions */
   public boolean addOrderItemAt(OrderItem aOrderItem, int index)
-  {  
+  {
     boolean wasAdded = false;
     if(addOrderItem(aOrderItem))
     {
@@ -819,8 +819,8 @@ public class GroceryManagementSystem
       orderItems.remove(aOrderItem);
       orderItems.add(index, aOrderItem);
       wasAdded = true;
-    } 
-    else 
+    }
+    else
     {
       wasAdded = addOrderItemAt(aOrderItem, index);
     }
@@ -868,7 +868,7 @@ public class GroceryManagementSystem
   }
   /* Code from template association_AddIndexControlFunctions */
   public boolean addShipmentItemAt(ShipmentItem aShipmentItem, int index)
-  {  
+  {
     boolean wasAdded = false;
     if(addShipmentItem(aShipmentItem))
     {
@@ -891,8 +891,8 @@ public class GroceryManagementSystem
       shipmentItems.remove(aShipmentItem);
       shipmentItems.add(index, aShipmentItem);
       wasAdded = true;
-    } 
-    else 
+    }
+    else
     {
       wasAdded = addShipmentItemAt(aShipmentItem, index);
     }
@@ -907,21 +907,21 @@ public class GroceryManagementSystem
       aUser.delete();
       users.remove(aUser);
     }
-    
+
     while (employees.size() > 0)
     {
       Employee aEmployee = employees.get(employees.size() - 1);
       aEmployee.delete();
       employees.remove(aEmployee);
     }
-    
+
     while (customers.size() > 0)
     {
       Customer aCustomer = customers.get(customers.size() - 1);
       aCustomer.delete();
       customers.remove(aCustomer);
     }
-    
+
     Manager existingManager = manager;
     manager = null;
     if (existingManager != null)
@@ -935,35 +935,35 @@ public class GroceryManagementSystem
       aOrder.delete();
       orders.remove(aOrder);
     }
-    
+
     while (items.size() > 0)
     {
       Item aItem = items.get(items.size() - 1);
       aItem.delete();
       items.remove(aItem);
     }
-    
+
     while (shipments.size() > 0)
     {
       Shipment aShipment = shipments.get(shipments.size() - 1);
       aShipment.delete();
       shipments.remove(aShipment);
     }
-    
+
     while (orderItems.size() > 0)
     {
       OrderItem aOrderItem = orderItems.get(orderItems.size() - 1);
       aOrderItem.delete();
       orderItems.remove(aOrderItem);
     }
-    
+
     while (shipmentItems.size() > 0)
     {
       ShipmentItem aShipmentItem = shipmentItems.get(shipmentItems.size() - 1);
       aShipmentItem.delete();
       shipmentItems.remove(aShipmentItem);
     }
-    
+
   }
 
 }
