@@ -19,13 +19,12 @@ public class OrderController {
 			throw new GroceryStoreException("customer is required" );
 		}
 
-		// Find the Customer (using GroceryManagementSystem, as it's our entry point)
 		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
 		User user = User.getWithUsername(creatorUsername);
 		if (user==null){
 			throw new GroceryStoreException("there is no user with username \"" + creatorUsername + "\"" );
 		}
-		Customer customer = findCustomerByUsername(creatorUsername); // Helper method (see below)
+		Customer customer = findCustomerByUsername(creatorUsername); 
 
 		if (customer == null) {
 			throw new GroceryStoreException("\"" + creatorUsername + "\" is not a customer");
@@ -34,7 +33,7 @@ public class OrderController {
 		// Create the Order
 		new Order(null, deadline, system, customer);
 	}
-	// Helper method to find a customer by username (reusable)
+	// Helper method to find a customer 
 	private static Customer findCustomerByUsername(String username) {
 		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
 		if (Objects.equals(username, "NULL")){
@@ -45,7 +44,7 @@ public class OrderController {
 				return customer;
 			}
 		}
-		return null; // Not found
+		return null; 
 	}
 
 	public static void deleteOrder(int orderNumber) throws GroceryStoreException {
@@ -57,9 +56,10 @@ public class OrderController {
 		if (orderToDelete.getDatePlaced() != null) {
 			throw new GroceryStoreException("cannot delete an order which has already been placed");
 		}
-		orderToDelete.delete(); // Use Umple-generated delete
+		orderToDelete.delete(); 
 	}
-	// Helper method to find an order by orderNumber (reusable)
+	// Helper method to find an order
+	
 	private static Order findOrderByOrderNumber(int orderNumber) {
 		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
 		for (Order order : system.getOrders()) {
@@ -67,7 +67,7 @@ public class OrderController {
 				return order;
 			}
 		}
-		return null; // Not found
+		return null;
 	}
 
 	public static void addItemToOrder(int orderNumber, String itemName) throws GroceryStoreException {
@@ -81,12 +81,11 @@ public class OrderController {
 			throw new GroceryStoreException("order has already been placed");
 		}
 
-		Item item = Item.getWithName(itemName);  // CORRECTED: Use getWithName
+		Item item = Item.getWithName(itemName); 
 		if (item == null) {
 			throw new GroceryStoreException("there is no item called \"" + itemName + "\"");
 		}
 
-		// Check if the item is already in the order
 		for (OrderItem orderItem : order.getOrderItems()) {
 			if (orderItem.getItem().getName().equals(item.getName())) {
 				throw new GroceryStoreException("order already includes item \"" + itemName + "\"");
@@ -94,7 +93,7 @@ public class OrderController {
 		}
 
 		// Add the item to the order with quantity 1
-		new OrderItem(1, system, order, item); //CORRECT constructor call
+		new OrderItem(1, system, order, item); 
 	}
 
 	public static void updateQuantityInOrder(int orderNumber, String itemName, int newQuantity)
@@ -112,7 +111,7 @@ public class OrderController {
 			throw new GroceryStoreException("order has already been placed");
 		}
 
-		Item item = Item.getWithName(itemName);  //CORRECTED: Use getWithName
+		Item item = Item.getWithName(itemName); 
 		if (item == null) {
 			throw new GroceryStoreException("there is no item called \"" + itemName + "\"");
 		}
@@ -132,9 +131,9 @@ public class OrderController {
 		if (newQuantity == 0 && orderItem != null) {
 			orderItem.delete(); // Remove if quantity is 0
 		} else if (orderItem != null) {
-			orderItem.setQuantity(newQuantity); // Update quantity
+			orderItem.setQuantity(newQuantity); 
 		} else {
-			new OrderItem(newQuantity, system, order, item); //CORRECT constructor call
+			new OrderItem(newQuantity, system, order, item); 
 		}
 	}
 }

@@ -6,9 +6,8 @@ import ca.mcgill.ecse.grocerymanagementsystem.model.Item;
 public class ItemController {
 
 	public static void create(String name, boolean isPerishable, int points, int price) throws GroceryStoreException {
-		// Input Validation and Error Messages (using correct exception constructor)
 		if (name == null || name.trim().isEmpty()) {
-			throw new GroceryStoreException("name is required"); // Correct exception
+			throw new GroceryStoreException("name is required"); 
 		}
 		if (points < 1 || points > 5) {
 			throw new GroceryStoreException("points must be between one and five");
@@ -58,9 +57,8 @@ public class ItemController {
 		if (item_valid == null) {
 			throw new GroceryStoreException("there is no item called \"" + name + "\"");
 		}
-		item_valid.delete(); // Use Umple-generated delete
+		item_valid.delete(); 
 	}
-	//Added missing return type
 	public static void setQuantity(String name, int quantity)throws GroceryStoreException {
 
 
