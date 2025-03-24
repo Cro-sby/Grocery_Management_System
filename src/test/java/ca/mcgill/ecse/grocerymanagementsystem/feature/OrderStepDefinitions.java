@@ -28,13 +28,13 @@ import java.util.Objects;
 
 public class OrderStepDefinitions extends StepDefinitions {
 
-	private Map<String, Integer> orderIdMap = new HashMap<>(); // Map string IDs to order numbers
-	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); // Date format
+	private Map<String, Integer> orderIdMap = new HashMap<>(); 
+	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); 
 
 	@Before
 	public void before() {
 		super.before();
-		orderIdMap.clear(); // Clear the orderIdMap before each scenario
+		orderIdMap.clear(); 
 	}
 
 	@Given("the following orders exist in the system")
@@ -58,13 +58,13 @@ public class OrderStepDefinitions extends StepDefinitions {
 
 			DeliveryDeadline deadline = DeliveryDeadline.valueOf(deadlineString);
 
-			// Use helper method
-			Customer customer = findCustomerByUsername(customerUsername); // Use the generated getter
+			
+			Customer customer = findCustomerByUsername(customerUsername);
 			if (customer == null) {
 				throw new IllegalArgumentException("Customer does not exist: " + customerUsername);
 			}
-			Order order = new Order(datePlaced, deadline, system, customer); // Pass system
-			system.addOrder(order); // Umple generated method
+			Order order = new Order(datePlaced, deadline, system, customer); 
+			system.addOrder(order); 
 			orderIdMap.put(id, order.getOrderNumber());
 		}
 	}
@@ -83,11 +83,11 @@ public class OrderStepDefinitions extends StepDefinitions {
 		GroceryManagementSystem system = getSystem();
 		for (Map<String, String> orderItemData : orderItems) {
 			String orderId = orderItemData.get("order");
+			
 			String itemName = orderItemData.get("item");
 			String quantityStr = orderItemData.get("quantity");
 			int quantity = Integer.parseInt(quantityStr);
 
-			// Use Umple-generated static methods to access objects
 			Item item = Item.getWithName(itemName);
 			int orderID ;
 			if (Objects.equals(orderId, "a")) {
@@ -99,13 +99,11 @@ public class OrderStepDefinitions extends StepDefinitions {
 			} else {
 				orderID = 3;
 			}
-			//CORRECTED: Use orderIdMap to get order number
 			Order order = system.getOrder(orderID);
 
 			if (item != null && order != null) {
-				new OrderItem(quantity, system, order, item); // Create the association class, include system in constructor
+				new OrderItem(quantity, system, order, item); 
 			} else {
-				// Handle cases where item or order is not found (should not happen with valid test data)
 				throw new IllegalArgumentException("Invalid item or order ID in 'the_following_items_are_part_of_orders'");
 			}
 		}
@@ -118,7 +116,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 		try {
 			DeliveryDeadline deliveryDeadline = DeliveryDeadline.valueOf(deadline);
 			OrderController.createOrder(username, deliveryDeadline); // Call OrderController
-			error = null; // Clear previous errors
+			error = null; 
 		} catch (GroceryStoreException e) {
 			error = e;
 		}
@@ -193,18 +191,18 @@ public class OrderStepDefinitions extends StepDefinitions {
 		assertEquals(n.intValue(), system.getOrders().size());
 	}
 
-	@Then("{string} shall have a new order") //CORRECTED
+	@Then("{string} shall have a new order") 
 	public void shall_have_a_new_order(String username) {
 		GroceryManagementSystem system = getSystem();
-		Customer customer = findCustomerByUsername(username); // Use helper method
+		Customer customer = findCustomerByUsername(username); 
 		assertNotNull(customer);
 		int orderCount = 0;
-		for(Order order : system.getOrders()){//count how many orders has this customer placed
+		for(Order order : system.getOrders()){
 			if(order.getOrderPlacer().equals(customer)){
-				orderCount++;//CORRECTED
+				orderCount++;
 			}
 		}
-		assertEquals(1, orderCount-1); // Assuming only creating one order at a time
+		assertEquals(1, orderCount-1); 
 	}
 
 	@Then("an order shall exist with ID {string}")
@@ -212,14 +210,14 @@ public class OrderStepDefinitions extends StepDefinitions {
 		Integer orderNumber = orderIdMap.get(id);
 		assertNotNull(orderNumber, "Order ID " + id + " not found in map");
 		GroceryManagementSystem system = getSystem();
-		Order order = system.getOrder(orderNumber); // Use a getOrder method (by order number)
+		Order order = system.getOrder(orderNumber); 
 		assertNotNull(order, "Order with ID " + id + " does not exist in the system");
 	}
 
 	@Then("no order shall exist with ID {string}")
 	public void no_order_shall_exist_with_id(String id) {
 		Integer orderNumber = orderIdMap.get(id);
-		if (orderNumber != null) { // Only check if the ID was ever used
+		if (orderNumber != null) {
 			GroceryManagementSystem system = getSystem();
 			if (system.numberOfOrders()<orderNumber+1){
 
@@ -239,7 +237,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("the newly-created order shall have deadline {string}")
 	public void the_newly_created_order_shall_have_deadline(String deadline) {
 		GroceryManagementSystem system = getSystem();
-		Order latestOrder = system.getOrders().get(system.getOrders().size() - 1); // Assuming last order is the latest
+		Order latestOrder = system.getOrders().get(system.getOrders().size() - 1); 
 		assertNotNull(latestOrder);
 		assertEquals(DeliveryDeadline.valueOf(deadline), latestOrder.getDeadline());
 	}
@@ -247,7 +245,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("the newly-created order shall have {int} items")
 	public void the_newly_created_order_shall_have_items(Integer n) {
 		GroceryManagementSystem system = getSystem();
-		Order latestOrder = system.getOrders().get(system.getOrders().size() - 1); // Assuming last order is the latest
+		Order latestOrder = system.getOrders().get(system.getOrders().size() - 1);
 		assertNotNull(latestOrder);
 		assertEquals(n.intValue(), latestOrder.getOrderItems().size());
 	}
@@ -255,15 +253,15 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("the newly-created order shall not have been placed")
 	public void the_newly_created_order_shall_not_have_been_placed() {
 		GroceryManagementSystem system = getSystem();
-		Order latestOrder = system.getOrders().get(system.getOrders().size() - 1); // Assuming last order is the latest
+		Order latestOrder = system.getOrders().get(system.getOrders().size() - 1); 
 		assertNotNull(latestOrder);
-		assertNull(latestOrder.getDatePlaced()); // Assuming null datePlaced means not placed
+		assertNull(latestOrder.getDatePlaced()); 
 	}
 
 	@Then("the order with ID {string} shall include {int} {string}")
 	public void the_order_with_id_shall_include(String orderId, Integer quantity, String item) {
 		GroceryManagementSystem system = getSystem();
-		Order order = system.getOrder(orderIdMap.get(orderId)); // Use orderIdMap and getOrder
+		Order order = system.getOrder(orderIdMap.get(orderId)); 
 		assertNotNull(order, "Order with ID " + orderId + " not found");
 
 		boolean found = false;
@@ -281,7 +279,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("the order with ID {string} shall not include any items called {string}")
 	public void the_order_with_id_shall_not_include_any_items_called(String orderId, String item) {
 		GroceryManagementSystem system = getSystem();
-		Order order = system.getOrder(orderIdMap.get(orderId)); // Use orderIdMap and getOrder
+		Order order = system.getOrder(orderIdMap.get(orderId)); 
 		assertNotNull(order, "Order with ID " + orderId + " not found");
 
 		for (OrderItem orderItem : order.getOrderItems()) {
@@ -293,7 +291,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("the order with ID {string} shall include {int} distinct item\\(s\\)")
 	public void the_order_with_id_shall_include_distinct_items(String orderId, Integer n) {
 		GroceryManagementSystem system = getSystem();
-		Order order = system.getOrder(orderIdMap.get(orderId)); // Use orderIdMap and getOrder
+		Order order = system.getOrder(orderIdMap.get(orderId)); 
 		assertNotNull(order, "Order with ID " + orderId + " not found");
 		assertEquals(n.intValue(), order.getOrderItems().size(),
 				"Number of distinct items mismatch in order " + orderId);
