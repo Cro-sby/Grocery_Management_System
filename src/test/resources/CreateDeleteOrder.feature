@@ -2,7 +2,7 @@ Feature: Create and delete orders
   As a customer, I want to create orders so that I can buy items.
   As a customer, I want to delete orders if I no longer intend to make the purchase.
 
-  Background:
+  Background: 
     Given the following employees exist in the system
       | username | password | name           | phone          |
       | alice    | alice123 | Alice Allisson | (514) 555-1111 |
@@ -21,11 +21,11 @@ Feature: Create and delete orders
       # The controller should still identify orders by their order number.
       # You'll need to create a map from string IDs to order numbers.
       # Also, please convert the string "NULL" to null (here and in the tests below).
-      | id | datePlaced | deadline    | customer  |
-      | a  | NULL       | SameDay     | alice     |
-      | b  | 2025-02-24 | InOneDay    | obiwan212 |
-      | c  | NULL       | InTwoDays   | anakin501 |
-      | d  | 2025-02-24 | InThreeDays | alice     |
+      | id | datePlaced | deadline    | customer  | assignee | state              |
+      | a  | NULL       | SameDay     | alice     | NULL     | under construction |
+      | b  | 2025-02-24 | InOneDay    | obiwan212 | NULL     | placed             |
+      | c  | NULL       | InTwoDays   | anakin501 | NULL     | pending            |
+      | d  | 2025-02-24 | InThreeDays | alice     | bob      | delivered          |
     And the following items are part of orders
       | order | item                | quantity |
       | a     | Eggs                |        2 |
@@ -42,7 +42,7 @@ Feature: Create and delete orders
     And the newly-created order shall not have been placed
     And the total number of orders shall be 5
 
-    Examples:
+    Examples: 
       | user      | deadline    |
       | obiwan212 | SameDay     |
       | obiwan212 | InOneDay    |
@@ -54,7 +54,7 @@ Feature: Create and delete orders
     Then the system shall raise the error "<error>"
     And the total number of orders shall be 4
 
-    Examples:
+    Examples: 
       | user        | deadline | error                                            |
       | NULL        | SameDay  | customer is required                             |
       | nonexistent | SameDay  | there is no user with username \\"nonexistent\\" |
@@ -68,7 +68,7 @@ Feature: Create and delete orders
     And no order shall exist with ID "<id>"
     And the total number of orders shall be 3
 
-    Examples:
+    Examples: 
       | id |
       | a  |
       | c  |
@@ -79,7 +79,7 @@ Feature: Create and delete orders
     And no order shall exist with order number <orderNumber>
     And the total number of orders shall be 4
 
-    Examples:
+    Examples: 
       | orderNumber |
       |     9999999 |
       |   123456789 |
@@ -90,7 +90,7 @@ Feature: Create and delete orders
     And an order shall exist with ID "<id>"
     And the total number of orders shall be 4
 
-    Examples:
+    Examples: 
       | id |
       | b  |
       | d  |

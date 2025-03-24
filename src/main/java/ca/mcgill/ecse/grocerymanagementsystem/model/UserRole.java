@@ -4,7 +4,7 @@
 package ca.mcgill.ecse.grocerymanagementsystem.model;
 
 // line 23 "../../../../../../model.ump"
-// line 98 "../../../../../../model.ump"
+// line 103 "../../../../../../model.ump"
 public class UserRole
 {
 

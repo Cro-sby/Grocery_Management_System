@@ -3,8 +3,8 @@
 
 package ca.mcgill.ecse.grocerymanagementsystem.model;
 
-// line 60 "../../../../../model.ump"
-// line 133 "../../../../../model.ump"
+// line 65 "../../../../../model.ump"
+// line 138 "../../../../../model.ump"
 public class OrderItem
 {
 

@@ -5,7 +5,7 @@ package ca.mcgill.ecse.grocerymanagementsystem.model;
 import java.util.*;
 
 // line 16 "../../../../../../model.ump"
-// line 93 "../../../../../../model.ump"
+// line 98 "../../../../../../model.ump"
 public class User
 {
 

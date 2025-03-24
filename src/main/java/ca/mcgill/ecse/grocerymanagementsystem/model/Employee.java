@@ -5,7 +5,7 @@ package ca.mcgill.ecse.grocerymanagementsystem.model;
 import java.util.*;
 
 // line 32 "../../../../../../model.ump"
-// line 108 "../../../../../../model.ump"
+// line 113 "../../../../../../model.ump"
 public class Employee extends UserRole
 {
 
