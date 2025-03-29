@@ -41,6 +41,11 @@ class Order {
   Date datePlaced;
   enum DeliveryDeadline { sameDay, inOneDay, inTwoDays, inThreeDays}
   DeliveryDeadline deadline;
+  // Total cost of the order, without considering points.
+  lazy immutable Integer totalCost;
+  // Amount that the customer actually had to pay for the order.
+  // This depends on both the total cost and whether or not the customer decided to use their points.
+  lazy immutable Integer pricePaid;
 }
 
 class Item {

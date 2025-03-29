@@ -4,8 +4,8 @@
 package ca.mcgill.ecse.grocerymanagementsystem.model;
 import java.util.*;
 
-// line 47 "../../../../../../model.ump"
-// line 123 "../../../../../../model.ump"
+// line 52 "../../../../../../model.ump"
+// line 128 "../../../../../../model.ump"
 public class Item
 {
 

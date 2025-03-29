@@ -5,8 +5,8 @@ package ca.mcgill.ecse.grocerymanagementsystem.model;
 import java.sql.Date;
 import java.util.*;
 
-// line 55 "../../../../../../model.ump"
-// line 128 "../../../../../../model.ump"
+// line 60 "../../../../../../model.ump"
+// line 133 "../../../../../../model.ump"
 public class Shipment
 {
 

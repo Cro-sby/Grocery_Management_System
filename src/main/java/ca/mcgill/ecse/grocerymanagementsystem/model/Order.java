@@ -6,7 +6,7 @@ import java.sql.Date;
 import java.util.*;
 
 // line 40 "../../../../../../model.ump"
-// line 118 "../../../../../../model.ump"
+// line 123 "../../../../../../model.ump"
 public class Order
 {
 
@@ -29,6 +29,8 @@ public class Order
   //Order Attributes
   private Date datePlaced;
   private DeliveryDeadline deadline;
+  private int totalCost;
+  private int pricePaid;
 
   //Autounique Attributes
   private int orderNumber;
@@ -39,6 +41,10 @@ public class Order
   private Customer orderPlacer;
   private Employee orderAssignee;
 
+  //Helper Variables
+  private boolean canSetTotalCost;
+  private boolean canSetPricePaid;
+
   //------------------------
   // CONSTRUCTOR
   //------------------------
@@ -47,6 +53,8 @@ public class Order
   {
     datePlaced = aDatePlaced;
     deadline = aDeadline;
+    canSetTotalCost = true;
+    canSetPricePaid = true;
     orderNumber = nextOrderNumber++;
     boolean didAddGroceryManagementSystem = setGroceryManagementSystem(aGroceryManagementSystem);
     if (!didAddGroceryManagementSystem)
@@ -80,6 +88,26 @@ public class Order
     wasSet = true;
     return wasSet;
   }
+  /* Code from template attribute_SetImmutable */
+  public boolean setTotalCost(int aTotalCost)
+  {
+    boolean wasSet = false;
+    if (!canSetTotalCost) { return false; }
+    canSetTotalCost = false;
+    totalCost = aTotalCost;
+    wasSet = true;
+    return wasSet;
+  }
+  /* Code from template attribute_SetImmutable */
+  public boolean setPricePaid(int aPricePaid)
+  {
+    boolean wasSet = false;
+    if (!canSetPricePaid) { return false; }
+    canSetPricePaid = false;
+    pricePaid = aPricePaid;
+    wasSet = true;
+    return wasSet;
+  }
 
   public Date getDatePlaced()
   {
@@ -89,6 +117,23 @@ public class Order
   public DeliveryDeadline getDeadline()
   {
     return deadline;
+  }
+
+  /**
+   * Total cost of the order, without considering points.
+   */
+  public int getTotalCost()
+  {
+    return totalCost;
+  }
+
+  /**
+   * Amount that the customer actually had to pay for the order.
+   * This depends on both the total cost and whether or not the customer decided to use their points.
+   */
+  public int getPricePaid()
+  {
+    return pricePaid;
   }
 
   public int getOrderNumber()
@@ -305,7 +350,9 @@ public class Order
   public String toString()
   {
     return super.toString() + "["+
-            "orderNumber" + ":" + getOrderNumber()+ "]" + System.getProperties().getProperty("line.separator") +
+            "orderNumber" + ":" + getOrderNumber()+ "," +
+            "totalCost" + ":" + getTotalCost()+ "," +
+            "pricePaid" + ":" + getPricePaid()+ "]" + System.getProperties().getProperty("line.separator") +
             "  " + "datePlaced" + "=" + (getDatePlaced() != null ? !getDatePlaced().equals(this)  ? getDatePlaced().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "deadline" + "=" + (getDeadline() != null ? !getDeadline().equals(this)  ? getDeadline().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "groceryManagementSystem = "+(getGroceryManagementSystem()!=null?Integer.toHexString(System.identityHashCode(getGroceryManagementSystem())):"null") + System.getProperties().getProperty("line.separator") +

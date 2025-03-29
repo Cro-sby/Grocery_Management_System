@@ -3,8 +3,8 @@
 
 package ca.mcgill.ecse.grocerymanagementsystem.model;
 
-// line 66 "../../../../../model.ump"
-// line 138 "../../../../../model.ump"
+// line 71 "../../../../../model.ump"
+// line 143 "../../../../../model.ump"
 public class ShipmentItem
 {
 

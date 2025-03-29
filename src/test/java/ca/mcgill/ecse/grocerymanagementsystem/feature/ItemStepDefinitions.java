@@ -107,6 +107,12 @@ public class ItemStepDefinitions extends StepDefinitions {
 		assertEquals(quantity, this.currentItem.getQuantityInInventory());
 	}
 
+	@Then("the quantity of item {string} shall be {int}")
+	public void the_quantity_of_item_shall_be(String itemName, Integer quantity) {
+		Item item = Item.getWithName(itemName);
+		assertEquals(quantity, item.getQuantityInInventory());
+	}
+
 	@Then("the total number of items shall be {int}")
 	public void the_total_number_of_items_shall_be(Integer n) {
 		assertEquals(n, this.getSystem().numberOfItems());

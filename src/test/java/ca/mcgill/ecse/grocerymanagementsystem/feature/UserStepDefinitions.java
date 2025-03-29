@@ -238,6 +238,12 @@ public class UserStepDefinitions extends StepDefinitions {
 	public void the_customer_shall_have_points(Integer points) {
 		assertEquals(points, this.currentCustomer.getNumberOfPoints());
 	}
+
+	@Then("{string} shall have {int} points")
+	public void shall_have_points(String username, Integer points) {
+		Customer c = getCustomerAccount(User.getWithUsername(username));
+		assertEquals(points, c.getNumberOfPoints());
+	}
 	
 	@Then("the total number of users shall be {int}")
 	public void the_total_number_of_users_shall_be(Integer n) {
