@@ -21,10 +21,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class OrderStepDefinitions extends StepDefinitions {
 
@@ -65,7 +62,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 			}
 			Order order = new Order(datePlaced, deadline, system, customer); 
 			system.addOrder(order);
-			orderIdMap.put(id, order.getOrderNumber());
+			orderIdMap.put(id, system.indexOfOrder(order));
 		}
 	}
 	private Customer findCustomerByUsername(String username) {
@@ -81,25 +78,24 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Given("the following items are part of orders")
 	public void the_following_items_are_part_of_orders(List<Map<String, String>> orderItems) {
 		GroceryManagementSystem system = getSystem();
+		List<String> orderids = new ArrayList<String>();
 		for (Map<String, String> orderItemData : orderItems) {
 			String orderId = orderItemData.get("order");
 			String itemName = orderItemData.get("item");
 			String quantityStr = orderItemData.get("quantity");
 			int quantity = Integer.parseInt(quantityStr);
 
-			Item item = Item.getWithName(itemName);
-			int orderID ;
-			if (Objects.equals(orderId, "a")) {
-				orderID = 0;
-			} else if (Objects.equals(orderId, "b")) {
-				orderID = 1;
-			} else if (Objects.equals(orderId, "c")) {
-				orderID = 2;
-			} else {
-				orderID = 3;
+			boolean found = false;
+			for (String ids : orderids) {
+				if (Objects.equals(ids, orderId)){
+					found = true;
+				}
 			}
-			Order order = system.getOrder(orderID);
-
+			if (!found){
+				orderids.add(orderId);
+			}
+			Item item = Item.getWithName(itemName);
+			Order order = system.getOrder(orderids.indexOf(orderId));
 			if (item != null && order != null) {
 				new OrderItem(quantity, system, order, item); // Create the association class, include system in constructor
 			} else {
@@ -302,7 +298,10 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("the order with ID {string} shall not include any items called {string}")
 	public void the_order_with_id_shall_not_include_any_items_called(String orderId, String item) {
 		GroceryManagementSystem system = getSystem();
-		Order order = system.getOrder(orderIdMap.get(orderId)); 
+		System.out.println(orderIdMap);
+		int ordernum = orderIdMap.get(orderId);
+		System.out.print(ordernum);
+		Order order = system.getOrder(ordernum);
 		assertNotNull(order, "Order with ID " + orderId + " not found");
 
 		for (OrderItem orderItem : order.getOrderItems()) {

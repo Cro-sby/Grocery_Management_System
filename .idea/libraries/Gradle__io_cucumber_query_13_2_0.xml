@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: io.cucumber:query:13.2.0" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="io.cucumber" artifactId="query" version="13.2.0" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.cucumber/query/13.2.0/3873a8628910ac0d45fe2833501cb88bd63fb141/query-13.2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -29,7 +29,7 @@ public class ItemStepDefinitions extends StepDefinitions {
 		for (Map<String, String> example : table) {
 			new Item(
 					example.get("name"),
-					0,
+					Integer.parseInt(example.get("quantity")),
 					Integer.parseInt(example.get("price")),
 					parsePerishable(example.get("perishableOrNot")),
 					Integer.parseInt(example.get("points")),
