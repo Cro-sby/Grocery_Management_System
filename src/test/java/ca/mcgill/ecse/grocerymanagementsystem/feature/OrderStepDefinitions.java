@@ -310,8 +310,17 @@ public class OrderStepDefinitions extends StepDefinitions {
 		}
 	}
 
-	@Then("the order with ID {string} shall include {int} distinct item\\(s\\)")
+	@Then("the order with ID {string} shall include {int} distinct items")
 	public void the_order_with_id_shall_include_distinct_items(String orderId, Integer n) {
+		GroceryManagementSystem system = getSystem();
+		Order order = system.getOrder(orderIdMap.get(orderId));
+		assertNotNull(order, "Order with ID " + orderId + " not found");
+		assertEquals(n.intValue(), order.getOrderItems().size(),
+				"Number of distinct items mismatch in order " + orderId);
+	}
+
+	@Then("the order with ID {string} shall include {int} distinct item")
+	public void the_order_with_id_shall_include_distinct_item(String orderId, Integer n) {
 		GroceryManagementSystem system = getSystem();
 		Order order = system.getOrder(orderIdMap.get(orderId));
 		assertNotNull(order, "Order with ID " + orderId + " not found");

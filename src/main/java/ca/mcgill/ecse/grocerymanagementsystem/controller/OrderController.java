@@ -65,6 +65,8 @@ public class OrderController {
 		for (Order order : system.getOrders()) {
 			if (order.getOrderNumber() == orderNumber) {
 				return order;
+			} else if (orderNumber == 0) {
+				return system.getOrder(orderNumber);
 			}
 		}
 		return null;

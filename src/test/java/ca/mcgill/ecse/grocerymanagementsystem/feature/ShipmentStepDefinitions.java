@@ -55,7 +55,7 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 
 			Shipment shipment = new Shipment(dateOrdered, system);
 			system.addShipment(shipment);
-			shipmentIdMap.put(id, shipment.getShipmentNumber());
+			shipmentIdMap.put(id, system.indexOfShipment(shipment));
 		}
 	}
 
