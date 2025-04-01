@@ -99,14 +99,14 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 			Integer shipmentNumber = shipmentIdMap.get(id); 
 			if (shipmentNumber != null) {
 				if (getSystem().numberOfShipments()<shipmentNumber+1){
-					error = new GroceryStoreException("Shipment ID not found: " + id);
+					error = new GroceryStoreException("Shipment ID not found1: " + id);
 				}
 				else {
 					ShipmentController.deleteShipment(shipmentNumber);
 					error = null;
 				}
 			} else {
-				error = new GroceryStoreException("Shipment ID not found: " + id);
+				error = new GroceryStoreException("Shipment ID not found2: " + id);
 			}
 		} catch (GroceryStoreException e) {
 			error = e;

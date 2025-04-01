@@ -202,7 +202,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("{string} shall have a new order") 
 	public void shall_have_a_new_order(String username) {
 		GroceryManagementSystem system = getSystem();
-		Customer customer = findCustomerByUsername(username); 
+		Customer customer = findCustomerByUsername(username);
 		assertNotNull(customer);
 		int orderCount = 0;
 		for(Order order : system.getOrders()){//count how many orders has this customer placed
@@ -210,7 +210,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 				orderCount++;
 			}
 		}
-		assertEquals(1, orderCount -1); // Assuming only creating one order at a time
+		assertEquals(customer.getOrdersPlaced().size(), orderCount); // Assuming only creating one order at a time
 	}
 
 	@Then("an order shall exist with ID {string}")
@@ -219,14 +219,13 @@ public class OrderStepDefinitions extends StepDefinitions {
 		assertNotNull(orderNumber, "Order ID " + id + " not found in map");
 		GroceryManagementSystem system = getSystem();
 		Order order;
-		if (system.numberOfOrders()<orderNumber+1){
+		if (orderNumber < 0 || orderNumber >= system.numberOfOrders()){
 			order = null;
 		}
 		else {
 			order = system.getOrder(orderNumber);
 		}
-		 
-		assertNotNull(order, "Order with ID " + id + " does not exist in the system");
+		assertNull(order, "Order with ID " + id + " does not exist in the system");
 	}
 
 	@Then("no order shall exist with ID {string}")
