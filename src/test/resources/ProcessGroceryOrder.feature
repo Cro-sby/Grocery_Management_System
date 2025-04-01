@@ -275,7 +275,7 @@ Feature: Process order
     Given the following orders exist in the system
       | id                 | datePlaced   | deadline   | customer  | assignee | state          |
       | with_perishable    | <datePlaced> | <deadline> | obiwan212 | alice    | in preparation |
-      | without_perishable | <datePlaced> | <deadline> | anakin212 | bob      | in preparation |
+      | without_perishable | <datePlaced> | <deadline> | anakin501 | bob      | in preparation |
     And the following items are part of orders
       | order              | item                | quantity |
       | with_perishable    | Chicken noodle soup |        1 |
