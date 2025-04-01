@@ -53,7 +53,7 @@ Feature: Update order
     When the user attempts to add item "<item>" to the non-existent order with order number <orderNumber>
     Then the system shall raise the error "there is no order with number \"<orderNumber>\""
     And no order shall exist with order number <orderNumber>
-    And the total number of orders shall be 4
+    And the total number of orders shall be 5
 
     Examples: 
       | item                | orderNumber |
@@ -118,7 +118,7 @@ Feature: Update order
     When the user attempts to set the quantity of item "<item>" in the non-existent order <orderNumber> to <newQty>
     Then the system shall raise the error "there is no order with number \"<orderNumber>\""
     And no order shall exist with order number <orderNumber>
-    And the total number of orders shall be 4
+    And the total number of orders shall be 5
 
     Examples: 
       | item                | orderNumber | newQty |
@@ -146,8 +146,8 @@ Feature: Update order
       | item                | orderId | newQty | oldQty | numItems | error                              |
       | Eggs                | a       |     -1 |      2 |        1 | quantity must be non-negative      |
       | Eggs                | a       |     -2 |      2 |        1 | quantity must be non-negative      |
-      | Eggs                | c       |     11 |      2 |        1 | quantity cannot exceed 10          |
-      | Eggs                | c       |     12 |      2 |        1 | quantity cannot exceed 10          |
+      | Eggs                | a       |     11 |      2 |        1 | quantity cannot exceed 10          |
+      | Eggs                | a       |     12 |      2 |        1 | quantity cannot exceed 10          |
       | Eggs                | b       |     10 |      1 |        2 | order has already been placed      |
       | Chicken noodle soup | b       |      7 |      3 |        2 | order has already been placed      |
       | Chicken noodle soup | e       |      2 |      1 |        1 | order has already been checked out |
