@@ -188,10 +188,9 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 	public void no_shipment_shall_exist_with_shipment_number(Integer shipmentNumber) {
 		GroceryManagementSystem system = getSystem();
 		Shipment shipment;
-		if (system.numberOfShipments()<shipmentNumber+1){
-			shipment=null;
-		}
-		else {
+		if (system.numberOfShipments() <= shipmentNumber){
+			shipment = null;
+		}else{
 			shipment = system.getShipment(shipmentNumber);
 		}
 		assertNull(shipment, "Shipment with shipment number " + shipmentNumber + " should not exist");
@@ -200,7 +199,12 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 	@Then("no shipment shall exist with number {int}")
 	public void no_shipment_shall_exist_with_number(Integer shipmentNumber) {
 		GroceryManagementSystem system = getSystem();
-		Shipment shipment = system.getShipment(shipmentNumber); 
+		Shipment shipment;
+		if (system.numberOfShipments() <= shipmentNumber){
+			shipment = null;
+		}else{
+			shipment = system.getShipment(shipmentNumber);
+		}
 		assertNull(shipment, "Shipment with number " + shipmentNumber + " should not exist");
 	}
 

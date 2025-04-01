@@ -19,23 +19,19 @@ public class ShipmentController {
 	public static void deleteShipment(int shipmentNumber) throws GroceryStoreException {
 		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
 		Shipment shipment;
-		if (system.numberOfShipments()<shipmentNumber+1){
-
+		if (system.numberOfShipments() <= shipmentNumber){
+			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
+		}else{
+			shipment = system.getShipment(shipmentNumber);
+		}
+		if (shipment == null) {
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
 		}
-		else {
-			shipment = system.getShipment(shipmentNumber);
-			if (shipment == null) {
-				throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
-			}
+		if (shipment.getDateOrdered() != null) {
+			throw new GroceryStoreException("cannot delete a shipment which has already been ordered");
 		}
+		shipment.delete(); // Umple generated delete
 
-		if (shipment != null) { // Add null check here!
-			if (shipment.getDateOrdered() != null) {
-				throw new GroceryStoreException("cannot delete a shipment which has already been ordered");
-			}
-			shipment.delete(); // Umple generated delete
-		}
 	}
 
 	private static Shipment findShipmentByShipmentNumber(int shipmentNumber) {
@@ -50,7 +46,12 @@ public class ShipmentController {
 
 	public static void addItemToShipment(int shipmentNumber, String itemName) throws GroceryStoreException {
 		GroceryManagementSystem system = getGroceryManagementSystem();
-		Shipment shipment = system.getShipment(shipmentNumber); // Assumes you have a getShipment method
+		Shipment shipment;
+		if (system.numberOfShipments() <= shipmentNumber){
+			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
+		}else{
+			shipment = system.getShipment(shipmentNumber);
+		}// Assumes you have a getShipment method
 		if (shipment == null) {
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
 		}
@@ -79,7 +80,13 @@ public class ShipmentController {
 			throw new GroceryStoreException("quantity must be non-negative");
 		}
 		GroceryManagementSystem system = getGroceryManagementSystem();
-		Shipment shipment = system.getShipment(shipmentNumber); // Assumes you have a getShipment method
+		Shipment shipment;
+		if (system.numberOfShipments() <= shipmentNumber){
+			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
+		}else{
+			shipment = system.getShipment(shipmentNumber);
+		}
+		// Assumes you have a getShipment method
 		if (shipment == null) {
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
 		}
