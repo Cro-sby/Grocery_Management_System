@@ -171,8 +171,8 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@When("the user attempts to set the quantity of item {string} in the order with ID {string} to {int}")
 	public void the_user_attempts_to_set_the_quantity_of_item_in_the_order_with_id_to(String item, String orderId, int newQuantity) {
 		try {
-			Integer orderNumber = orderIdMap.get(orderId);
-			OrderController.updateQuantityInOrder(orderNumber, item, newQuantity);
+			Integer orderindex = orderIdMap.get(orderId);
+			OrderController.updateQuantityInOrder(orderindex, item, newQuantity);
 			error = null;
 		} catch (GroceryStoreException e) {
 			error = e;

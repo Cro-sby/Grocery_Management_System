@@ -7,10 +7,12 @@ import ca.mcgill.ecse.grocerymanagementsystem.model.ShipmentItem;
 
 import java.sql.Date;
 
+import static ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryManagementSystemController.getGroceryManagementSystem;
+
 public class ShipmentController {
-	private static GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
 
 	public static void createShipment() throws GroceryStoreException {
+		GroceryManagementSystem system = getGroceryManagementSystem();
 		new Shipment(null, system);
 	}
 
@@ -37,6 +39,7 @@ public class ShipmentController {
 	}
 
 	private static Shipment findShipmentByShipmentNumber(int shipmentNumber) {
+		GroceryManagementSystem system = getGroceryManagementSystem();
 		for (Shipment shipment : system.getShipments()) {
 			if (shipment.getShipmentNumber() == shipmentNumber) {
 				return shipment;
@@ -46,6 +49,7 @@ public class ShipmentController {
 	}
 
 	public static void addItemToShipment(int shipmentNumber, String itemName) throws GroceryStoreException {
+		GroceryManagementSystem system = getGroceryManagementSystem();
 		Shipment shipment = system.getShipment(shipmentNumber); // Assumes you have a getShipment method
 		if (shipment == null) {
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
@@ -74,7 +78,7 @@ public class ShipmentController {
 		if (newQuantity < 0) {
 			throw new GroceryStoreException("quantity must be non-negative");
 		}
-
+		GroceryManagementSystem system = getGroceryManagementSystem();
 		Shipment shipment = system.getShipment(shipmentNumber); // Assumes you have a getShipment method
 		if (shipment == null) {
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");

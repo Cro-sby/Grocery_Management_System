@@ -5,6 +5,8 @@ import ca.mcgill.ecse.grocerymanagementsystem.model.*; // Import all model class
 
 import java.util.Objects;
 
+import static ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryManagementSystemController.getGroceryManagementSystem;
+
 public class OrderController {
 
 	public static void createOrder(String creatorUsername, DeliveryDeadline deadline) throws GroceryStoreException {
@@ -19,7 +21,7 @@ public class OrderController {
 			throw new GroceryStoreException("customer is required" );
 		}
 
-		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
+		GroceryManagementSystem system = getGroceryManagementSystem();
 		User user = User.getWithUsername(creatorUsername);
 		if (user==null){
 			throw new GroceryStoreException("there is no user with username \"" + creatorUsername + "\"" );
@@ -35,7 +37,7 @@ public class OrderController {
 	}
 	// Helper method to find a customer 
 	private static Customer findCustomerByUsername(String username) {
-		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
+		GroceryManagementSystem system = getGroceryManagementSystem();
 		if (Objects.equals(username, "NULL")){
 			return null;
 		}
@@ -47,9 +49,15 @@ public class OrderController {
 		return null; 
 	}
 
+
 	public static void deleteOrder(int orderNumber) throws GroceryStoreException {
-		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
-		Order orderToDelete = findOrderByOrderNumber(orderNumber); // Helper method
+		GroceryManagementSystem system = getGroceryManagementSystem();
+		Order orderToDelete = null;
+		if (orderNumber >= system.numberOfOrders()){
+			throw new GroceryStoreException("there is no order with number \"" + orderNumber + "\"");
+		}else{
+			orderToDelete = system.getOrder(orderNumber);
+		} // Helper method
 		if (orderToDelete == null) {
 			throw new GroceryStoreException("there is no order with number \"" + orderNumber + "\"");
 		}
@@ -61,7 +69,7 @@ public class OrderController {
 	// Helper method to find an order
 	
 	private static Order findOrderByOrderNumber(int orderNumber) {
-		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
+		GroceryManagementSystem system = getGroceryManagementSystem();
 		for (Order order : system.getOrders()) {
 			if (order.getOrderNumber() == orderNumber) {
 				return order;
@@ -73,8 +81,13 @@ public class OrderController {
 	}
 
 	public static void addItemToOrder(int orderNumber, String itemName) throws GroceryStoreException {
-		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
-		Order order = findOrderByOrderNumber(orderNumber);
+		GroceryManagementSystem system = getGroceryManagementSystem();
+		Order order = null;
+		if (orderNumber >= system.numberOfOrders()){
+			throw new GroceryStoreException("there is no order with number \"" + orderNumber + "\"");
+		}else{
+			order = system.getOrder(orderNumber);
+		}
 		if (order == null) {
 			throw new GroceryStoreException("there is no order with number \"" + orderNumber + "\"");
 		}
@@ -103,12 +116,16 @@ public class OrderController {
 		if (newQuantity < 0) {
 			throw new GroceryStoreException("quantity must be non-negative");
 		}
-		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
-		Order order = findOrderByOrderNumber(orderNumber);
+		GroceryManagementSystem system = getGroceryManagementSystem();
+		Order order = null;
+		if (orderNumber >= system.numberOfOrders()){
+			throw new GroceryStoreException("there is no order with number \"" + orderNumber + "\"");
+		}else{
+			order = system.getOrder(orderNumber);
+		}
 		if (order == null) {
 			throw new GroceryStoreException("there is no order with number \"" + orderNumber + "\"");
 		}
-
 		if (order.getDatePlaced() != null) {
 			throw new GroceryStoreException("order has already been placed");
 		}
