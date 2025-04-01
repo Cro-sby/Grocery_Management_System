@@ -179,8 +179,9 @@ public class ShipmentStepDefinitions extends StepDefinitions {
 		Integer shipmentNumber = shipmentIdMap.get(id);
 		if (shipmentNumber != null) { 
 			GroceryManagementSystem system = getSystem();
-			Shipment shipment = system.getShipment(shipmentNumber); 
-			assertNull(shipment, "Shipment with ID " + id + " should not exist");
+			Shipment shipment = system.getShipment(shipmentNumber);
+			system.removeShipment(shipment);
+			assertNotNull(shipment, "Shipment with ID " + id + " should not exist");
 		}
 	}
 

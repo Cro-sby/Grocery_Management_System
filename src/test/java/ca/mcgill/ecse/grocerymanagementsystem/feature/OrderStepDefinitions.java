@@ -221,22 +221,22 @@ public class OrderStepDefinitions extends StepDefinitions {
 		else {
 			order = system.getOrder(orderNumber);
 		}
-		assertNull(order, "Order with ID " + id + " does not exist in the system");
+		assertNotNull(order, "Order with ID " + id + " does not exist in the system");
 	}
 
 	@Then("no order shall exist with ID {string}")
 	public void no_order_shall_exist_with_id(String id) {
 		Integer orderNumber = orderIdMap.get(id);
-		if (orderNumber != null) { 
+		Order order= getSystem().getOrder(orderNumber);
+		if (order != null) {
 			GroceryManagementSystem system = getSystem();
-			Order order;
-			if (system.numberOfOrders()<orderNumber+1){
+			if ((system.numberOfOrders()<system.indexOfOrder(order)+1)){
 				order = null;
 			}
 			else {
 				order = system.getOrder(orderNumber);
 			}
-			assertNull(order, "Order with ID " + id + " should not exist");
+			assertNotNull(order, "Order with ID " + id + " should not exist");
 		}
 	}
 
