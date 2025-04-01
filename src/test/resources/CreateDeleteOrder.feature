@@ -22,9 +22,9 @@ Feature: Create and delete orders
       # You'll need to create a map from string IDs to order numbers.
       # Also, please convert the string "NULL" to null (here and in the tests below).
       | id | datePlaced | deadline    | customer  | assignee | state              |
-      | a  | NULL       | SameDay     | alice     | NULL     | under construction |
+      | a  | NULL       | SameDay     | alice     | NULL     | pending            |
       | b  | 2025-02-24 | InOneDay    | obiwan212 | NULL     | placed             |
-      | c  | NULL       | InTwoDays   | anakin501 | NULL     | pending            |
+      | c  | NULL       | InTwoDays   | anakin501 | NULL     | under construction |
       | d  | 2025-02-24 | InThreeDays | alice     | bob      | delivered          |
     And the following items are part of orders
       | order | item                | quantity |
