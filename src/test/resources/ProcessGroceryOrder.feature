@@ -138,7 +138,7 @@ Feature: Process order
     And "<customer>" shall have <points> points
     And the quantity of item "Eggs" shall be <newQtyEggs>
     And the quantity of item "Chicken noodle soup" shall be <newQtySoup>
-    And the quantity of item "Bananas" shall be <newQtyBananas>
+    And the quantity of item "Banana" shall be <newQtyBananas>
     And the quantity of item "Grain of rice" shall be <newQtyRice>
 
     Examples: 
