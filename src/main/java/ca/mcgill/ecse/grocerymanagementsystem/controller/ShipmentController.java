@@ -5,7 +5,7 @@ import ca.mcgill.ecse.grocerymanagementsystem.model.Item;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Shipment;
 import ca.mcgill.ecse.grocerymanagementsystem.model.ShipmentItem;
 
-import java.sql.Date;
+import java.text.SimpleDateFormat;
 
 import static ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryManagementSystemController.getGroceryManagementSystem;
 
@@ -18,20 +18,17 @@ public class ShipmentController {
 
 	public static void deleteShipment(int shipmentNumber) throws GroceryStoreException {
 		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
-		Shipment shipment;
-		if (system.numberOfShipments() <= shipmentNumber){
-			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
-		}else{
-			shipment = system.getShipment(shipmentNumber);
-		}
-		if (shipment == null) {
+
+		// Use the helper method to find by ACTUAL shipment number
+		Shipment shipmentToDelete = findShipmentByShipmentNumber(shipmentNumber);
+
+		if (shipmentToDelete == null) {
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
 		}
-		if (shipment.getDateOrdered() != null) {
+		if (shipmentToDelete.getDateOrdered() != null) {
 			throw new GroceryStoreException("cannot delete a shipment which has already been ordered");
 		}
-		shipment.delete(); // Umple generated delete
-
+		shipmentToDelete.delete();
 	}
 
 	private static Shipment findShipmentByShipmentNumber(int shipmentNumber) {
@@ -46,16 +43,12 @@ public class ShipmentController {
 
 	public static void addItemToShipment(int shipmentNumber, String itemName) throws GroceryStoreException {
 		GroceryManagementSystem system = getGroceryManagementSystem();
-		Shipment shipment;
-		if (system.numberOfShipments() <= shipmentNumber){
-			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
-		}else{
-			shipment = system.getShipment(shipmentNumber);
-		}// Assumes you have a getShipment method
+
+		Shipment shipment = findShipmentByShipmentNumber(shipmentNumber);
+
 		if (shipment == null) {
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
 		}
-
 		if (shipment.getDateOrdered() != null) {
 			throw new GroceryStoreException("shipment has already been ordered");
 		}
@@ -66,12 +59,12 @@ public class ShipmentController {
 		}
 
 		for (ShipmentItem shipmentItem : shipment.getShipmentItems()) {
-			if (shipmentItem.getItem().getName().equals(item.getName())) {
+			if (shipmentItem.getItem().getName().equals(itemName)) {
 				throw new GroceryStoreException("shipment already includes item \"" + itemName + "\"");
 			}
 		}
 
-		new ShipmentItem(1,  system, shipment, item); 
+		new ShipmentItem(1, system, shipment, item);
 	}
 
 
@@ -80,13 +73,9 @@ public class ShipmentController {
 			throw new GroceryStoreException("quantity must be non-negative");
 		}
 		GroceryManagementSystem system = getGroceryManagementSystem();
-		Shipment shipment;
-		if (system.numberOfShipments() <= shipmentNumber){
-			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
-		}else{
-			shipment = system.getShipment(shipmentNumber);
-		}
-		// Assumes you have a getShipment method
+
+		Shipment shipment = findShipmentByShipmentNumber(shipmentNumber);
+
 		if (shipment == null) {
 			throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
 		}
@@ -107,16 +96,16 @@ public class ShipmentController {
 			}
 		}
 
-		if (shipmentItem == null && newQuantity !=0) {
+		if (shipmentItem == null && newQuantity != 0) {
 			throw new GroceryStoreException("shipment does not include item \"" + itemName + "\"");
 		}
 
 		if (newQuantity == 0 && shipmentItem != null) {
-			shipmentItem.delete(); 
-		} else if(shipmentItem != null){
+			shipmentItem.delete();
+		} else if (shipmentItem != null) {
 			shipmentItem.setQuantity(newQuantity);
-		} else{
-			new ShipmentItem(newQuantity, system, shipment, item); //CORRECT constructor call
+		} else {
+			new ShipmentItem(newQuantity, system, shipment, item);
 		}
 	}
 }

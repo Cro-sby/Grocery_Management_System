@@ -52,42 +52,39 @@ public class OrderController {
 
 	public static void deleteOrder(int orderNumber) throws GroceryStoreException {
 		GroceryManagementSystem system = getGroceryManagementSystem();
-		Order orderToDelete = null;
-		if (orderNumber >= system.numberOfOrders()){
-			throw new GroceryStoreException("there is no order with number \"" + orderNumber + "\"");
-		}else{
-			orderToDelete = system.getOrder(orderNumber);
-		} // Helper method
+
+		// Use the helper method to FIND the order by its orderNumber
+		Order orderToDelete = findOrderByOrderNumber(orderNumber);
+
+		// Check if the order was found (findOrderByOrderNumber returns null if not found)
 		if (orderToDelete == null) {
 			throw new GroceryStoreException("there is no order with number \"" + orderNumber + "\"");
 		}
+		// Check if the order has already been placed
 		if (orderToDelete.getDatePlaced() != null) {
 			throw new GroceryStoreException("cannot delete an order which has already been placed");
 		}
-		orderToDelete.delete(); 
+		// If order exists and is not placed, delete it
+		orderToDelete.delete();
 	}
 	// Helper method to find an order
-	
+
 	private static Order findOrderByOrderNumber(int orderNumber) {
 		GroceryManagementSystem system = getGroceryManagementSystem();
 		for (Order order : system.getOrders()) {
 			if (order.getOrderNumber() == orderNumber) {
-				return order;
-			} else if (orderNumber == 0) {
-				return system.getOrder(orderNumber);
+				return order; // Found the order with matching orderNumber
 			}
 		}
-		return null;
+		return null; // Order with that orderNumber not found
 	}
 
 	public static void addItemToOrder(int orderNumber, String itemName) throws GroceryStoreException {
 		GroceryManagementSystem system = getGroceryManagementSystem();
-		Order order = null;
-		if (orderNumber >= system.numberOfOrders()){
-			throw new GroceryStoreException("there is no order with number \"" + orderNumber + "\"");
-		}else{
-			order = system.getOrder(orderNumber);
-		}
+
+		Order order = findOrderByOrderNumber(orderNumber); // Use helper to find by number
+
+
 		if (order == null) {
 			throw new GroceryStoreException("there is no order with number \"" + orderNumber + "\"");
 		}
@@ -96,9 +93,13 @@ public class OrderController {
 			throw new GroceryStoreException("order has already been placed");
 		}
 
-		Item item = Item.getWithName(itemName); 
+		Item item = Item.getWithName(itemName);
 		if (item == null) {
 			throw new GroceryStoreException("there is no item called \"" + itemName + "\"");
+		}
+
+		if (item.numberOfOrderItems() <= 0) {
+			throw new GroceryStoreException("item \"" + itemName + "\" is out of stock");
 		}
 
 		for (OrderItem orderItem : order.getOrderItems()) {
@@ -108,21 +109,22 @@ public class OrderController {
 		}
 
 		// Add the item to the order with quantity 1
-		new OrderItem(1, system, order, item); 
+		new OrderItem(1, system, order, item);
 	}
+
 
 	public static void updateQuantityInOrder(int orderNumber, String itemName, int newQuantity)
 			throws GroceryStoreException {
 		if (newQuantity < 0) {
 			throw new GroceryStoreException("quantity must be non-negative");
 		}
-		GroceryManagementSystem system = getGroceryManagementSystem();
-		Order order = null;
-		if (orderNumber >= system.numberOfOrders()){
-			throw new GroceryStoreException("there is no order with number \"" + orderNumber + "\"");
-		}else{
-			order = system.getOrder(orderNumber);
+		if (newQuantity > 10) { // <-- ADD THIS CHECK: Quantity limit
+			throw new GroceryStoreException("quantity cannot exceed 10");
 		}
+		GroceryManagementSystem system = getGroceryManagementSystem();
+
+		Order order = findOrderByOrderNumber(orderNumber); // Use helper to find by number
+
 		if (order == null) {
 			throw new GroceryStoreException("there is no order with number \"" + orderNumber + "\"");
 		}
@@ -130,7 +132,7 @@ public class OrderController {
 			throw new GroceryStoreException("order has already been placed");
 		}
 
-		Item item = Item.getWithName(itemName); 
+		Item item = Item.getWithName(itemName);
 		if (item == null) {
 			throw new GroceryStoreException("there is no item called \"" + itemName + "\"");
 		}
@@ -150,9 +152,9 @@ public class OrderController {
 		if (newQuantity == 0 && orderItem != null) {
 			orderItem.delete(); // Remove if quantity is 0
 		} else if (orderItem != null) {
-			orderItem.setQuantity(newQuantity); 
+			orderItem.setQuantity(newQuantity);
 		} else {
-			new OrderItem(newQuantity, system, order, item); 
+			new OrderItem(newQuantity, system, order, item);
 		}
 	}
 }

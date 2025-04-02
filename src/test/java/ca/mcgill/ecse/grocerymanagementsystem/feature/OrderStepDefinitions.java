@@ -62,7 +62,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 			}
 			Order order = new Order(datePlaced, deadline, system, customer); 
 			system.addOrder(order);
-			orderIdMap.put(id, system.indexOfOrder(order));
+			orderIdMap.put(id, order.getOrderNumber());
 		}
 	}
 	private Customer findCustomerByUsername(String username) {
@@ -78,28 +78,22 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Given("the following items are part of orders")
 	public void the_following_items_are_part_of_orders(List<Map<String, String>> orderItems) {
 		GroceryManagementSystem system = getSystem();
-		List<String> orderids = new ArrayList<String>();
 		for (Map<String, String> orderItemData : orderItems) {
 			String orderId = orderItemData.get("order");
 			String itemName = orderItemData.get("item");
 			String quantityStr = orderItemData.get("quantity");
 			int quantity = Integer.parseInt(quantityStr);
 
-			boolean found = false;
-			for (String ids : orderids) {
-				if (Objects.equals(ids, orderId)){
-					found = true;
-				}
-			}
-			if (!found){
-				orderids.add(orderId);
-			}
 			Item item = Item.getWithName(itemName);
-			Order order = system.getOrder(orderids.indexOf(orderId));
+			Integer orderNumber = orderIdMap.get(orderId); // Get actual order number using orderIdMap
+			if (orderNumber == null) {
+				throw new IllegalArgumentException("Invalid order ID: " + orderId);
+			}
+			Order order = findOrderByOrderNumberHelper(orderNumber); // Use helper to find by number
+
 			if (item != null && order != null) {
-				new OrderItem(quantity, system, order, item); // Create the association class, include system in constructor
+				new OrderItem(quantity, system, order, item);
 			} else {
-				// Handle cases where item or order is not found (should not happen with valid test data)
 				throw new IllegalArgumentException("Invalid item or order ID in 'the_following_items_are_part_of_orders'");
 			}
 		}
@@ -129,8 +123,8 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@When("the user attempts to delete the order with ID {string}")
 	public void the_user_attempts_to_delete_the_order_with_id(String id) {
 		try {
-			Integer orderNumber = orderIdMap.get(id);
-			OrderController.deleteOrder(orderNumber); // Call OrderController
+			Integer orderNumber = orderIdMap.get(id); // Get orderNumber from map
+			OrderController.deleteOrder(orderNumber);     // Call controller with orderNumber
 			error = null;
 		} catch (GroceryStoreException e) {
 			error = e;
@@ -171,8 +165,8 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@When("the user attempts to set the quantity of item {string} in the order with ID {string} to {int}")
 	public void the_user_attempts_to_set_the_quantity_of_item_in_the_order_with_id_to(String item, String orderId, int newQuantity) {
 		try {
-			Integer orderindex = orderIdMap.get(orderId);
-			OrderController.updateQuantityInOrder(orderindex, item, newQuantity);
+			Integer orderNumber = orderIdMap.get(orderId);
+			OrderController.updateQuantityInOrder(orderNumber, item, newQuantity);
 			error = null;
 		} catch (GroceryStoreException e) {
 			error = e;
@@ -211,33 +205,37 @@ public class OrderStepDefinitions extends StepDefinitions {
 
 	@Then("an order shall exist with ID {string}")
 	public void an_order_shall_exist_with_id(String id) {
+		// 1. Get the ACTUAL order number associated with 'id' from the map
 		Integer orderNumber = orderIdMap.get(id);
-		assertNotNull(orderNumber, "Order ID " + id + " not found in map");
-		GroceryManagementSystem system = getSystem();
-		Order order;
-		if (orderNumber < 0 || orderNumber >= system.numberOfOrders()){
-			order = null;
-		}
-		else {
-			order = system.getOrder(orderNumber);
-		}
-		assertNotNull(order, "Order with ID " + id + " does not exist in the system");
+
+		// 2. Check if the ID was even in the map to begin with (test setup validation)
+		assertNotNull(orderNumber, "Test setup issue: Order ID '" + id + "' was not found in orderIdMap.");
+
+		// 3. Use the helper method to SEARCH for an order with this ACTUAL order number
+		Order foundOrder = findOrderByOrderNumberHelper(orderNumber);
+
+		// 4. Assert that the helper method returned NOT NULL, meaning an order WAS found
+		assertNotNull(foundOrder, "Order with actual number " + orderNumber + " (ID '" + id + "') should exist, but was not found.");
 	}
 
 	@Then("no order shall exist with ID {string}")
 	public void no_order_shall_exist_with_id(String id) {
-		Integer orderNumber = orderIdMap.get(id);
-		Order order= getSystem().getOrder(orderNumber);
-		if (order != null) {
-			GroceryManagementSystem system = getSystem();
-			if ((system.numberOfOrders()<system.indexOfOrder(order)+1)){
-				order = null;
+		Integer targetOrderNumber = orderIdMap.get(id);
+		assertNotNull(targetOrderNumber, "Test setup issue: ID '" + id + "' was not found in orderIdMap.");
+		// *** Use the helper method here ***
+		Order foundOrder = findOrderByOrderNumberHelper(targetOrderNumber);
+		assertNull(foundOrder, "Order with actual number " + targetOrderNumber + " (ID '" + id + "') should NOT exist...");
+	}
+
+	// Helper method to find an order by its ACTUAL order number
+	private Order findOrderByOrderNumberHelper(int orderNumber) {
+		GroceryManagementSystem system = getSystem();
+		for (Order order : system.getOrders()) {
+			if (order.getOrderNumber() == orderNumber) {
+				return order;
 			}
-			else {
-				order = system.getOrder(orderNumber);
-			}
-			assertNotNull(order, "Order with ID " + id + " should not exist");
 		}
+		return null;
 	}
 
 	@Then("no order shall exist with order number {int}")
@@ -280,7 +278,8 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("the order with ID {string} shall include {int} {string}")
 	public void the_order_with_id_shall_include(String orderId, Integer quantity, String item) {
 		GroceryManagementSystem system = getSystem();
-		Order order = system.getOrder(orderIdMap.get(orderId)); // Use orderIdMap and getOrder
+		Integer orderNumber = orderIdMap.get(orderId); // Get order number from map
+		Order order = findOrderByOrderNumberHelper(orderNumber); // Use helper to find by number
 		assertNotNull(order, "Order with ID " + orderId + " not found");
 
 		boolean found = false;
@@ -298,10 +297,8 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("the order with ID {string} shall not include any items called {string}")
 	public void the_order_with_id_shall_not_include_any_items_called(String orderId, String item) {
 		GroceryManagementSystem system = getSystem();
-		System.out.println(orderIdMap);
-		int ordernum = orderIdMap.get(orderId);
-		System.out.print(ordernum);
-		Order order = system.getOrder(ordernum);
+		Integer orderNumber = orderIdMap.get(orderId); // Get order number from map
+		Order order = findOrderByOrderNumberHelper(orderNumber); // Use helper to find by number
 		assertNotNull(order, "Order with ID " + orderId + " not found");
 
 		for (OrderItem orderItem : order.getOrderItems()) {
@@ -313,7 +310,8 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("the order with ID {string} shall include {int} distinct items")
 	public void the_order_with_id_shall_include_distinct_items(String orderId, Integer n) {
 		GroceryManagementSystem system = getSystem();
-		Order order = system.getOrder(orderIdMap.get(orderId));
+		Integer orderNumber = orderIdMap.get(orderId); // Get order number from map
+		Order order = findOrderByOrderNumberHelper(orderNumber); // Use helper to find by number
 		assertNotNull(order, "Order with ID " + orderId + " not found");
 		assertEquals(n.intValue(), order.getOrderItems().size(),
 				"Number of distinct items mismatch in order " + orderId);
@@ -322,9 +320,11 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("the order with ID {string} shall include {int} distinct item")
 	public void the_order_with_id_shall_include_distinct_item(String orderId, Integer n) {
 		GroceryManagementSystem system = getSystem();
-		Order order = system.getOrder(orderIdMap.get(orderId));
+		Integer orderNumber = orderIdMap.get(orderId); // Get order number from map
+		Order order = findOrderByOrderNumberHelper(orderNumber); // Use helper to find by number
 		assertNotNull(order, "Order with ID " + orderId + " not found");
 		assertEquals(n.intValue(), order.getOrderItems().size(),
 				"Number of distinct items mismatch in order " + orderId);
 	}
+
 }
