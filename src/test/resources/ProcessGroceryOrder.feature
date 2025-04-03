@@ -436,10 +436,10 @@ Feature: Process order
       | datePlaced   | deadline    | oldState           | oldAssignee | error                                                             |
       | today        | InOneDay    | ready for delivery | alice       | cannot mark order as delivered before the delivery date           |
       | today        | InTwoDays   | ready for delivery | bob         | cannot mark order as delivered before the delivery date           |
-      | today        | InThreeDays | ready for delivery | charlie     | cannot mark order as delivered before the delivery date           |
-      | yesterday    | InTwoDays   | ready for delivery | charlie     | cannot mark order as delivered before the delivery date           |
-      | yesterday    | InThreeDays | ready for delivery | charlie     | cannot mark order as delivered before the delivery date           |
-      | two days ago | InThreeDays | ready for delivery | charlie     | cannot mark order as delivered before the delivery date           |
+      | today        | InThreeDays | ready for delivery | claire      | cannot mark order as delivered before the delivery date           |
+      | yesterday    | InTwoDays   | ready for delivery | claire      | cannot mark order as delivered before the delivery date           |
+      | yesterday    | InThreeDays | ready for delivery | claire      | cannot mark order as delivered before the delivery date           |
+      | two days ago | InThreeDays | ready for delivery | claire      | cannot mark order as delivered before the delivery date           |
       | NULL         | SameDay     | under construction | NULL        | cannot mark an order as delivered if it is not ready for delivery |
       | NULL         | InOneDay    | pending            | NULL        | cannot mark an order as delivered if it is not ready for delivery |
       | today        | SameDay     | placed             | NULL        | cannot mark an order as delivered if it is not ready for delivery |
