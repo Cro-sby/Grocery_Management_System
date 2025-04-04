@@ -138,7 +138,7 @@ Feature: Process order
     And "<customer>" shall have <points> points
     And the quantity of item "Eggs" shall be <newQtyEggs>
     And the quantity of item "Chicken noodle soup" shall be <newQtySoup>
-    And the quantity of item "Bananas" shall be <newQtyBananas>
+    And the quantity of item "Banana" shall be <newQtyBananas>
     And the quantity of item "Grain of rice" shall be <newQtyRice>
 
     Examples: 
@@ -275,7 +275,7 @@ Feature: Process order
     Given the following orders exist in the system
       | id                 | datePlaced   | deadline   | customer  | assignee | state          |
       | with_perishable    | <datePlaced> | <deadline> | obiwan212 | alice    | in preparation |
-      | without_perishable | <datePlaced> | <deadline> | anakin212 | bob      | in preparation |
+      | without_perishable | <datePlaced> | <deadline> | anakin501 | bob      | in preparation |
     And the following items are part of orders
       | order              | item                | quantity |
       | with_perishable    | Chicken noodle soup |        1 |
@@ -436,10 +436,10 @@ Feature: Process order
       | datePlaced   | deadline    | oldState           | oldAssignee | error                                                             |
       | today        | InOneDay    | ready for delivery | alice       | cannot mark order as delivered before the delivery date           |
       | today        | InTwoDays   | ready for delivery | bob         | cannot mark order as delivered before the delivery date           |
-      | today        | InThreeDays | ready for delivery | charlie     | cannot mark order as delivered before the delivery date           |
-      | yesterday    | InTwoDays   | ready for delivery | charlie     | cannot mark order as delivered before the delivery date           |
-      | yesterday    | InThreeDays | ready for delivery | charlie     | cannot mark order as delivered before the delivery date           |
-      | two days ago | InThreeDays | ready for delivery | charlie     | cannot mark order as delivered before the delivery date           |
+      | today        | InThreeDays | ready for delivery | claire      | cannot mark order as delivered before the delivery date           |
+      | yesterday    | InTwoDays   | ready for delivery | claire      | cannot mark order as delivered before the delivery date           |
+      | yesterday    | InThreeDays | ready for delivery | claire      | cannot mark order as delivered before the delivery date           |
+      | two days ago | InThreeDays | ready for delivery | claire      | cannot mark order as delivered before the delivery date           |
       | NULL         | SameDay     | under construction | NULL        | cannot mark an order as delivered if it is not ready for delivery |
       | NULL         | InOneDay    | pending            | NULL        | cannot mark an order as delivered if it is not ready for delivery |
       | today        | SameDay     | placed             | NULL        | cannot mark an order as delivered if it is not ready for delivery |
