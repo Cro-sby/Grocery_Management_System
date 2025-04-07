@@ -80,7 +80,9 @@ public class OrderProcessingController {
                 throw new GroceryStoreException("Cannot pay for order in the current state: " + initialStatus);
             }
         }
+
         String outOfStockItem = null;
+        // Check for out-of-stock items
         for (OrderItem oi : order.getOrderItems()) {
             if (oi.getItem().getQuantityInInventory() < oi.getQuantity()) {
                 outOfStockItem = oi.getItem().getName();
@@ -98,8 +100,7 @@ public class OrderProcessingController {
         if (usePoints) {
             Customer customer = order.getOrderPlacer();
             if (customer != null) {
-                int availablePoints = customer.getNumberOfPoints();
-                pointsToUse = Math.min(availablePoints, totalCostCents);
+                pointsToUse = Math.min(customer.getNumberOfPoints(), totalCostCents);
                 amountToPay = (double)(totalCostCents - pointsToUse) / 100.0;
             } else {
                 amountToPay = (double)totalCostCents / 100.0;
@@ -109,9 +110,13 @@ public class OrderProcessingController {
             pointsToUse = 0;
         }
 
+        // Round to two decimal places to avoid any floating point precision errors
+        amountToPay = Math.round(amountToPay * 100.0) / 100.0;
+
         boolean paid = order.payOrder(amountToPay, pointsToUse);
 
         if (!paid) {
+            // Check again for out-of-stock items after attempting to pay
             outOfStockItem = null;
             for (OrderItem oi : order.getOrderItems()) {
                 if (oi.getItem().getQuantityInInventory() < oi.getQuantity()) {
@@ -125,7 +130,14 @@ public class OrderProcessingController {
 
             throw new GroceryStoreException("Payment failed for order " + orderNumber + ". Ensure payment amount/points are valid.");
         }
+
+        // If payment succeeds, ensure the order's points and cost are correctly recorded
+        if (order.getStatus() == Order.Status.Pending) {
+            throw new GroceryStoreException("Order could not be processed properly after payment.");
+        }
     }
+
+
 
 
     public static void assignOrderToEmployee(int orderNumber, String employeeUsername) throws GroceryStoreException {

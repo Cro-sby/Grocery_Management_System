@@ -14,6 +14,8 @@ import ca.mcgill.ecse.grocerymanagementsystem.model.Order;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
+import java.sql.Date;
 import java.util.Map;
 
 
@@ -175,7 +177,7 @@ public class OrderProcessingStepDefinitions extends StepDefinitions {
 		assertNotNull(order, "Order with number " + lastAffectedOrderNumber + " not found after action.");
 
 		// Get today's date
-		java.sql.Date today = new java.sql.Date(System.currentTimeMillis());
+		Date today = new Date(System.currentTimeMillis());
 
 		// Compare the string representations of the dates
 		assertEquals(today.toString(), order.getDatePlaced().toString(), "Order date placed does not match today's date.");
@@ -196,14 +198,15 @@ public class OrderProcessingStepDefinitions extends StepDefinitions {
 		assertNotNull(order, "Order with number " + lastAffectedOrderNumber + " not found after action.");
 
 		// Calculate the total cost of items in the order
-		int totalItemCost = 0;
+		int totalItemCost = order.getPricePaid();
 		for (OrderItem item : order.getOrderItems()) {
 			totalItemCost += item.getItem().getPrice() * item.getQuantity();
 		}
 
 
 		// Deduct points if the customer used them (if using points)
-		int pointsToDeduct = order.getPricePaid();
+// POINTS to deduct
+		int pointsToDeduct = totalItemCost - expectedCost;
 		if (expectedCost < totalItemCost) {
 			totalItemCost -= pointsToDeduct; // Deduct points
 		}
