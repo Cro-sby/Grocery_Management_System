@@ -4,12 +4,15 @@ import ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryManagementSystem
 import ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryStoreException;
 import ca.mcgill.ecse.grocerymanagementsystem.model.GroceryManagementSystem;
 
+import java.util.HashMap;
+import java.util.Map;
+import io.cucumber.java.Before;
 public class StepDefinitions {
 	/**
 	 * Set this field in <code>@When</code> steps if an error was raised.
 	 */
 	static GroceryStoreException error;
-	
+
 	protected void before() {
 		GroceryManagementSystemController.resetSystem();
 		error = null;
@@ -18,4 +21,5 @@ public class StepDefinitions {
 	protected GroceryManagementSystem getSystem() {
 		return GroceryManagementSystemController.getGroceryManagementSystem();
 	}
+
 }

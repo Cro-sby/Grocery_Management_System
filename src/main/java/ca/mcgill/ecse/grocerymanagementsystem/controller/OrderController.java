@@ -26,7 +26,7 @@ public class OrderController {
 		if (user==null){
 			throw new GroceryStoreException("there is no user with username \"" + creatorUsername + "\"" );
 		}
-		Customer customer = findCustomerByUsername(creatorUsername); 
+		Customer customer = findCustomerByUsername(creatorUsername);
 
 		if (customer == null) {
 			throw new GroceryStoreException("\"" + creatorUsername + "\" is not a customer");
@@ -35,7 +35,7 @@ public class OrderController {
 		// Create the Order
 		new Order(null, deadline, system, customer);
 	}
-	// Helper method to find a customer 
+	// Helper method to find a customer
 	private static Customer findCustomerByUsername(String username) {
 		GroceryManagementSystem system = getGroceryManagementSystem();
 		if (Objects.equals(username, "NULL")){
@@ -46,7 +46,7 @@ public class OrderController {
 				return customer;
 			}
 		}
-		return null; 
+		return null;
 	}
 
 
@@ -107,6 +107,9 @@ public class OrderController {
 				throw new GroceryStoreException("order already includes item \"" + itemName + "\"");
 			}
 		}
+		if (Objects.equals(order.getStatusFullName(), "Checkout")){
+			throw new GroceryStoreException("order has already been checked out");
+		}
 
 		// Add the item to the order with quantity 1
 		new OrderItem(1, system, order, item);
@@ -124,6 +127,7 @@ public class OrderController {
 		GroceryManagementSystem system = getGroceryManagementSystem();
 
 		Order order = findOrderByOrderNumber(orderNumber); // Use helper to find by number
+
 
 		if (order == null) {
 			throw new GroceryStoreException("there is no order with number \"" + orderNumber + "\"");
@@ -147,6 +151,10 @@ public class OrderController {
 
 		if (orderItem == null && newQuantity != 0) {
 			throw new GroceryStoreException("order does not include item \"" + itemName + "\"");
+		}
+
+		if (Objects.equals(order.getStatusFullName(), "Checkout")){
+			throw new GroceryStoreException("order has already been checked out");
 		}
 
 		if (newQuantity == 0 && orderItem != null) {

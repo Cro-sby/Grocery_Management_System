@@ -7,26 +7,36 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryStoreException;
-import ca.mcgill.ecse.grocerymanagementsystem.controller.OrderController; // Import OrderController
+import ca.mcgill.ecse.grocerymanagementsystem.controller.OrderController;
+
 import ca.mcgill.ecse.grocerymanagementsystem.model.Customer;
 import ca.mcgill.ecse.grocerymanagementsystem.model.GroceryManagementSystem;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Item;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Order;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Order.DeliveryDeadline;
 import ca.mcgill.ecse.grocerymanagementsystem.model.OrderItem;
-import ca.mcgill.ecse.grocerymanagementsystem.model.User;
+
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate; // *** ADD THIS IMPORT ***
+
 import java.util.*;
 
 public class OrderStepDefinitions extends StepDefinitions {
 
-	private Map<String, Integer> orderIdMap = new HashMap<>(); // Map string IDs to order numbers
+	 // Map string IDs to order numbers
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); // Date format
+	private static Map<Integer, List<Map<String, String>>> itemsForSetup = new HashMap<>();
+	public static Map<String, Integer> orderIdMap = new HashMap<>();
+	public static Map<String, String> orderStatusMap = new HashMap<>();
+	public static Map<String, DeliveryDeadline> orderDeadlineMap = new HashMap<>();
+
+
+
 
 	@Before
 	public void before() {
@@ -42,27 +52,69 @@ public class OrderStepDefinitions extends StepDefinitions {
 			String datePlacedString = orderData.get("datePlaced");
 			String deadlineString = orderData.get("deadline");
 			String customerUsername = orderData.get("customer");
+			String orderStatus = orderData.get("state");
 
-			java.sql.Date datePlaced = null;
-			if (datePlacedString != null && !datePlacedString.equals("NULL")) {
-				try {
-					java.util.Date parsedDate = dateFormat.parse(datePlacedString);
-					datePlaced = new java.sql.Date(parsedDate.getTime());
-				} catch (ParseException e) {
-					throw new RuntimeException("Error parsing date: " + datePlacedString, e);
+			// --- REPLACEMENT CODE BLOCK ---
+			java.sql.Date datePlaced = null; // Keep this initialization
+			LocalDate today = LocalDate.now(); // Add this line before the 'if'
+
+			if (datePlacedString != null && !datePlacedString.equalsIgnoreCase("NULL")) { // Uses equalsIgnoreCase now
+				// Check for relative terms FIRST
+				switch (datePlacedString.toLowerCase()) { // Converts to lowercase
+					case "today":
+						datePlaced = java.sql.Date.valueOf(today);
+						break;
+					case "yesterday":
+						datePlaced = java.sql.Date.valueOf(today.minusDays(1));
+						break;
+					case "two days ago": // Add if used in other scenarios
+						datePlaced = java.sql.Date.valueOf(today.minusDays(2));
+						break;
+					case "three days ago": // Add if used in other scenarios
+						datePlaced = java.sql.Date.valueOf(today.minusDays(3));
+						break;
+					default:
+						// Not a relative term, TRY parsing as yyyy-MM-dd (Original Logic)
+						try {
+							// Use the existing dateFormat field (make sure it's defined in your class)
+							java.util.Date parsedUtilDate = dateFormat.parse(datePlacedString);
+							datePlaced = new java.sql.Date(parsedUtilDate.getTime());
+						} catch (ParseException e) {
+							// This error now only happens if the string is NOT relative AND NOT yyyy-MM-dd
+							throw new RuntimeException("Error parsing specific date: '" + datePlacedString + "'. Expected yyyy-MM-dd format.", e);
+						}
+						break;
 				}
 			}
+// --- END REPLACEMENT CODE BLOCK ---
 
 			DeliveryDeadline deadline = DeliveryDeadline.valueOf(deadlineString);
 
 			// Use helper method
-			Customer customer = findCustomerByUsername(customerUsername); 
+			Customer customer = findCustomerByUsername(customerUsername);
 			if (customer == null) {
 				throw new IllegalArgumentException("Customer does not exist: " + customerUsername);
 			}
-			Order order = new Order(datePlaced, deadline, system, customer); 
+			Order order = new Order(datePlaced, deadline, system, customer);
 			system.addOrder(order);
 			orderIdMap.put(id, order.getOrderNumber());
+			orderStatusMap.put(id,orderStatus);
+			orderDeadlineMap.put(id, deadline);
+
+
+
+
+			if (Objects.equals(orderStatus, "under construction")){
+				order.startOrder(deadline, order.getDeliveryDelay());
+			}
+			if (Objects.equals(orderStatus, "pending")){
+				order.startOrder(deadline, order.getDeliveryDelay());
+
+				order.calculateCost();
+				System.out.println(order.hasItems());
+				order.finalizeOrder();
+			}
+
 		}
 	}
 	private Customer findCustomerByUsername(String username) {
@@ -83,6 +135,8 @@ public class OrderStepDefinitions extends StepDefinitions {
 			String itemName = orderItemData.get("item");
 			String quantityStr = orderItemData.get("quantity");
 			int quantity = Integer.parseInt(quantityStr);
+			String orderStatus = orderStatusMap.get(orderId);
+			DeliveryDeadline deadline = orderDeadlineMap.get(orderId);
 
 			Item item = Item.getWithName(itemName);
 			Integer orderNumber = orderIdMap.get(orderId); // Get actual order number using orderIdMap
@@ -96,6 +150,18 @@ public class OrderStepDefinitions extends StepDefinitions {
 			} else {
 				throw new IllegalArgumentException("Invalid item or order ID in 'the_following_items_are_part_of_orders'");
 			}
+
+			if (Objects.equals(orderStatus, "under construction")){
+				order.startOrder(deadline, order.getDeliveryDelay());
+			}
+			if (Objects.equals(orderStatus, "pending")){
+				order.startOrder(deadline, order.getDeliveryDelay());
+				order.calculateCost();
+				System.out.println(order.hasItems());
+				order.finalizeOrder();
+			}
+
+
 		}
 	}
 
@@ -106,12 +172,12 @@ public class OrderStepDefinitions extends StepDefinitions {
 		try {
 			if (!(Objects.equals(deadline, "NULL"))){
 				DeliveryDeadline deliveryDeadline = DeliveryDeadline.valueOf(deadline);
-				OrderController.createOrder(username, deliveryDeadline); 
+				OrderController.createOrder(username, deliveryDeadline);
 				error = null;
 			}
 			else {
 				DeliveryDeadline deliveryDeadline = null;
-				OrderController.createOrder(username, deliveryDeadline); 
+				OrderController.createOrder(username, deliveryDeadline);
 				error = null;
 			}
 
@@ -145,6 +211,8 @@ public class OrderStepDefinitions extends StepDefinitions {
 	public void the_user_attempts_to_add_item_to_the_order_with_id(String item, String orderId) {
 		try {
 			Integer orderNumber = orderIdMap.get(orderId);
+			Order CureentOrder = findOrderByOrderNumberHelper(orderNumber);
+			System.out.println(CureentOrder.getStatusFullName());
 			OrderController.addItemToOrder(orderNumber, item); // Call OrderController
 			error = null;
 		} catch (GroceryStoreException e) {
@@ -176,7 +244,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@When("the user attempts to set the quantity of item {string} in the non-existent order {int} to {int}")
 	public void the_user_attempts_to_set_the_quantity_of_item_in_the_nonexistent_order_to(String item, int orderNumber, int newQuantity) {
 		try {
-			OrderController.updateQuantityInOrder(orderNumber, item, newQuantity); 
+			OrderController.updateQuantityInOrder(orderNumber, item, newQuantity);
 			error = null;
 		} catch (GroceryStoreException e) {
 			error = e;
@@ -189,7 +257,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 		assertEquals(n.intValue(), system.getOrders().size());
 	}
 
-	@Then("{string} shall have a new order") 
+	@Then("{string} shall have a new order")
 	public void shall_have_a_new_order(String username) {
 		GroceryManagementSystem system = getSystem();
 		Customer customer = findCustomerByUsername(username);
@@ -254,7 +322,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("the newly-created order shall have deadline {string}")
 	public void the_newly_created_order_shall_have_deadline(String deadline) {
 		GroceryManagementSystem system = getSystem();
-		Order latestOrder = system.getOrders().get(system.getOrders().size() - 1); 
+		Order latestOrder = system.getOrders().get(system.getOrders().size() - 1);
 		assertNotNull(latestOrder);
 		assertEquals(DeliveryDeadline.valueOf(deadline), latestOrder.getDeadline());
 	}
@@ -262,7 +330,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("the newly-created order shall have {int} items")
 	public void the_newly_created_order_shall_have_items(Integer n) {
 		GroceryManagementSystem system = getSystem();
-		Order latestOrder = system.getOrders().get(system.getOrders().size() - 1); 
+		Order latestOrder = system.getOrders().get(system.getOrders().size() - 1);
 		assertNotNull(latestOrder);
 		assertEquals(n.intValue(), latestOrder.getOrderItems().size());
 	}
@@ -270,9 +338,9 @@ public class OrderStepDefinitions extends StepDefinitions {
 	@Then("the newly-created order shall not have been placed")
 	public void the_newly_created_order_shall_not_have_been_placed() {
 		GroceryManagementSystem system = getSystem();
-		Order latestOrder = system.getOrders().get(system.getOrders().size() - 1); 
+		Order latestOrder = system.getOrders().get(system.getOrders().size() - 1);
 		assertNotNull(latestOrder);
-		assertNull(latestOrder.getDatePlaced()); 
+		assertNull(latestOrder.getDatePlaced());
 	}
 
 	@Then("the order with ID {string} shall include {int} {string}")
