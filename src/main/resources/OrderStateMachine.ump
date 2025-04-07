@@ -1,0 +1,295 @@
+namespace ca.mcgill.ecse.grocerymanagementsystem.model;
+
+class Order
+{
+  Integer deliveryDelay = 0;
+
+  status
+  {
+    Idle
+    {
+
+      startOrder (DeliveryDeadline chosenDeadline, int delayDays) / { setDeadline(chosenDeadline); setDeliveryDelay(delayDays); } -> Cart;
+    }
+
+    Cart
+    {
+      removeItem (Item item) [isItemInOrder(item)] / { removeOrderItem(findOrderItem(item)); } -> Cart;
+
+      addItem (Item item, int quantity) [!isItemInOrder(item) && isValidQuantity(item, quantity) && isInventorySufficient(item, quantity) && isCartNotFull()] / { addOrderItem(quantity, getGroceryManagementSystem(), item); } -> Cart;
+
+      changeQuantity (Item item, int newQuantity) [isItemInOrder(item) && isValidQuantityForChange(item, newQuantity)] / { doUpdateItemQuantityAction(item, newQuantity); } -> Cart;
+
+      calculateCost / { calculateOrderCost(); } -> Checkout;
+    }
+
+    Checkout
+    {
+
+      finalizeOrder [hasItems()] -> Pending; // Enters OrderCancellable
+      // Event takes no parameters.
+       cancel / { doCancelOrder(); } -> Cancelled;
+    }
+
+
+      Pending
+      {
+
+        payOrder (double amount, int points) [isPaymentValid(amount, points) && isInventorySufficientForAllItems()] / { doProcessPaymentAction(amount, points); } -> OrderPlaced;
+
+        paymentDeclined -> Pending;
+        cancel / { doCancelOrder(); } -> Cancelled;
+      }
+
+      OrderPlaced
+      {
+        assignEmployee (Employee employee) [!isEmployeeAssigned()] / { setOrderAssignee(employee); } -> Assembling; // Exits OrderCancellable
+
+        cancel / { doCancelOrder(); } -> Cancelled;
+      }
+
+
+      Assembling
+      {
+        finishAssembly [canAssemble()] -> ReadyForDelivery;
+      }
+
+      ReadyForDelivery
+      {
+        // Event takes no parameters. Guard checks delivery date.
+        completeDelivery [isDeliveryDateValid()] -> Delivered;
+      }
+
+    Delivered { }
+
+    Cancelled { }
+  }
+
+
+  public boolean isItemInOrder(Item item) {
+     return findOrderItem(item) != null;
+  }
+
+  public boolean isValidQuantity(Item item, int quantity) {
+    return quantity > 0 && quantity <= 10;
+  }
+
+   public boolean isValidQuantityForChange(Item item, int quantity) {
+      return quantity >= 0 && quantity <= 10;  // Allows 0 for removal
+  }
+
+  public boolean isInventorySufficient(Item item, int requestedQuantity) {
+
+    if (item == null) return false;
+    // Uses generated Item.getQuantityInInventory()
+    return item.getQuantityInInventory() >= requestedQuantity;
+
+  }
+
+  public boolean isCartNotFull() {
+    // Uses generated Order.numberOfOrderItems()
+     return numberOfOrderItems() < 50;
+  }
+
+  public boolean hasItems() {
+    // Uses generated Order.hasOrderItems()
+     return hasOrderItems();
+  }
+
+  public boolean isPaymentValid(double amount, int points) {
+
+    // Uses generated Order.canSetTotalCost and Order.getTotalCost()
+    boolean costIsSet = !canSetTotalCost;
+
+    if (costIsSet) {
+        double totalCostDollars = getTotalCost() / 100.0;
+        double pointsValueDollars = points * 0.01;
+        // Use tolerance for float comparison
+        return amount + pointsValueDollars >= totalCostDollars - 0.001;
+    } else {
+        return false;
+    }
+
+  }
+
+
+  public boolean isEmployeeAssigned() {
+    // Uses generated Order.hasOrderAssignee()
+     return hasOrderAssignee();
+  }
+
+  public boolean canAssemble() {
+
+    if (!containsPerishableItems()) {
+      return true;
+    }
+    return isDeliveryDateValid();
+
+  }
+
+  public boolean isDeliveryDateValid() {
+
+    java.sql.Date deliveryDate = calculateTargetDeliveryDate();
+    if (deliveryDate == null) return false;
+    java.time.LocalDate today = java.time.LocalDate.now();
+    java.time.LocalDate deliveryLocalDate = deliveryDate.toLocalDate();
+    return today.equals(deliveryLocalDate);
+
+  }
+
+  public java.sql.Date calculateTargetDeliveryDate() {
+
+    java.sql.Date placed = getDatePlaced();
+    DeliveryDeadline deadline = getDeadline();
+    // Uses getter for deliveryDelay defined here
+    int delay = getDeliveryDelay();
+
+    if (placed == null || deadline == null) return null;
+
+    java.time.LocalDate placedLocalDate = placed.toLocalDate();
+    java.time.LocalDate targetLocalDate = placedLocalDate.plusDays(delay); // Apply integer delay first
+
+    switch (deadline) {
+      case InOneDay:  targetLocalDate = targetLocalDate.plusDays(1); break;
+      case InTwoDays: targetLocalDate = targetLocalDate.plusDays(2); break;
+      case InThreeDays: targetLocalDate = targetLocalDate.plusDays(3); break;
+      case SameDay: default: break;
+    }
+    return java.sql.Date.valueOf(targetLocalDate);
+
+  }
+
+  public boolean containsPerishableItems() {
+
+    for (OrderItem orderItem : getOrderItems()) {
+      if (orderItem.getItem().getIsPerishable()) {
+        return true;
+      }
+    }
+    return false;
+
+  }
+
+  public boolean isInventorySufficientForAllItems() {
+
+      for (OrderItem oi : getOrderItems()) {
+          if (oi.getItem().getQuantityInInventory() < oi.getQuantity()) {
+              return false;
+          }
+      }
+      return true;
+
+  }
+
+
+  public void doUpdateItemQuantityAction(Item item, int newQuantity) {
+
+    OrderItem orderItemToUpdate = findOrderItem(item);
+    if (orderItemToUpdate != null) {
+      if (newQuantity == 0) {
+        removeOrderItem(orderItemToUpdate);
+      } else {
+        // Uses generated OrderItem.setQuantity()
+        orderItemToUpdate.setQuantity(newQuantity);
+      }
+    }
+
+  }
+
+  public void calculateOrderCost() {
+
+    double totalCostCents = 0;
+    for (OrderItem orderItem : getOrderItems()) {
+      Item item = orderItem.getItem();
+      int quantity = orderItem.getQuantity();
+      int itemPriceCents = item.getPrice();
+
+      double discountPercentage = Math.min(0.45, (quantity - 1) * 0.05);
+      double discountedPriceCents = itemPriceCents * (1.0 - discountPercentage);
+      totalCostCents += quantity * discountedPriceCents;
+    }
+
+    if (getDeliveryDelay() == 0 && getDeadline() == DeliveryDeadline.SameDay) {
+      totalCostCents += 500;
+    }
+    setTotalCost((int)Math.round(totalCostCents));
+
+  }
+
+  public void doProcessPaymentAction(double amount, int points) {
+
+    Customer customer = getOrderPlacer();
+    if (customer == null) return;
+
+    // Uses generated Order.getTotalCost()
+    int calculatedTotalCost = getTotalCost();
+    int priceToPay = calculatedTotalCost;
+    int pointsUsed = 0;
+
+    if (points > 0) {
+        int availablePoints = customer.getNumberOfPoints();
+        int discountInCents = Math.min(calculatedTotalCost, availablePoints);
+        priceToPay -= discountInCents;
+        pointsUsed = discountInCents;
+        // Uses generated Customer.setNumberOfPoints()
+        customer.setNumberOfPoints(availablePoints - pointsUsed);
+    }
+    setPricePaid(priceToPay);
+
+    int pointsAwarded = 0;
+    // Uses generated Order.getOrderItems(), OrderItem.getItem(), Item.getNumberOfPoints(), OrderItem.getQuantity()
+    for (OrderItem oi : getOrderItems()) {
+        pointsAwarded += oi.getItem().getNumberOfPoints() * oi.getQuantity();
+    }
+    customer.setNumberOfPoints(customer.getNumberOfPoints() + pointsAwarded);
+
+    updateInventory(); // Calls helper action method
+
+    // Uses generated Order.setDatePlaced()
+    setDatePlaced(new java.sql.Date(System.currentTimeMillis()));
+
+  }
+
+  public void updateInventory() {
+
+      for (OrderItem orderItem : getOrderItems()) {
+          Item item = orderItem.getItem();
+          int quantity = orderItem.getQuantity();
+          item.setQuantityInInventory(item.getQuantityInInventory() - quantity);
+      }
+
+  }
+
+  public void restoreInventory() {
+
+      for (OrderItem orderItem : getOrderItems()) {
+          Item item = orderItem.getItem();
+          int quantity = orderItem.getQuantity();
+          item.setQuantityInInventory(item.getQuantityInInventory() + quantity);
+      }
+
+  }
+
+  public void doCancelOrder() {
+
+    // Uses generated Order.getDatePlaced()
+    if (getDatePlaced() != null) {
+        restoreInventory();
+    }
+
+  }
+
+  public OrderItem findOrderItem(Item item) {
+
+    if (item == null) return null;
+    // Uses generated Order.getOrderItems(), OrderItem.getItem()
+    for (OrderItem oi : getOrderItems()) {
+      if (item.equals(oi.getItem())) {
+        return oi;
+      }
+    }
+    return null;
+
+  }
+
+}

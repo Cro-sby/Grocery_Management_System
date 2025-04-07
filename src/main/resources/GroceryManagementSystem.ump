@@ -1,4 +1,5 @@
 namespace ca.mcgill.ecse.grocerymanagementsystem.model;
+use OrderStateMachine.ump;
 
 class GroceryManagementSystem {
   1 <@>- * User users;
