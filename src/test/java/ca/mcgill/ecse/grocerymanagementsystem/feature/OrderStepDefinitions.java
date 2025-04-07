@@ -15,6 +15,7 @@ import ca.mcgill.ecse.grocerymanagementsystem.model.Item;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Order;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Order.DeliveryDeadline;
 import ca.mcgill.ecse.grocerymanagementsystem.model.OrderItem;
+import ca.mcgill.ecse.grocerymanagementsystem.model.*;
 
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -151,18 +152,71 @@ public class OrderStepDefinitions extends StepDefinitions {
 				throw new IllegalArgumentException("Invalid item or order ID in 'the_following_items_are_part_of_orders'");
 			}
 
-			if (Objects.equals(orderStatus, "under construction")){
-				order.startOrder(deadline, order.getDeliveryDelay());
-			}
-			if (Objects.equals(orderStatus, "pending")){
-				order.startOrder(deadline, order.getDeliveryDelay());
-				order.calculateCost();
-				System.out.println(order.hasItems());
-				order.finalizeOrder();
-			}
+
+			// --- Part 2: Apply final states AFTER all items are added ---
+			for (Map.Entry<String, Integer> mapEntry : orderIdMap.entrySet()) {
+				String targetStatus = orderStatusMap.get(orderId);
 
 
+				if (order == null || targetStatus == null || deadline == null) {
+					continue; // Skip if essential data is missing
+				}
+
+				try {
+					// Apply necessary transitions sequentially to reach the target state
+					// We rely on the model's event methods to handle guards.
+					// If a transition fails (returns false), subsequent ones won't be attempted
+					// if the state didn't change as expected.
+
+					// Target: Cart ("under construction")
+					if (targetStatus.equalsIgnoreCase("under construction")) {
+						if (order.getStatus() == Order.Status.Idle) {
+							order.startOrder(deadline, order.getDeliveryDelay());
+						}
+					}
+					// Target: Pending
+					else if (targetStatus.equalsIgnoreCase("pending")) {
+						if (order.getStatus() == Order.Status.Idle) order.startOrder(deadline, order.getDeliveryDelay());
+						if (order.getStatus() == Order.Status.Cart) order.calculateCost();
+						if (order.getStatus() == Order.Status.Checkout) order.finalizeOrder();
+					}
+					// Target: Placed
+					else if (targetStatus.equalsIgnoreCase("placed")) {
+						if (order.getStatus() == Order.Status.Idle) order.startOrder(deadline, order.getDeliveryDelay());
+						if (order.getStatus() == Order.Status.Cart) order.calculateCost();
+						if (order.getStatus() == Order.Status.Checkout) order.finalizeOrder();
+						if (order.getStatus() == Order.Status.Pending) {
+							double amountToPay = order.getTotalCost() / 100.0; // Assume exact payment
+							order.payOrder(amountToPay, 0); // Assume 0 points
+						}
+					}
+					// Target: Delivered
+					else if (targetStatus.equalsIgnoreCase("delivered")) {
+						if (order.getStatus() == Order.Status.Idle) order.startOrder(deadline, order.getDeliveryDelay());
+						if (order.getStatus() == Order.Status.Cart) order.calculateCost();
+						if (order.getStatus() == Order.Status.Checkout) order.finalizeOrder();
+						if (order.getStatus() == Order.Status.Pending) {
+							double amountToPay = order.getTotalCost() / 100.0;
+							order.payOrder(amountToPay, 0);
+						}
+						if (order.getStatus() == Order.Status.OrderPlaced) {
+							Employee assignee = findFirstEmployee(system);
+							if (assignee != null) order.assignEmployee(assignee);
+						}
+						if (order.getStatus() == Order.Status.Assembling) order.finishAssembly();
+						if (order.getStatus() == Order.Status.ReadyForDelivery) order.completeDelivery();
+					}
+					// Add other target states like 'cancelled' if needed for setup
+
+				} catch (RuntimeException e) {
+					// Log unexpected errors during setup for debugging
+					System.err.println("EXCEPTION during state setup for Order ID '" + orderId + "' to '" + targetStatus + "': " + e.getMessage());
+					e.printStackTrace(); // Helps pinpoint the issue
+				}}
 		}
+	}
+	private Employee findFirstEmployee(GroceryManagementSystem system) {
+		return system.hasEmployees() ? system.getEmployee(0) : null;
 	}
 
 
@@ -212,7 +266,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 		try {
 			Integer orderNumber = orderIdMap.get(orderId);
 			Order CureentOrder = findOrderByOrderNumberHelper(orderNumber);
-			System.out.println(CureentOrder.getStatusFullName());
+			System.out.println(CureentOrder.getStatus());
 			OrderController.addItemToOrder(orderNumber, item); // Call OrderController
 			error = null;
 		} catch (GroceryStoreException e) {

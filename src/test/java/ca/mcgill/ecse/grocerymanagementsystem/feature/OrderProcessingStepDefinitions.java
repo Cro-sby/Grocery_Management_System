@@ -45,16 +45,18 @@ public class OrderProcessingStepDefinitions extends StepDefinitions {
 	// **Helper function to translate feature state names to model state names**
 	private String translateFeatureStateToModelState(String featureState) {
 		switch (featureState) {
-			case "Cart":
+			case "Cart","Checkout":
 				return "under construction";
-			case "Pending":
+            case "Pending":
 				return "pending";
 			case "OrderPlaced":
 				return "placed";
 			case "Delivered":
 				return "delivered";
+			case "Cancelled":
+				return "cancelled";
 			default:
-				return "thingy failed";
+				return "weird ting";
 		}
 	}
 
@@ -139,9 +141,8 @@ public class OrderProcessingStepDefinitions extends StepDefinitions {
 		assertNotNull(lastAffectedOrderNumber, "No order number was affected in the previous step.");
 		Order order = findOrderByOrderNumberHelper(lastAffectedOrderNumber);
 		assertNotNull(order, "Order with number " + lastAffectedOrderNumber + " not found after action.");
-		System.out.println(order.getStatusOrderCancellable().toString());
-		assertEquals(expectedState.toLowerCase(), translateFeatureStateToModelState(order.getStatusOrderCancellable().toString()), "Order state mismatch.");
-
+		System.out.println(order.getStatus().toString());
+		assertEquals(expectedState.toLowerCase(), translateFeatureStateToModelState(order.getStatus().toString()), "Order state mismatch.");
 	}
 
 	@Then("the order's placer shall be {string}")
@@ -190,6 +191,7 @@ public class OrderProcessingStepDefinitions extends StepDefinitions {
 		assertNotNull(lastAffectedOrderNumber, "No order number was affected in the previous step.");
 		Order order = findOrderByOrderNumberHelper(lastAffectedOrderNumber);
 		assertNotNull(order, "Order with number " + lastAffectedOrderNumber + " not found after action.");
-		assertEquals(expectedCost, order.getPricePaid());
+
+		assertEquals(expectedCost, order.getTotalCost());
 	}
 }

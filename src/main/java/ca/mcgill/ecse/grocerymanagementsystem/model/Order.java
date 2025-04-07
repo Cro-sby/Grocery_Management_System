@@ -5,8 +5,8 @@ package ca.mcgill.ecse.grocerymanagementsystem.model;
 import java.sql.Date;
 import java.util.*;
 
-// line 3 "../../../../../../Untitled2.ump"
-// line 343 "../../../../../../Untitled2.ump"
+// line 3 "../../../../../../Untitled.ump"
+// line 341 "../../../../../../Untitled.ump"
 // line 41 "../../../../../../model.ump"
 // line 124 "../../../../../../model.ump"
 public class Order
@@ -39,12 +39,8 @@ public class Order
   private int orderNumber;
 
   //Order State Machines
-  public enum Status { Idle, Cart, Checkout, OrderCancellable, InPreparation, Delivered }
-  public enum StatusOrderCancellable { Null, Pending, OrderPlaced }
-  public enum StatusInPreparation { Null, Assembling, ReadyForDelivery }
+  public enum Status { Idle, Cart, Checkout, Pending, OrderPlaced, Assembling, ReadyForDelivery, Delivered, Cancelled }
   private Status status;
-  private StatusOrderCancellable statusOrderCancellable;
-  private StatusInPreparation statusInPreparation;
 
   //Order Associations
   private GroceryManagementSystem groceryManagementSystem;
@@ -79,8 +75,6 @@ public class Order
     {
       throw new RuntimeException("Unable to create ordersPlaced due to orderPlacer. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
-    setStatusOrderCancellable(StatusOrderCancellable.Null);
-    setStatusInPreparation(StatusInPreparation.Null);
     setStatus(Status.Idle);
   }
 
@@ -176,24 +170,12 @@ public class Order
   public String getStatusFullName()
   {
     String answer = status.toString();
-    if (statusOrderCancellable != StatusOrderCancellable.Null) { answer += "." + statusOrderCancellable.toString(); }
-    if (statusInPreparation != StatusInPreparation.Null) { answer += "." + statusInPreparation.toString(); }
     return answer;
   }
 
   public Status getStatus()
   {
     return status;
-  }
-
-  public StatusOrderCancellable getStatusOrderCancellable()
-  {
-    return statusOrderCancellable;
-  }
-
-  public StatusInPreparation getStatusInPreparation()
-  {
-    return statusInPreparation;
   }
 
   public boolean startOrder(DeliveryDeadline chosenDeadline,int delayDays)
@@ -204,7 +186,7 @@ public class Order
     switch (aStatus)
     {
       case Idle:
-        // line 13 "../../../../../../Untitled2.ump"
+        // line 13 "../../../../../../Untitled.ump"
         setDeadline(chosenDeadline); setDeliveryDelay(delayDays);
         setStatus(Status.Cart);
         wasEventProcessed = true;
@@ -226,7 +208,7 @@ public class Order
       case Cart:
         if (isItemInOrder(item))
         {
-          // line 19 "../../../../../../Untitled2.ump"
+          // line 19 "../../../../../../Untitled.ump"
           removeOrderItem(findOrderItem(item));
           setStatus(Status.Cart);
           wasEventProcessed = true;
@@ -250,7 +232,7 @@ public class Order
       case Cart:
         if (!(isItemInOrder(item))&&isValidQuantity(item,quantity)&&isInventorySufficient(item,quantity)&&isCartNotFull())
         {
-          // line 23 "../../../../../../Untitled2.ump"
+          // line 23 "../../../../../../Untitled.ump"
           addOrderItem(quantity, getGroceryManagementSystem(), item);
           setStatus(Status.Cart);
           wasEventProcessed = true;
@@ -274,7 +256,7 @@ public class Order
       case Cart:
         if (isItemInOrder(item)&&isValidQuantityForChange(item,newQuantity))
         {
-          // line 27 "../../../../../../Untitled2.ump"
+          // line 27 "../../../../../../Untitled.ump"
           doUpdateItemQuantityAction(item, newQuantity);
           setStatus(Status.Cart);
           wasEventProcessed = true;
@@ -296,7 +278,7 @@ public class Order
     switch (aStatus)
     {
       case Cart:
-        // line 30 "../../../../../../Untitled2.ump"
+        // line 30 "../../../../../../Untitled.ump"
         calculateOrderCost();
         setStatus(Status.Checkout);
         wasEventProcessed = true;
@@ -318,7 +300,7 @@ public class Order
       case Checkout:
         if (hasItems())
         {
-          setStatusOrderCancellable(StatusOrderCancellable.Pending);
+          setStatus(Status.Pending);
           wasEventProcessed = true;
           break;
         }
@@ -338,14 +320,21 @@ public class Order
     switch (aStatus)
     {
       case Checkout:
-        setStatus(Status.Cart);
+        // line 38 "../../../../../../Untitled.ump"
+        doCancelOrder();
+        setStatus(Status.Cancelled);
         wasEventProcessed = true;
         break;
-      case OrderCancellable:
-        exitStatus();
-        // line 45 "../../../../../../Untitled2.ump"
+      case Pending:
+        // line 52 "../../../../../../Untitled.ump"
         doCancelOrder();
-        setStatus(Status.Idle);
+        setStatus(Status.Cancelled);
+        wasEventProcessed = true;
+        break;
+      case OrderPlaced:
+        // line 61 "../../../../../../Untitled.ump"
+        doCancelOrder();
+        setStatus(Status.Cancelled);
         wasEventProcessed = true;
         break;
       default:
@@ -359,16 +348,15 @@ public class Order
   {
     boolean wasEventProcessed = false;
 
-    StatusOrderCancellable aStatusOrderCancellable = statusOrderCancellable;
-    switch (aStatusOrderCancellable)
+    Status aStatus = status;
+    switch (aStatus)
     {
       case Pending:
         if (isPaymentValid(amount,points)&&isInventorySufficientForAllItems())
         {
-          exitStatusOrderCancellable();
-          // line 51 "../../../../../../Untitled2.ump"
+          // line 49 "../../../../../../Untitled.ump"
           doProcessPaymentAction(amount, points);
-          setStatusOrderCancellable(StatusOrderCancellable.OrderPlaced);
+          setStatus(Status.OrderPlaced);
           wasEventProcessed = true;
           break;
         }
@@ -384,12 +372,11 @@ public class Order
   {
     boolean wasEventProcessed = false;
 
-    StatusOrderCancellable aStatusOrderCancellable = statusOrderCancellable;
-    switch (aStatusOrderCancellable)
+    Status aStatus = status;
+    switch (aStatus)
     {
       case Pending:
-        exitStatusOrderCancellable();
-        setStatusOrderCancellable(StatusOrderCancellable.Pending);
+        setStatus(Status.Pending);
         wasEventProcessed = true;
         break;
       default:
@@ -403,16 +390,15 @@ public class Order
   {
     boolean wasEventProcessed = false;
 
-    StatusOrderCancellable aStatusOrderCancellable = statusOrderCancellable;
-    switch (aStatusOrderCancellable)
+    Status aStatus = status;
+    switch (aStatus)
     {
       case OrderPlaced:
         if (!(isEmployeeAssigned()))
         {
-          exitStatus();
-          // line 60 "../../../../../../Untitled2.ump"
+          // line 59 "../../../../../../Untitled.ump"
           setOrderAssignee(employee);
-          setStatus(Status.InPreparation);
+          setStatus(Status.Assembling);
           wasEventProcessed = true;
           break;
         }
@@ -428,14 +414,13 @@ public class Order
   {
     boolean wasEventProcessed = false;
 
-    StatusInPreparation aStatusInPreparation = statusInPreparation;
-    switch (aStatusInPreparation)
+    Status aStatus = status;
+    switch (aStatus)
     {
       case Assembling:
         if (canAssemble())
         {
-          exitStatusInPreparation();
-          setStatusInPreparation(StatusInPreparation.ReadyForDelivery);
+          setStatus(Status.ReadyForDelivery);
           wasEventProcessed = true;
           break;
         }
@@ -451,13 +436,12 @@ public class Order
   {
     boolean wasEventProcessed = false;
 
-    StatusInPreparation aStatusInPreparation = statusInPreparation;
-    switch (aStatusInPreparation)
+    Status aStatus = status;
+    switch (aStatus)
     {
       case ReadyForDelivery:
         if (isDeliveryDateValid())
         {
-          exitStatus();
           setStatus(Status.Delivered);
           wasEventProcessed = true;
           break;
@@ -470,71 +454,9 @@ public class Order
     return wasEventProcessed;
   }
 
-  private void exitStatus()
-  {
-    switch(status)
-    {
-      case OrderCancellable:
-        exitStatusOrderCancellable();
-        break;
-      case InPreparation:
-        exitStatusInPreparation();
-        break;
-    }
-  }
-
   private void setStatus(Status aStatus)
   {
     status = aStatus;
-
-    // entry actions and do activities
-    switch(status)
-    {
-      case OrderCancellable:
-        if (statusOrderCancellable == StatusOrderCancellable.Null) { setStatusOrderCancellable(StatusOrderCancellable.Pending); }
-        break;
-      case InPreparation:
-        if (statusInPreparation == StatusInPreparation.Null) { setStatusInPreparation(StatusInPreparation.Assembling); }
-        break;
-    }
-  }
-
-  private void exitStatusOrderCancellable()
-  {
-    switch(statusOrderCancellable)
-    {
-      case Pending:
-        setStatusOrderCancellable(StatusOrderCancellable.Null);
-        break;
-      case OrderPlaced:
-        setStatusOrderCancellable(StatusOrderCancellable.Null);
-        break;
-    }
-  }
-
-  private void setStatusOrderCancellable(StatusOrderCancellable aStatusOrderCancellable)
-  {
-    statusOrderCancellable = aStatusOrderCancellable;
-    if (status != Status.OrderCancellable && aStatusOrderCancellable != StatusOrderCancellable.Null) { setStatus(Status.OrderCancellable); }
-  }
-
-  private void exitStatusInPreparation()
-  {
-    switch(statusInPreparation)
-    {
-      case Assembling:
-        setStatusInPreparation(StatusInPreparation.Null);
-        break;
-      case ReadyForDelivery:
-        setStatusInPreparation(StatusInPreparation.Null);
-        break;
-    }
-  }
-
-  private void setStatusInPreparation(StatusInPreparation aStatusInPreparation)
-  {
-    statusInPreparation = aStatusInPreparation;
-    if (status != Status.InPreparation && aStatusInPreparation != StatusInPreparation.Null) { setStatus(Status.InPreparation); }
   }
   /* Code from template association_GetOne */
   public GroceryManagementSystem getGroceryManagementSystem()
@@ -747,41 +669,41 @@ public class Order
    * ========== GUARD METHODS ==========
    * Implementations use generated model methods where possible
    */
-  // line 94 "../../../../../../Untitled2.ump"
+  // line 92 "../../../../../../Untitled.ump"
   public boolean isItemInOrder(Item item){
     return findOrderItem(item) != null;
   }
 
-  // line 98 "../../../../../../Untitled2.ump"
+  // line 96 "../../../../../../Untitled.ump"
   public boolean isValidQuantity(Item item, int quantity){
     return quantity > 0 && quantity <= 10;
   }
 
-  // line 102 "../../../../../../Untitled2.ump"
+  // line 100 "../../../../../../Untitled.ump"
   public boolean isValidQuantityForChange(Item item, int quantity){
     return quantity >= 0 && quantity <= 10;  // Allows 0 for removal
   }
 
-  // line 107 "../../../../../../Untitled2.ump"
+  // line 105 "../../../../../../Untitled.ump"
   public boolean isInventorySufficient(Item item, int requestedQuantity){
     if (item == null) return false;
     // Uses generated Item.getQuantityInInventory()
     return item.getQuantityInInventory() >= requestedQuantity;
   }
 
-  // line 114 "../../../../../../Untitled2.ump"
+  // line 112 "../../../../../../Untitled.ump"
   public boolean isCartNotFull(){
     // Uses generated Order.numberOfOrderItems()
     return numberOfOrderItems() < 50;
   }
 
-  // line 119 "../../../../../../Untitled2.ump"
+  // line 117 "../../../../../../Untitled.ump"
   public boolean hasItems(){
     // Uses generated Order.hasOrderItems()
     return hasOrderItems();
   }
 
-  // line 125 "../../../../../../Untitled2.ump"
+  // line 123 "../../../../../../Untitled.ump"
   public boolean isPaymentValid(double amount, int points){
     // Uses generated Order.canSetTotalCost and Order.getTotalCost()
     boolean costIsSet = !canSetTotalCost;
@@ -796,13 +718,13 @@ public class Order
     }
   }
 
-  // line 141 "../../../../../../Untitled2.ump"
+  // line 139 "../../../../../../Untitled.ump"
   public boolean isEmployeeAssigned(){
     // Uses generated Order.hasOrderAssignee()
     return hasOrderAssignee();
   }
 
-  // line 147 "../../../../../../Untitled2.ump"
+  // line 145 "../../../../../../Untitled.ump"
   public boolean canAssemble(){
     if (!containsPerishableItems()) {
       return true;
@@ -810,7 +732,7 @@ public class Order
     return isDeliveryDateValid();
   }
 
-  // line 156 "../../../../../../Untitled2.ump"
+  // line 154 "../../../../../../Untitled.ump"
   public boolean isDeliveryDateValid(){
     java.sql.Date deliveryDate = calculateTargetDeliveryDate();
     if (deliveryDate == null) return false;
@@ -823,7 +745,7 @@ public class Order
   /**
    * Uses the deliveryDelay attribute defined in this file
    */
-  // line 167 "../../../../../../Untitled2.ump"
+  // line 165 "../../../../../../Untitled.ump"
   public java.sql.Date calculateTargetDeliveryDate(){
     // Uses generated Order.getDatePlaced(), Order.getDeadline()
     java.sql.Date placed = getDatePlaced();
@@ -845,7 +767,7 @@ public class Order
     return java.sql.Date.valueOf(targetLocalDate);
   }
 
-  // line 190 "../../../../../../Untitled2.ump"
+  // line 188 "../../../../../../Untitled.ump"
   public boolean containsPerishableItems(){
     // Uses generated Order.getOrderItems(), OrderItem.getItem(), Item.getIsPerishable()
     for (OrderItem orderItem : getOrderItems()) {
@@ -856,7 +778,7 @@ public class Order
     return false;
   }
 
-  // line 202 "../../../../../../Untitled2.ump"
+  // line 200 "../../../../../../Untitled.ump"
   public boolean isInventorySufficientForAllItems(){
     // Uses generated Order.getOrderItems(), OrderItem.getItem(), Item.getQuantityInInventory(), OrderItem.getQuantity()
     for (OrderItem oi : getOrderItems()) {
@@ -872,7 +794,7 @@ public class Order
    * ========== ACTION METHODS ==========
    * Necessary helpers with logic implemented using model methods
    */
-  // line 217 "../../../../../../Untitled2.ump"
+  // line 215 "../../../../../../Untitled.ump"
   public void doUpdateItemQuantityAction(Item item, int newQuantity){
     OrderItem orderItemToUpdate = findOrderItem(item);
     if (orderItemToUpdate != null) {
@@ -890,7 +812,7 @@ public class Order
   /**
    * Uses the deliveryDelay attribute defined in this file
    */
-  // line 233 "../../../../../../Untitled2.ump"
+  // line 231 "../../../../../../Untitled.ump"
   public void calculateOrderCost(){
     double totalCostCents = 0;
     // Uses generated Order.getOrderItems(), OrderItem.getItem(), OrderItem.getQuantity(), Item.getPrice()
@@ -912,7 +834,7 @@ public class Order
     setTotalCost((int)Math.round(totalCostCents));
   }
 
-  // line 256 "../../../../../../Untitled2.ump"
+  // line 254 "../../../../../../Untitled.ump"
   public void doProcessPaymentAction(double amount, int points){
     // Uses generated Order.getOrderPlacer()
     Customer customer = getOrderPlacer();
@@ -949,7 +871,7 @@ public class Order
     setDatePlaced(new java.sql.Date(System.currentTimeMillis()));
   }
 
-  // line 294 "../../../../../../Untitled2.ump"
+  // line 292 "../../../../../../Untitled.ump"
   public void updateInventory(){
     // Uses generated Order.getOrderItems(), OrderItem.getItem(), OrderItem.getQuantity(), Item.setQuantityInInventory(), Item.getQuantityInInventory()
     for (OrderItem orderItem : getOrderItems()) {
@@ -959,7 +881,7 @@ public class Order
     }
   }
 
-  // line 305 "../../../../../../Untitled2.ump"
+  // line 303 "../../../../../../Untitled.ump"
   public void restoreInventory(){
     // Uses generated Order.getOrderItems(), OrderItem.getItem(), OrderItem.getQuantity(), Item.setQuantityInInventory(), Item.getQuantityInInventory()
     for (OrderItem orderItem : getOrderItems()) {
@@ -969,7 +891,7 @@ public class Order
     }
   }
 
-  // line 316 "../../../../../../Untitled2.ump"
+  // line 314 "../../../../../../Untitled.ump"
   public void doCancelOrder(){
     // Uses generated Order.getDatePlaced()
     if (getDatePlaced() != null) {
@@ -981,7 +903,7 @@ public class Order
   /**
    * Helper method kept as it's used by multiple guards/actions
    */
-  // line 326 "../../../../../../Untitled2.ump"
+  // line 324 "../../../../../../Untitled.ump"
   public OrderItem findOrderItem(Item item){
     if (item == null) return null;
     // Uses generated Order.getOrderItems(), OrderItem.getItem()
