@@ -6,38 +6,29 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryManagementSystemController;
 import ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryStoreException;
-import ca.mcgill.ecse.grocerymanagementsystem.controller.OrderController;
-
-import ca.mcgill.ecse.grocerymanagementsystem.model.Customer;
-import ca.mcgill.ecse.grocerymanagementsystem.model.GroceryManagementSystem;
-import ca.mcgill.ecse.grocerymanagementsystem.model.Item;
-import ca.mcgill.ecse.grocerymanagementsystem.model.Order;
-import ca.mcgill.ecse.grocerymanagementsystem.model.Order.DeliveryDeadline;
-import ca.mcgill.ecse.grocerymanagementsystem.model.OrderItem;
+import ca.mcgill.ecse.grocerymanagementsystem.controller.OrderController; // Import OrderController
+import ca.mcgill.ecse.grocerymanagementsystem.controller.OrderProcessingController;
 import ca.mcgill.ecse.grocerymanagementsystem.model.*;
-
+import ca.mcgill.ecse.grocerymanagementsystem.model.Order.DeliveryDeadline;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate; // *** ADD THIS IMPORT ***
-
+import java.time.LocalDate;
 import java.util.*;
 
 public class OrderStepDefinitions extends StepDefinitions {
 
-	 // Map string IDs to order numbers
+	// Map string IDs to order numbers
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); // Date format
 	private static Map<Integer, List<Map<String, String>>> itemsForSetup = new HashMap<>();
 	public static Map<String, Integer> orderIdMap = new HashMap<>();
 	public static Map<String, String> orderStatusMap = new HashMap<>();
 	public static Map<String, DeliveryDeadline> orderDeadlineMap = new HashMap<>();
-
-
-
 
 	@Before
 	public void before() {
@@ -53,6 +44,8 @@ public class OrderStepDefinitions extends StepDefinitions {
 			String datePlacedString = orderData.get("datePlaced");
 			String deadlineString = orderData.get("deadline");
 			String customerUsername = orderData.get("customer");
+			String assignee = orderData.get("assignee");
+			String deliverydelay = orderData.get("deliveryDelay");
 			String orderStatus = orderData.get("state");
 
 			// --- REPLACEMENT CODE BLOCK ---
@@ -97,24 +90,13 @@ public class OrderStepDefinitions extends StepDefinitions {
 				throw new IllegalArgumentException("Customer does not exist: " + customerUsername);
 			}
 			Order order = new Order(datePlaced, deadline, system, customer);
+			if (!Objects.equals(assignee, "NULL")){
+				order.setOrderAssignee(findEmployeeByUsername(assignee));
+			}
 			system.addOrder(order);
 			orderIdMap.put(id, order.getOrderNumber());
 			orderStatusMap.put(id,orderStatus);
 			orderDeadlineMap.put(id, deadline);
-
-
-
-
-			if (Objects.equals(orderStatus, "under construction")){
-				order.startOrder(deadline, order.getDeliveryDelay());
-			}
-			if (Objects.equals(orderStatus, "pending")){
-				order.startOrder(deadline, order.getDeliveryDelay());
-
-				order.calculateCost();
-				System.out.println(order.hasItems());
-				order.finalizeOrder();
-			}
 
 		}
 	}
@@ -126,6 +108,22 @@ public class OrderStepDefinitions extends StepDefinitions {
 			}
 		}
 		return null;
+	}
+
+	private static Employee findEmployeeByUsername(String username) throws GroceryStoreException {
+		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
+		User user = User.getWithUsername(username);
+		if (user == null) {
+			throw new GroceryStoreException("there is no user with username \"" + username + "\"");
+		}
+		// Check if the user has an Employee role
+		for (UserRole role : user.getRoles()) {
+			if (role instanceof Employee) {
+				return (Employee) role;
+			}
+		}
+		// If loop finishes without finding an Employee role
+		throw new GroceryStoreException("\"" + username + "\" is not an employee");
 	}
 
 	@Given("the following items are part of orders")
@@ -167,44 +165,146 @@ public class OrderStepDefinitions extends StepDefinitions {
 					// We rely on the model's event methods to handle guards.
 					// If a transition fails (returns false), subsequent ones won't be attempted
 					// if the state didn't change as expected.
-
-					// Target: Cart ("under construction")
-					if (targetStatus.equalsIgnoreCase("under construction")) {
-						if (order.getStatus() == Order.Status.Idle) {
+					System.out.print(targetStatus);
+					if (targetStatus.equalsIgnoreCase("pending")){
+						if (order.getStatus() == Order.Status.under_construction){
 							order.startOrder(deadline, order.getDeliveryDelay());
+							order.checkout();
 						}
 					}
-					// Target: Pending
-					else if (targetStatus.equalsIgnoreCase("pending")) {
-						if (order.getStatus() == Order.Status.Idle) order.startOrder(deadline, order.getDeliveryDelay());
-						if (order.getStatus() == Order.Status.Cart) order.calculateCost();
-						if (order.getStatus() == Order.Status.Checkout) order.finalizeOrder();
-					}
-					// Target: Placed
-					else if (targetStatus.equalsIgnoreCase("placed")) {
-						if (order.getStatus() == Order.Status.Idle) order.startOrder(deadline, order.getDeliveryDelay());
-						if (order.getStatus() == Order.Status.Cart) order.calculateCost();
-						if (order.getStatus() == Order.Status.Checkout) order.finalizeOrder();
-						if (order.getStatus() == Order.Status.Pending) {
-							double amountToPay = order.getTotalCost() / 100.0; // Assume exact payment
-							order.payOrder(amountToPay, 0); // Assume 0 points
+
+					if (targetStatus.equalsIgnoreCase("placed")){
+						if (order.getStatus() == Order.Status.under_construction){
+							order.startOrder(deadline, order.getDeliveryDelay());
+							order.checkout();
+							System.out.print(order.getStatusFullName());
 						}
+						int num_saver = order.getOrderPlacer().getNumberOfPoints();
+						List<OrderItem> oi = order.getOrderItems();
+						List<Integer> oq = new ArrayList<>();
+						for (OrderItem orderItem : oi) {
+							Item titem = orderItem.getItem();
+							oq.add(titem.getQuantityInInventory());
+						}
+
+						if (order.getStatus() == Order.Status.pending) order.payOrder((order.getTotalCost() / 100.0),0);
+						order.getOrderPlacer().setNumberOfPoints(num_saver);
+
+						int counter = 0;
+						List<OrderItem> neo_oi = order.getOrderItems();
+						System.out.print(neo_oi.get(0));
+						for (OrderItem orderItem : neo_oi) {
+							Item neoitem = orderItem.getItem();
+							neoitem.setQuantityInInventory(oq.get(counter));
+							counter += 1;
+						}
+					}
+					else if (targetStatus.equalsIgnoreCase("in preparation")) {
+						if (order.getStatus() == Order.Status.under_construction){
+							order.startOrder(deadline, order.getDeliveryDelay());
+							order.checkout();
+
+						}
+
+						int num_saver = order.getOrderPlacer().getNumberOfPoints();
+						List<OrderItem> oi = order.getOrderItems();
+						List<Integer> oq = new ArrayList<>();
+						for (OrderItem orderItem : oi) {
+							Item titem = orderItem.getItem();
+							oq.add(titem.getQuantityInInventory());
+						}
+
+						if (order.getStatus() == Order.Status.pending) order.payOrder((order.getTotalCost() / 100.0),0);
+						order.getOrderPlacer().setNumberOfPoints(num_saver);
+
+						int counter = 0;
+						List<OrderItem> neo_oi = order.getOrderItems();
+						System.out.print(neo_oi.get(0));
+						for (OrderItem orderItem : neo_oi) {
+							Item neoitem = orderItem.getItem();
+							neoitem.setQuantityInInventory(oq.get(counter));
+							counter += 1;
+						}
+
+						Employee employee = order.getOrderAssignee();
+						order.setOrderAssignee(null);
+						System.out.print(employee);
+						if (order.getStatus() == Order.Status.placed) order.assignEmployee(employee);
+						order.setOrderAssignee(employee);
 					}
 					// Target: Delivered
+					else if (targetStatus.equalsIgnoreCase("ready for delivery")) {
+						if (order.getStatus() == Order.Status.under_construction){
+							order.startOrder(deadline, order.getDeliveryDelay());
+							order.checkout();
+						}
+						int num_saver = order.getOrderPlacer().getNumberOfPoints();
+						List<OrderItem> oi = order.getOrderItems();
+						List<Integer> oq = new ArrayList<>();
+						for (OrderItem orderItem : oi) {
+							Item titem = orderItem.getItem();
+							oq.add(titem.getQuantityInInventory());
+						}
+
+						if (order.getStatus() == Order.Status.pending) order.payOrder((order.getTotalCost() / 100.0),0);
+						order.getOrderPlacer().setNumberOfPoints(num_saver);
+
+						int counter = 0;
+						List<OrderItem> neo_oi = order.getOrderItems();
+						for (OrderItem orderItem : neo_oi) {
+							Item neoitem = orderItem.getItem();
+							neoitem.setQuantityInInventory(oq.get(counter));
+							counter += 1;
+						}
+						Employee employee = order.getOrderAssignee();
+						order.setOrderAssignee(null);
+						if (order.getStatus() == Order.Status.placed) order.assignEmployee(employee);
+						order.setOrderAssignee(employee);
+						order.setDeliveryDelay(-2);
+						System.out.print(order.calculateTargetDeliveryDate());
+						if (order.getStatus() == Order.Status.in_preparation) order.finishAssembly();
+					}
 					else if (targetStatus.equalsIgnoreCase("delivered")) {
-						if (order.getStatus() == Order.Status.Idle) order.startOrder(deadline, order.getDeliveryDelay());
-						if (order.getStatus() == Order.Status.Cart) order.calculateCost();
-						if (order.getStatus() == Order.Status.Checkout) order.finalizeOrder();
-						if (order.getStatus() == Order.Status.Pending) {
-							double amountToPay = order.getTotalCost() / 100.0;
-							order.payOrder(amountToPay, 0);
+						if (order.getStatus() == Order.Status.under_construction){
+							order.startOrder(deadline, order.getDeliveryDelay());
+							order.checkout();
 						}
-						if (order.getStatus() == Order.Status.OrderPlaced) {
-							Employee assignee = findFirstEmployee(system);
-							if (assignee != null) order.assignEmployee(assignee);
+						int num_saver = order.getOrderPlacer().getNumberOfPoints();
+						List<OrderItem> oi = order.getOrderItems();
+						List<Integer> oq = new ArrayList<>();
+						for (OrderItem orderItem : oi) {
+							Item titem = orderItem.getItem();
+							oq.add(titem.getQuantityInInventory());
 						}
-						if (order.getStatus() == Order.Status.Assembling) order.finishAssembly();
-						if (order.getStatus() == Order.Status.ReadyForDelivery) order.completeDelivery();
+
+						if (order.getStatus() == Order.Status.pending) order.payOrder((order.getTotalCost() / 100.0),0);
+						order.getOrderPlacer().setNumberOfPoints(num_saver);
+
+						int counter = 0;
+						List<OrderItem> neo_oi = order.getOrderItems();
+						for (OrderItem orderItem : neo_oi) {
+							Item neoitem = orderItem.getItem();
+							neoitem.setQuantityInInventory(oq.get(counter));
+							counter += 1;
+						}
+						Employee employee = order.getOrderAssignee();
+						order.setOrderAssignee(null);
+						if (order.getStatus() == Order.Status.placed) order.assignEmployee(employee);
+						order.setOrderAssignee(employee);
+						System.out.print(order.calculateTargetDeliveryDate());
+						order.setDeliveryDelay(-2);
+						if (order.getStatus() == Order.Status.in_preparation) order.finishAssembly();
+						if (order.getStatus() == Order.Status.ready_for_delivery) order.completeDelivery();
+					}
+					else if (targetStatus.equalsIgnoreCase("cancelled")) {
+						if (order.getStatus() == Order.Status.under_construction){
+							order.startOrder(deadline, order.getDeliveryDelay());
+							order.checkout();
+							int num_saver = order.getOrderPlacer().getNumberOfPoints();
+							order.payOrder((order.getTotalCost() / 100.0),0);
+							order.getOrderPlacer().setNumberOfPoints(num_saver);
+							order.cancel();
+						}
 					}
 					// Add other target states like 'cancelled' if needed for setup
 
@@ -265,8 +365,6 @@ public class OrderStepDefinitions extends StepDefinitions {
 	public void the_user_attempts_to_add_item_to_the_order_with_id(String item, String orderId) {
 		try {
 			Integer orderNumber = orderIdMap.get(orderId);
-			Order CureentOrder = findOrderByOrderNumberHelper(orderNumber);
-			System.out.println(CureentOrder.getStatus());
 			OrderController.addItemToOrder(orderNumber, item); // Call OrderController
 			error = null;
 		} catch (GroceryStoreException e) {

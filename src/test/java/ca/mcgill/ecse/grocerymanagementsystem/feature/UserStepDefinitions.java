@@ -68,6 +68,7 @@ public class UserStepDefinitions extends StepDefinitions {
 					example.get("address"),
 					Integer.parseInt(example.get("points")),
 					this.getSystem());
+			System.out.println(Integer.parseInt(example.get("points")));
 		}
 	}
 

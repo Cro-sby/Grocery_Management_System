@@ -1,3 +1,5 @@
+//%% NEW FILE Order BEGINS HERE %%
+
 /*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
@@ -6,9 +8,9 @@ import java.sql.Date;
 import java.util.*;
 
 // line 3 "../../../../../../Untitled.ump"
-// line 341 "../../../../../../Untitled.ump"
-// line 41 "../../../../../../model.ump"
-// line 124 "../../../../../../model.ump"
+// line 354 "../../../../../../Untitled.ump"
+// line 42 "../../../../../../model.ump"
+// line 125 "../../../../../../model.ump"
 public class Order
 {
 
@@ -39,7 +41,7 @@ public class Order
   private int orderNumber;
 
   //Order State Machines
-  public enum Status { Idle, Cart, Checkout, Pending, OrderPlaced, Assembling, ReadyForDelivery, Delivered, Cancelled }
+  public enum Status { under_construction, pending, placed, in_preparation, ready_for_delivery, delivered, cancelled }
   private Status status;
 
   //Order Associations
@@ -75,7 +77,7 @@ public class Order
     {
       throw new RuntimeException("Unable to create ordersPlaced due to orderPlacer. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
-    setStatus(Status.Idle);
+    setStatus(Status.under_construction);
   }
 
   //------------------------
@@ -178,18 +180,22 @@ public class Order
     return status;
   }
 
-  public boolean startOrder(DeliveryDeadline chosenDeadline,int delayDays)
+  public boolean removeItem(Item item)
   {
     boolean wasEventProcessed = false;
 
     Status aStatus = status;
     switch (aStatus)
     {
-      case Idle:
-        // line 13 "../../../../../../Untitled.ump"
-        setDeadline(chosenDeadline); setDeliveryDelay(delayDays);
-        setStatus(Status.Cart);
-        wasEventProcessed = true;
+      case under_construction:
+        if (isItemInOrder(item))
+        {
+          // line 13 "../../../../../../Untitled.ump"
+          removeOrderItem(findOrderItem(item));
+          setStatus(Status.under_construction);
+          wasEventProcessed = true;
+          break;
+        }
         break;
       default:
         // Other states do respond to this event
@@ -198,22 +204,19 @@ public class Order
     return wasEventProcessed;
   }
 
-  public boolean removeItem(Item item)
+  public boolean startOrder(DeliveryDeadline chosenDeadline,int delayDays)
   {
     boolean wasEventProcessed = false;
 
     Status aStatus = status;
     switch (aStatus)
     {
-      case Cart:
-        if (isItemInOrder(item))
-        {
-          // line 19 "../../../../../../Untitled.ump"
-          removeOrderItem(findOrderItem(item));
-          setStatus(Status.Cart);
-          wasEventProcessed = true;
-          break;
-        }
+      case under_construction:
+        // line 18 "../../../../../../Untitled.ump"
+        setDeadline(chosenDeadline);
+        setDeliveryDelay(delayDays);
+        setStatus(Status.under_construction);
+        wasEventProcessed = true;
         break;
       default:
         // Other states do respond to this event
@@ -229,12 +232,12 @@ public class Order
     Status aStatus = status;
     switch (aStatus)
     {
-      case Cart:
+      case under_construction:
         if (!(isItemInOrder(item))&&isValidQuantity(item,quantity)&&isInventorySufficient(item,quantity)&&isCartNotFull())
         {
-          // line 23 "../../../../../../Untitled.ump"
+          // line 26 "../../../../../../Untitled.ump"
           addOrderItem(quantity, getGroceryManagementSystem(), item);
-          setStatus(Status.Cart);
+          setStatus(Status.under_construction);
           wasEventProcessed = true;
           break;
         }
@@ -253,12 +256,12 @@ public class Order
     Status aStatus = status;
     switch (aStatus)
     {
-      case Cart:
+      case under_construction:
         if (isItemInOrder(item)&&isValidQuantityForChange(item,newQuantity))
         {
-          // line 27 "../../../../../../Untitled.ump"
+          // line 33 "../../../../../../Untitled.ump"
           doUpdateItemQuantityAction(item, newQuantity);
-          setStatus(Status.Cart);
+          setStatus(Status.under_construction);
           wasEventProcessed = true;
           break;
         }
@@ -270,72 +273,22 @@ public class Order
     return wasEventProcessed;
   }
 
-  public boolean calculateCost()
+  public boolean checkout()
   {
     boolean wasEventProcessed = false;
 
     Status aStatus = status;
     switch (aStatus)
     {
-      case Cart:
-        // line 30 "../../../../../../Untitled.ump"
-        calculateOrderCost();
-        setStatus(Status.Checkout);
-        wasEventProcessed = true;
-        break;
-      default:
-        // Other states do respond to this event
-    }
-
-    return wasEventProcessed;
-  }
-
-  public boolean finalizeOrder()
-  {
-    boolean wasEventProcessed = false;
-
-    Status aStatus = status;
-    switch (aStatus)
-    {
-      case Checkout:
+      case under_construction:
         if (hasItems())
         {
-          setStatus(Status.Pending);
+          // line 39 "../../../../../../Untitled.ump"
+          calculateOrderCost();
+          setStatus(Status.pending);
           wasEventProcessed = true;
           break;
         }
-        break;
-      default:
-        // Other states do respond to this event
-    }
-
-    return wasEventProcessed;
-  }
-
-  public boolean cancel()
-  {
-    boolean wasEventProcessed = false;
-
-    Status aStatus = status;
-    switch (aStatus)
-    {
-      case Checkout:
-        // line 38 "../../../../../../Untitled.ump"
-        doCancelOrder();
-        setStatus(Status.Cancelled);
-        wasEventProcessed = true;
-        break;
-      case Pending:
-        // line 52 "../../../../../../Untitled.ump"
-        doCancelOrder();
-        setStatus(Status.Cancelled);
-        wasEventProcessed = true;
-        break;
-      case OrderPlaced:
-        // line 61 "../../../../../../Untitled.ump"
-        doCancelOrder();
-        setStatus(Status.Cancelled);
-        wasEventProcessed = true;
         break;
       default:
         // Other states do respond to this event
@@ -351,12 +304,12 @@ public class Order
     Status aStatus = status;
     switch (aStatus)
     {
-      case Pending:
+      case pending:
         if (isPaymentValid(amount,points)&&isInventorySufficientForAllItems())
         {
-          // line 49 "../../../../../../Untitled.ump"
+          // line 51 "../../../../../../Untitled.ump"
           doProcessPaymentAction(amount, points);
-          setStatus(Status.OrderPlaced);
+          setStatus(Status.placed);
           wasEventProcessed = true;
           break;
         }
@@ -375,8 +328,34 @@ public class Order
     Status aStatus = status;
     switch (aStatus)
     {
-      case Pending:
-        setStatus(Status.Pending);
+      case pending:
+        setStatus(Status.pending);
+        wasEventProcessed = true;
+        break;
+      default:
+        // Other states do respond to this event
+    }
+
+    return wasEventProcessed;
+  }
+
+  public boolean cancel()
+  {
+    boolean wasEventProcessed = false;
+
+    Status aStatus = status;
+    switch (aStatus)
+    {
+      case pending:
+        // line 57 "../../../../../../Untitled.ump"
+        doCancelOrder();
+        setStatus(Status.cancelled);
+        wasEventProcessed = true;
+        break;
+      case placed:
+        // line 68 "../../../../../../Untitled.ump"
+        doCancelOrder();
+        setStatus(Status.cancelled);
         wasEventProcessed = true;
         break;
       default:
@@ -393,12 +372,12 @@ public class Order
     Status aStatus = status;
     switch (aStatus)
     {
-      case OrderPlaced:
+      case placed:
         if (!(isEmployeeAssigned()))
         {
-          // line 59 "../../../../../../Untitled.ump"
+          // line 65 "../../../../../../Untitled.ump"
           setOrderAssignee(employee);
-          setStatus(Status.Assembling);
+          setStatus(Status.in_preparation);
           wasEventProcessed = true;
           break;
         }
@@ -417,10 +396,10 @@ public class Order
     Status aStatus = status;
     switch (aStatus)
     {
-      case Assembling:
+      case in_preparation:
         if (canAssemble())
         {
-          setStatus(Status.ReadyForDelivery);
+          setStatus(Status.ready_for_delivery);
           wasEventProcessed = true;
           break;
         }
@@ -439,10 +418,10 @@ public class Order
     Status aStatus = status;
     switch (aStatus)
     {
-      case ReadyForDelivery:
+      case ready_for_delivery:
         if (isDeliveryDateValid())
         {
-          setStatus(Status.Delivered);
+          setStatus(Status.delivered);
           wasEventProcessed = true;
           break;
         }
@@ -669,42 +648,42 @@ public class Order
    * ========== GUARD METHODS ==========
    * Implementations use generated model methods where possible
    */
-  // line 92 "../../../../../../Untitled.ump"
-  public boolean isItemInOrder(Item item){
+  // line 100 "../../../../../../Untitled.ump"
+  private boolean isItemInOrder(Item item){
     return findOrderItem(item) != null;
   }
 
-  // line 96 "../../../../../../Untitled.ump"
-  public boolean isValidQuantity(Item item, int quantity){
+  // line 104 "../../../../../../Untitled.ump"
+  private boolean isValidQuantity(Item item, int quantity){
     return quantity > 0 && quantity <= 10;
   }
 
-  // line 100 "../../../../../../Untitled.ump"
-  public boolean isValidQuantityForChange(Item item, int quantity){
+  // line 108 "../../../../../../Untitled.ump"
+  private boolean isValidQuantityForChange(Item item, int quantity){
     return quantity >= 0 && quantity <= 10;  // Allows 0 for removal
   }
 
-  // line 105 "../../../../../../Untitled.ump"
-  public boolean isInventorySufficient(Item item, int requestedQuantity){
+  // line 113 "../../../../../../Untitled.ump"
+  private boolean isInventorySufficient(Item item, int requestedQuantity){
     if (item == null) return false;
     // Uses generated Item.getQuantityInInventory()
     return item.getQuantityInInventory() >= requestedQuantity;
   }
 
-  // line 112 "../../../../../../Untitled.ump"
-  public boolean isCartNotFull(){
+  // line 120 "../../../../../../Untitled.ump"
+  private boolean isCartNotFull(){
     // Uses generated Order.numberOfOrderItems()
     return numberOfOrderItems() < 50;
   }
 
-  // line 117 "../../../../../../Untitled.ump"
+  // line 125 "../../../../../../Untitled.ump"
   public boolean hasItems(){
     // Uses generated Order.hasOrderItems()
     return hasOrderItems();
   }
 
-  // line 123 "../../../../../../Untitled.ump"
-  public boolean isPaymentValid(double amount, int points){
+  // line 131 "../../../../../../Untitled.ump"
+  private boolean isPaymentValid(double amount, int points){
     // Uses generated Order.canSetTotalCost and Order.getTotalCost()
     boolean costIsSet = !canSetTotalCost;
 
@@ -713,27 +692,28 @@ public class Order
       double pointsValueDollars = points * 0.01;
       // Use tolerance for float comparison
       return amount + pointsValueDollars >= totalCostDollars - 0.001;
-    } else {
+    }
+    else {
       return false; // Cannot validate if cost not set
     }
   }
 
-  // line 139 "../../../../../../Untitled.ump"
-  public boolean isEmployeeAssigned(){
+  // line 148 "../../../../../../Untitled.ump"
+  private boolean isEmployeeAssigned(){
     // Uses generated Order.hasOrderAssignee()
     return hasOrderAssignee();
   }
 
-  // line 145 "../../../../../../Untitled.ump"
-  public boolean canAssemble(){
+  // line 154 "../../../../../../Untitled.ump"
+  private boolean canAssemble(){
     if (!containsPerishableItems()) {
       return true;
     }
     return isDeliveryDateValid();
   }
 
-  // line 154 "../../../../../../Untitled.ump"
-  public boolean isDeliveryDateValid(){
+  // line 163 "../../../../../../Untitled.ump"
+  private boolean isDeliveryDateValid(){
     java.sql.Date deliveryDate = calculateTargetDeliveryDate();
     if (deliveryDate == null) return false;
     java.time.LocalDate today = java.time.LocalDate.now();
@@ -745,7 +725,7 @@ public class Order
   /**
    * Uses the deliveryDelay attribute defined in this file
    */
-  // line 165 "../../../../../../Untitled.ump"
+  // line 174 "../../../../../../Untitled.ump"
   public java.sql.Date calculateTargetDeliveryDate(){
     // Uses generated Order.getDatePlaced(), Order.getDeadline()
     java.sql.Date placed = getDatePlaced();
@@ -759,16 +739,19 @@ public class Order
     java.time.LocalDate targetLocalDate = placedLocalDate.plusDays(delay); // Apply integer delay first
 
     switch (deadline) { // Apply enum delay
-      case InOneDay:  targetLocalDate = targetLocalDate.plusDays(1); break;
-      case InTwoDays: targetLocalDate = targetLocalDate.plusDays(2); break;
-      case InThreeDays: targetLocalDate = targetLocalDate.plusDays(3); break;
+      case InOneDay:  targetLocalDate = targetLocalDate.plusDays(1);
+        break;
+      case InTwoDays: targetLocalDate = targetLocalDate.plusDays(2);
+        break;
+      case InThreeDays: targetLocalDate = targetLocalDate.plusDays(3);
+        break;
       case SameDay: default: break;
     }
     return java.sql.Date.valueOf(targetLocalDate);
   }
 
-  // line 188 "../../../../../../Untitled.ump"
-  public boolean containsPerishableItems(){
+  // line 200 "../../../../../../Untitled.ump"
+  private boolean containsPerishableItems(){
     // Uses generated Order.getOrderItems(), OrderItem.getItem(), Item.getIsPerishable()
     for (OrderItem orderItem : getOrderItems()) {
       if (orderItem.getItem().getIsPerishable()) {
@@ -778,8 +761,8 @@ public class Order
     return false;
   }
 
-  // line 200 "../../../../../../Untitled.ump"
-  public boolean isInventorySufficientForAllItems(){
+  // line 212 "../../../../../../Untitled.ump"
+  private boolean isInventorySufficientForAllItems(){
     // Uses generated Order.getOrderItems(), OrderItem.getItem(), Item.getQuantityInInventory(), OrderItem.getQuantity()
     for (OrderItem oi : getOrderItems()) {
       if (oi.getItem().getQuantityInInventory() < oi.getQuantity()) {
@@ -794,14 +777,15 @@ public class Order
    * ========== ACTION METHODS ==========
    * Necessary helpers with logic implemented using model methods
    */
-  // line 215 "../../../../../../Untitled.ump"
-  public void doUpdateItemQuantityAction(Item item, int newQuantity){
+  // line 227 "../../../../../../Untitled.ump"
+  private void doUpdateItemQuantityAction(Item item, int newQuantity){
     OrderItem orderItemToUpdate = findOrderItem(item);
     if (orderItemToUpdate != null) {
       if (newQuantity == 0) {
         // Uses generated Order.removeOrderItem()
         removeOrderItem(orderItemToUpdate);
-      } else {
+      }
+      else {
         // Uses generated OrderItem.setQuantity()
         orderItemToUpdate.setQuantity(newQuantity);
       }
@@ -812,8 +796,8 @@ public class Order
   /**
    * Uses the deliveryDelay attribute defined in this file
    */
-  // line 231 "../../../../../../Untitled.ump"
-  public void calculateOrderCost(){
+  // line 244 "../../../../../../Untitled.ump"
+  private void calculateOrderCost(){
     double totalCostCents = 0;
     // Uses generated Order.getOrderItems(), OrderItem.getItem(), OrderItem.getQuantity(), Item.getPrice()
     for (OrderItem orderItem : getOrderItems()) {
@@ -834,8 +818,8 @@ public class Order
     setTotalCost((int)Math.round(totalCostCents));
   }
 
-  // line 254 "../../../../../../Untitled.ump"
-  public void doProcessPaymentAction(double amount, int points){
+  // line 267 "../../../../../../Untitled.ump"
+  private void doProcessPaymentAction(double amount, int points){
     // Uses generated Order.getOrderPlacer()
     Customer customer = getOrderPlacer();
     if (customer == null) return;
@@ -871,8 +855,8 @@ public class Order
     setDatePlaced(new java.sql.Date(System.currentTimeMillis()));
   }
 
-  // line 292 "../../../../../../Untitled.ump"
-  public void updateInventory(){
+  // line 305 "../../../../../../Untitled.ump"
+  private void updateInventory(){
     // Uses generated Order.getOrderItems(), OrderItem.getItem(), OrderItem.getQuantity(), Item.setQuantityInInventory(), Item.getQuantityInInventory()
     for (OrderItem orderItem : getOrderItems()) {
       Item item = orderItem.getItem();
@@ -881,8 +865,8 @@ public class Order
     }
   }
 
-  // line 303 "../../../../../../Untitled.ump"
-  public void restoreInventory(){
+  // line 316 "../../../../../../Untitled.ump"
+  private void restoreInventory(){
     // Uses generated Order.getOrderItems(), OrderItem.getItem(), OrderItem.getQuantity(), Item.setQuantityInInventory(), Item.getQuantityInInventory()
     for (OrderItem orderItem : getOrderItems()) {
       Item item = orderItem.getItem();
@@ -891,8 +875,8 @@ public class Order
     }
   }
 
-  // line 314 "../../../../../../Untitled.ump"
-  public void doCancelOrder(){
+  // line 327 "../../../../../../Untitled.ump"
+  private void doCancelOrder(){
     // Uses generated Order.getDatePlaced()
     if (getDatePlaced() != null) {
       restoreInventory(); // Calls helper action method
@@ -903,8 +887,8 @@ public class Order
   /**
    * Helper method kept as it's used by multiple guards/actions
    */
-  // line 324 "../../../../../../Untitled.ump"
-  public OrderItem findOrderItem(Item item){
+  // line 337 "../../../../../../Untitled.ump"
+  private OrderItem findOrderItem(Item item){
     if (item == null) return null;
     // Uses generated Order.getOrderItems(), OrderItem.getItem()
     for (OrderItem oi : getOrderItems()) {
@@ -930,5 +914,3 @@ public class Order
             "  " + "orderAssignee = "+(getOrderAssignee()!=null?Integer.toHexString(System.identityHashCode(getOrderAssignee())):"null");
   }
 }
-
-
