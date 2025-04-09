@@ -32,7 +32,7 @@ java {
 }
 
 application {
-    mainClass = 'ca.mcgill.ecse.grocerymanagementsystem.application.GroceryApplication'
+    mainClass = 'ca.mcgill.ecse.grocerymanagementsystem.application.GroceryStoreGUIApplication'
 }
 
 javafx {
