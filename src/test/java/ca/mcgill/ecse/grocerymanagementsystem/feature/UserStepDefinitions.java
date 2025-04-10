@@ -23,7 +23,7 @@ import io.cucumber.java.en.When;
  * Step definitions related to users, customers, employees, and managers.
  */
 public class UserStepDefinitions extends StepDefinitions {
-	private Customer currentCustomer;
+	public static Customer currentCustomer;
 	private Employee currentEmployee;
 	
 	@Before
@@ -68,7 +68,6 @@ public class UserStepDefinitions extends StepDefinitions {
 					example.get("address"),
 					Integer.parseInt(example.get("points")),
 					this.getSystem());
-			System.out.println(Integer.parseInt(example.get("points")));
 		}
 	}
 

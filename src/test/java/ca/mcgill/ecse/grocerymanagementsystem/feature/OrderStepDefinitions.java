@@ -16,6 +16,8 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
+import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -45,34 +47,39 @@ public class OrderStepDefinitions extends StepDefinitions {
 			String deadlineString = orderData.get("deadline");
 			String customerUsername = orderData.get("customer");
 			String assignee = orderData.get("assignee");
-			String deliverydelay = orderData.get("deliveryDelay");
 			String orderStatus = orderData.get("state");
 
-			// --- REPLACEMENT CODE BLOCK ---
-			java.sql.Date datePlaced = null; // Keep this initialization
-			LocalDate today = LocalDate.now(); // Add this line before the 'if'
+			DeliveryDeadline deadline = DeliveryDeadline.valueOf(deadlineString);
 
+			// --- REPLACEMENT CODE BLOCK ---
+			Date datePlaced = null; // Keep this initialization
+			LocalDate today = LocalDate.now(); // Add this line before the 'if'
+			int datep = 0;
 			if (datePlacedString != null && !datePlacedString.equalsIgnoreCase("NULL")) { // Uses equalsIgnoreCase now
 				// Check for relative terms FIRST
 				switch (datePlacedString.toLowerCase()) { // Converts to lowercase
 					case "today":
-						datePlaced = java.sql.Date.valueOf(today);
+						datePlaced = Date.valueOf(today);
+						datep = 0;
 						break;
 					case "yesterday":
-						datePlaced = java.sql.Date.valueOf(today.minusDays(1));
+						datePlaced = Date.valueOf(today.minusDays(1));
+						datep = -1;
 						break;
 					case "two days ago": // Add if used in other scenarios
-						datePlaced = java.sql.Date.valueOf(today.minusDays(2));
+						datePlaced = Date.valueOf(today.minusDays(2));
+						datep = -2;
 						break;
 					case "three days ago": // Add if used in other scenarios
-						datePlaced = java.sql.Date.valueOf(today.minusDays(3));
+						datePlaced = Date.valueOf(today.minusDays(3));
+						datep = -3;
 						break;
 					default:
 						// Not a relative term, TRY parsing as yyyy-MM-dd (Original Logic)
 						try {
 							// Use the existing dateFormat field (make sure it's defined in your class)
 							java.util.Date parsedUtilDate = dateFormat.parse(datePlacedString);
-							datePlaced = new java.sql.Date(parsedUtilDate.getTime());
+							datePlaced = new Date(parsedUtilDate.getTime());
 						} catch (ParseException e) {
 							// This error now only happens if the string is NOT relative AND NOT yyyy-MM-dd
 							throw new RuntimeException("Error parsing specific date: '" + datePlacedString + "'. Expected yyyy-MM-dd format.", e);
@@ -80,20 +87,31 @@ public class OrderStepDefinitions extends StepDefinitions {
 						break;
 				}
 			}
+
 // --- END REPLACEMENT CODE BLOCK ---
-
-			DeliveryDeadline deadline = DeliveryDeadline.valueOf(deadlineString);
-
+			int dead;
+			if (deadline == DeliveryDeadline.SameDay){
+				dead = 0;
+			} else if (deadline == DeliveryDeadline.InOneDay) {
+				dead = 1;
+			} else if (deadline == DeliveryDeadline.InTwoDays) {
+				dead = 2;
+			}else{
+				dead = 3;
+			}
+			int deliverydelay = datep + dead;
 			// Use helper method
 			Customer customer = findCustomerByUsername(customerUsername);
+
 			if (customer == null) {
 				throw new IllegalArgumentException("Customer does not exist: " + customerUsername);
 			}
 			Order order = new Order(datePlaced, deadline, system, customer);
+			order.setDeliveryDelay(-deliverydelay);
 			if (!Objects.equals(assignee, "NULL")){
 				order.setOrderAssignee(findEmployeeByUsername(assignee));
 			}
-			system.addOrder(order);
+
 			orderIdMap.put(id, order.getOrderNumber());
 			orderStatusMap.put(id,orderStatus);
 			orderDeadlineMap.put(id, deadline);
@@ -143,15 +161,21 @@ public class OrderStepDefinitions extends StepDefinitions {
 				throw new IllegalArgumentException("Invalid order ID: " + orderId);
 			}
 			Order order = findOrderByOrderNumberHelper(orderNumber); // Use helper to find by number
-
 			if (item != null && order != null) {
 				new OrderItem(quantity, system, order, item);
 			} else {
 				throw new IllegalArgumentException("Invalid item or order ID in 'the_following_items_are_part_of_orders'");
 			}
+		}
+
+		for (Map<String, String> orderItemData : orderItems) {
+			String orderId = orderItemData.get("order");
+			int ordernum = orderIdMap.get(orderId);
+
+			Order order = findOrderByOrderNumberHelper(ordernum);
+			DeliveryDeadline deadline = orderDeadlineMap.get(orderId);
 
 
-			// --- Part 2: Apply final states AFTER all items are added ---
 			for (Map.Entry<String, Integer> mapEntry : orderIdMap.entrySet()) {
 				String targetStatus = orderStatusMap.get(orderId);
 
@@ -165,19 +189,15 @@ public class OrderStepDefinitions extends StepDefinitions {
 					// We rely on the model's event methods to handle guards.
 					// If a transition fails (returns false), subsequent ones won't be attempted
 					// if the state didn't change as expected.
-					System.out.print(targetStatus);
 					if (targetStatus.equalsIgnoreCase("pending")){
 						if (order.getStatus() == Order.Status.under_construction){
 							order.startOrder(deadline, order.getDeliveryDelay());
 							order.checkout();
 						}
-					}
-
-					if (targetStatus.equalsIgnoreCase("placed")){
+					} else if (targetStatus.equalsIgnoreCase("placed")) {
 						if (order.getStatus() == Order.Status.under_construction){
 							order.startOrder(deadline, order.getDeliveryDelay());
 							order.checkout();
-							System.out.print(order.getStatusFullName());
 						}
 						int num_saver = order.getOrderPlacer().getNumberOfPoints();
 						List<OrderItem> oi = order.getOrderItems();
@@ -187,19 +207,25 @@ public class OrderStepDefinitions extends StepDefinitions {
 							oq.add(titem.getQuantityInInventory());
 						}
 
-						if (order.getStatus() == Order.Status.pending) order.payOrder((order.getTotalCost() / 100.0),0);
-						order.getOrderPlacer().setNumberOfPoints(num_saver);
+						Date dateplaced1 = order.getDatePlaced();
+						if (order.getStatus() == Order.Status.pending)
+							if (order.payOrder((order.getTotalCost() / 100.0),order.getOrderPlacer().getNumberOfPoints())){
+								order.getOrderPlacer().setNumberOfPoints(num_saver);
+								order.setDatePlaced(dateplaced1);
 
-						int counter = 0;
-						List<OrderItem> neo_oi = order.getOrderItems();
-						System.out.print(neo_oi.get(0));
-						for (OrderItem orderItem : neo_oi) {
-							Item neoitem = orderItem.getItem();
-							neoitem.setQuantityInInventory(oq.get(counter));
-							counter += 1;
-						}
-					}
-					else if (targetStatus.equalsIgnoreCase("in preparation")) {
+								int counter = 0;
+								List<OrderItem> neo_oi = order.getOrderItems();
+								for (OrderItem orderItem : neo_oi) {
+									Item neoitem = orderItem.getItem();
+									neoitem.setQuantityInInventory(oq.get(counter));
+									counter += 1;
+								}
+							}else{
+								order.setStatus(Order.Status.placed);
+							}
+
+
+					} else if (targetStatus.equalsIgnoreCase("in preparation")) {
 						if (order.getStatus() == Order.Status.under_construction){
 							order.startOrder(deadline, order.getDeliveryDelay());
 							order.checkout();
@@ -214,12 +240,13 @@ public class OrderStepDefinitions extends StepDefinitions {
 							oq.add(titem.getQuantityInInventory());
 						}
 
-						if (order.getStatus() == Order.Status.pending) order.payOrder((order.getTotalCost() / 100.0),0);
+						Date dateplaced1 = order.getDatePlaced();
+						if (order.getStatus() == Order.Status.pending) order.payOrder((order.getTotalCost() / 100.0),order.getOrderPlacer().getNumberOfPoints());
 						order.getOrderPlacer().setNumberOfPoints(num_saver);
+						order.setDatePlaced(dateplaced1);
 
 						int counter = 0;
 						List<OrderItem> neo_oi = order.getOrderItems();
-						System.out.print(neo_oi.get(0));
 						for (OrderItem orderItem : neo_oi) {
 							Item neoitem = orderItem.getItem();
 							neoitem.setQuantityInInventory(oq.get(counter));
@@ -228,8 +255,7 @@ public class OrderStepDefinitions extends StepDefinitions {
 
 						Employee employee = order.getOrderAssignee();
 						order.setOrderAssignee(null);
-						System.out.print(employee);
-						if (order.getStatus() == Order.Status.placed) order.assignEmployee(employee);
+						if (order.getStatus() == Order.Status.placed) order.assignEmployee(system.getEmployee(0));
 						order.setOrderAssignee(employee);
 					}
 					// Target: Delivered
@@ -246,8 +272,10 @@ public class OrderStepDefinitions extends StepDefinitions {
 							oq.add(titem.getQuantityInInventory());
 						}
 
-						if (order.getStatus() == Order.Status.pending) order.payOrder((order.getTotalCost() / 100.0),0);
+						Date dateplaced1 = order.getDatePlaced();
+						if (order.getStatus() == Order.Status.pending) order.payOrder((order.getTotalCost() / 100.0),order.getOrderPlacer().getNumberOfPoints());
 						order.getOrderPlacer().setNumberOfPoints(num_saver);
+						order.setDatePlaced(dateplaced1);
 
 						int counter = 0;
 						List<OrderItem> neo_oi = order.getOrderItems();
@@ -260,9 +288,29 @@ public class OrderStepDefinitions extends StepDefinitions {
 						order.setOrderAssignee(null);
 						if (order.getStatus() == Order.Status.placed) order.assignEmployee(employee);
 						order.setOrderAssignee(employee);
-						order.setDeliveryDelay(-2);
-						System.out.print(order.calculateTargetDeliveryDate());
+						System.out.print(order.getDatePlaced() + " ");
+						System.out.print(order.getDeadline() + " ");
+						System.out.print(order.getDeliveryDelay() + " ");
+						System.out.print(order.calculateTargetDeliveryDate()+ " ");
+
+						Date datePlacedt; // Keep this initialization
+						LocalDate today = LocalDate.now();
+						if (order.getDatePlaced() == null){
+							if (order.getDeadline() == DeliveryDeadline.SameDay){
+								datePlacedt = Date.valueOf(today);
+							} else if (order.getDeadline() == DeliveryDeadline.InOneDay) {
+								datePlacedt = Date.valueOf(today.minusDays(1));
+							}else if (order.getDeadline() == DeliveryDeadline.InTwoDays) {
+								datePlacedt = Date.valueOf(today.minusDays(2));
+							}else {
+								datePlacedt = Date.valueOf(today.minusDays(3));
+							}
+							order.setDatePlaced(datePlacedt);
+							order.setDeliveryDelay(0);
+							if (order.getStatus() == Order.Status.in_preparation) order.finishAssembly();
+						}
 						if (order.getStatus() == Order.Status.in_preparation) order.finishAssembly();
+
 					}
 					else if (targetStatus.equalsIgnoreCase("delivered")) {
 						if (order.getStatus() == Order.Status.under_construction){
@@ -277,8 +325,10 @@ public class OrderStepDefinitions extends StepDefinitions {
 							oq.add(titem.getQuantityInInventory());
 						}
 
-						if (order.getStatus() == Order.Status.pending) order.payOrder((order.getTotalCost() / 100.0),0);
+						Date dateplaced1 = order.getDatePlaced();
+						if (order.getStatus() == Order.Status.pending) order.payOrder((order.getTotalCost() / 100.0),order.getOrderPlacer().getNumberOfPoints());
 						order.getOrderPlacer().setNumberOfPoints(num_saver);
+						order.setDatePlaced(dateplaced1);
 
 						int counter = 0;
 						List<OrderItem> neo_oi = order.getOrderItems();
@@ -291,9 +341,26 @@ public class OrderStepDefinitions extends StepDefinitions {
 						order.setOrderAssignee(null);
 						if (order.getStatus() == Order.Status.placed) order.assignEmployee(employee);
 						order.setOrderAssignee(employee);
-						System.out.print(order.calculateTargetDeliveryDate());
-						order.setDeliveryDelay(-2);
+
+						Date datePlacedt; // Keep this initialization
+						LocalDate today = LocalDate.now();
+						if (order.getDatePlaced() == null){
+							if (order.getDeadline() == DeliveryDeadline.SameDay){
+								datePlacedt = Date.valueOf(today);
+							} else if (order.getDeadline() == DeliveryDeadline.InOneDay) {
+								datePlacedt = Date.valueOf(today.minusDays(1));
+							}else if (order.getDeadline() == DeliveryDeadline.InTwoDays) {
+								datePlacedt = Date.valueOf(today.minusDays(2));
+							}else {
+								datePlacedt = Date.valueOf(today.minusDays(3));
+							}
+							order.setDatePlaced(datePlacedt);
+							order.setDeliveryDelay(0);
+							if (order.getStatus() == Order.Status.in_preparation) order.finishAssembly();
+						}
 						if (order.getStatus() == Order.Status.in_preparation) order.finishAssembly();
+
+
 						if (order.getStatus() == Order.Status.ready_for_delivery) order.completeDelivery();
 					}
 					else if (targetStatus.equalsIgnoreCase("cancelled")) {
@@ -301,19 +368,26 @@ public class OrderStepDefinitions extends StepDefinitions {
 							order.startOrder(deadline, order.getDeliveryDelay());
 							order.checkout();
 							int num_saver = order.getOrderPlacer().getNumberOfPoints();
-							order.payOrder((order.getTotalCost() / 100.0),0);
+							order.payOrder((order.getTotalCost() / 100.0),order.getOrderPlacer().getNumberOfPoints());
 							order.getOrderPlacer().setNumberOfPoints(num_saver);
 							order.cancel();
 						}
 					}
 					// Add other target states like 'cancelled' if needed for setup
-
 				} catch (RuntimeException e) {
 					// Log unexpected errors during setup for debugging
 					System.err.println("EXCEPTION during state setup for Order ID '" + orderId + "' to '" + targetStatus + "': " + e.getMessage());
 					e.printStackTrace(); // Helps pinpoint the issue
-				}}
+				}
+			}
+
 		}
+
+
+			// --- Part 2: Apply final states AFTER all items are added ---
+
+
+
 	}
 	private Employee findFirstEmployee(GroceryManagementSystem system) {
 		return system.hasEmployees() ? system.getEmployee(0) : null;

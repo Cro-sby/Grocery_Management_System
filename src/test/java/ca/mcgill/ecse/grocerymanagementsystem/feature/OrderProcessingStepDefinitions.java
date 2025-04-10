@@ -15,8 +15,10 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 import javax.swing.plaf.nimbus.State;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 
 public class OrderProcessingStepDefinitions extends StepDefinitions {
@@ -28,7 +30,7 @@ public class OrderProcessingStepDefinitions extends StepDefinitions {
 	public void before() {
 		super.before();
 		lastAffectedOrderNumber = 0;
-		 // Clear the orderIdMap before each scenario
+		orderIdMap.clear();
 	}
 
 
@@ -96,6 +98,7 @@ public class OrderProcessingStepDefinitions extends StepDefinitions {
 		lastAffectedOrderNumber = orderNumber;
 		boolean usePoints = usingOrWithoutUsing.equals("using");
 		try {
+			UserStepDefinitions.currentCustomer = findOrderByOrderNumberHelper(orderNumber).getOrderPlacer();
 			OrderProcessingController.payForOrder(orderNumber, usePoints);
 		} catch (GroceryStoreException e) {
 			error = e;
@@ -170,12 +173,17 @@ public class OrderProcessingStepDefinitions extends StepDefinitions {
 	public void the_order_s_assignee_shall_be(String employeeUsername) {
 		Order order = findOrderByOrderNumberHelper(lastAffectedOrderNumber);
 		assertNotNull(order);
-		assertEquals(findEmployeeByUsername(employeeUsername), order.getOrderAssignee());
+		if (Objects.equals(employeeUsername, "NULL")){
+            assertNull(order.getOrderAssignee());
+		}else
+            assertEquals(findEmployeeByUsername(employeeUsername), order.getOrderAssignee());
 	}
 
 	@Then("the order's date placed shall be today")
 	public void the_order_s_date_placed_shall_be_today() {
-		throw new PendingException();
+		Order order = findOrderByOrderNumberHelper(lastAffectedOrderNumber);
+		assertNotNull(order);
+		assertEquals(java.sql.Date.valueOf(LocalDate.now()).toString(), order.getDatePlaced().toString());
 		}
 
 	@Then("the total cost of the order shall be {int} cents")
@@ -190,21 +198,7 @@ public class OrderProcessingStepDefinitions extends StepDefinitions {
 		assertNotNull(lastAffectedOrderNumber, "No order number was affected in the previous step.");
 		Order order = findOrderByOrderNumberHelper(lastAffectedOrderNumber);
 		assertNotNull(order, "Order with number " + lastAffectedOrderNumber + " not found after action.");
-
-		// Calculate the total cost of items in the order
-		int totalItemCost = 0;
-		for (OrderItem item : order.getOrderItems()) {
-			totalItemCost += item.getItem().getPrice() * item.getQuantity();
-		}
-
-
-		// Deduct points if the customer used them (if using points)
-		int pointsToDeduct = order.getPricePaid();
-		if (expectedCost < totalItemCost) {
-			totalItemCost -= pointsToDeduct; // Deduct points
-		}
-
-		assertEquals(expectedCost, totalItemCost, "Final cost calculation mismatch.");
+		assertEquals(expectedCost, order.getPricePaid(), "Final cost calculation mismatch.");
 
 	}
 }

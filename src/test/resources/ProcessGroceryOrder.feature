@@ -163,7 +163,6 @@ Feature: Process order
       | smol    | SameDay     | alice     | using               |  499 |      1 |         20 |          2 |             8 |         99 |
       | smol    | SameDay     | anakin501 | without using       |  501 |    502 |         20 |          2 |             8 |         99 |
       | smol    | SameDay     | anakin501 | using               |    0 |      1 |         20 |          2 |             8 |         99 |
-
   Scenario Outline: Unsuccessfully pay for order due to insufficient stock
     Given the following orders exist in the system
       | id      | datePlaced | deadline    | customer  | assignee | state   |

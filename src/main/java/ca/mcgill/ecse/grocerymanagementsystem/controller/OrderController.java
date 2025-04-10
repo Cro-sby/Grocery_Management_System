@@ -109,8 +109,7 @@ public class OrderController {
 		}
 		System.out.println(order.getStatus());
 		System.out.println(order.getStatus());
-		if (order.getStatus().toString() == "OrderCancellable" ||
-				order.getStatus().toString()== "Pending"){
+		if (!Objects.equals(order.getStatus().toString(), "under_construction")){
 			throw new GroceryStoreException("order has already been checked out");
 		}
 
@@ -156,8 +155,7 @@ public class OrderController {
 			throw new GroceryStoreException("order does not include item \"" + itemName + "\"");
 		}
 
-		if (order.getStatus().toString() == "OrderCancellable" ||
-				order.getStatus().toString()== "Pending"){
+		if (!Objects.equals(order.getStatusFullName(), "under_construction")){
 			throw new GroceryStoreException("order has already been checked out");
 		}
 

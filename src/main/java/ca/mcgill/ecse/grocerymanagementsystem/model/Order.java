@@ -433,7 +433,7 @@ public class Order
     return wasEventProcessed;
   }
 
-  private void setStatus(Status aStatus)
+  public void setStatus(Status aStatus)
   {
     status = aStatus;
   }
@@ -804,7 +804,6 @@ public class Order
       Item item = orderItem.getItem();
       int quantity = orderItem.getQuantity();
       int itemPriceCents = item.getPrice();
-
       double discountPercentage = Math.min(0.45, (quantity - 1) * 0.05);
       double discountedPriceCents = itemPriceCents * (1.0 - discountPercentage);
       totalCostCents += quantity * discountedPriceCents;
@@ -814,11 +813,10 @@ public class Order
     if (getDeliveryDelay() == 0 && getDeadline() == DeliveryDeadline.SameDay) {
       totalCostCents += 500;
     }
-    // Uses generated Order.setTotalCost()
     setTotalCost((int)Math.round(totalCostCents));
-  }
+    // Uses generated Order.setTotalCost()
 
-  // line 267 "../../../../../../Untitled.ump"
+  }
   private void doProcessPaymentAction(double amount, int points){
     // Uses generated Order.getOrderPlacer()
     Customer customer = getOrderPlacer();
@@ -842,7 +840,7 @@ public class Order
     setPricePaid(priceToPay);
 
     int pointsAwarded = 0;
-    // Uses generated Order.getOrderItems(), OrderItem.getItem(), Item.getNumberOfPoints(), OrderItem.getQuantity()
+    // Uses generated Order.getOrderItems(), OrderItem.ggeetItem(), Item.getNumberOfPoints(), OrderItem.getQuantity()
     for (OrderItem oi : getOrderItems()) {
       pointsAwarded += oi.getItem().getNumberOfPoints() * oi.getQuantity();
     }
