@@ -59,8 +59,5 @@ public class ItemController {
 		}
 		item_valid.delete(); 
 	}
-	public static void setQuantity(String name, int quantity)throws GroceryStoreException {
 
-
-	}
 }

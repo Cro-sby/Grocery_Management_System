@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="598.0" prefWidth="631.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <TabPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="598.4" prefWidth="759.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <tabs>
+            <Tab text="Main Page">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TextArea layoutX="207.0" layoutY="85.0" prefHeight="53.0" prefWidth="283.0" text="Hello and Welcome">
+                           <font>
+                              <Font size="23.0" />
+                           </font>
+                        </TextArea>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+          <Tab text="Orders">
+            <content>
+                  <TabPane prefHeight="569.6" prefWidth="707.2" tabClosingPolicy="UNAVAILABLE">
+                    <tabs>
+                      <Tab text="Create Order">
+                           <content>
+                              <AnchorPane prefHeight="200.0" prefWidth="200.0" />
+                           </content>
+                      </Tab>
+                      <Tab text="Delete Order">
+                           <content>
+                              <AnchorPane prefHeight="200.0" prefWidth="200.0" />
+                           </content>
+                      </Tab>
+                        <Tab text="Add/Remove Items">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                          </content>
+                        </Tab>
+                        <Tab text="Checkout &amp; Pay for Order">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                          </content>
+                        </Tab>
+                        <Tab text="Assemble &amp; Deliver Order">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                          </content>
+                        </Tab>
+                        <Tab text="Cancel Order">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                          </content>
+                        </Tab>
+                        <Tab text="View All">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                          </content>
+                        </Tab>
+                    </tabs>
+                  </TabPane>
+            </content>
+          </Tab>
+          <Tab text="Shipments">
+            <content>
+                  <TabPane prefHeight="569.6" prefWidth="707.2" tabClosingPolicy="UNAVAILABLE">
+                    <tabs>
+                      <Tab text="Create Shipment" />
+                      <Tab text="Delete Shipment" />
+                        <Tab text="Add/Remove Items">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                          </content>
+                        </Tab>
+                        <Tab text="Receive Shipment">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                          </content>
+                        </Tab>
+                    </tabs>
+                  </TabPane>
+            </content>
+          </Tab>
+            <Tab text="Customers">
+               <content>
+                  <AnchorPane>
+                     <children>
+                        <TabPane prefHeight="569.6" prefWidth="631.2" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <tabs>
+                              <Tab text="Customer Management">
+                                 <content>
+                                    <AnchorPane prefHeight="200.0" prefWidth="34.0">
+                                       <children>
+                                          <fx:include source="CustomerManagement.fxml" AnchorPane.bottomAnchor="1.1368683772161603E-13" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                       </children>
+                                    </AnchorPane>
+                                 </content>
+                              </Tab>
+                           </tabs>
+                        </TabPane>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+            <Tab text="Employees">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TabPane prefHeight="569.6" prefWidth="707.2" tabClosingPolicy="UNAVAILABLE">
+                           <tabs>
+                              <Tab text="Register New Employee" />
+                              <Tab text="Update Employee Info" />
+                              <Tab text="Delete Employee">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                </content>
+                              </Tab>
+                           </tabs>
+                        </TabPane>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            <Tab text="Items">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TabPane prefHeight="569.6" prefWidth="707.2" tabClosingPolicy="UNAVAILABLE">
+                           <tabs>
+                              <Tab text="Create Item" />
+                              <Tab text="Update Item " />
+                              <Tab text="Delete Item">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                </content>
+                              </Tab>
+                           </tabs>
+                        </TabPane>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</AnchorPane>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <content>
+      <AnchorPane prefHeight="842.0" prefWidth="590.0">
+         <children>
+            
+                  <VBox prefHeight="922.0" prefWidth="780.0" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+             <padding>
+               <Insets bottom="20" left="20" right="20" top="20" />
+             </padding>
+            
+                   <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Customer Management" />
+               <AnchorPane>
+                  <children>
+                  
+                         <!-- Register Section -->
+                   <TitledPane expanded="true" prefHeight="182.4" prefWidth="740.0" text="Register New Customer" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <VBox prefHeight="156.0" prefWidth="662.0" spacing="10.0">
+                       <padding>
+                         <Insets bottom="10" left="10" right="10" top="10" />
+                       </padding>
+                       <TextField promptText="Username" />
+                       <PasswordField promptText="Password" />
+                       <TextField promptText="Address" />
+                       <Button text="Register" />
+                     </VBox>
+                   </TitledPane>
+                  </children>
+               </AnchorPane>
+               <AnchorPane>
+                  <children>
+                     <TitledPane prefHeight="253.6" prefWidth="740.0" text="Update Current Customer Info" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <content>
+                         <VBox spacing="10.0">
+                           <padding>
+                             <Insets bottom="10" left="10" right="10" top="10" />
+                           </padding>
+                           <TextField promptText="Username" />
+                           <PasswordField promptText="New Password" />
+                           <TextField promptText="New Address" />
+                           <TextField promptText="New Name" />
+                           <TextField promptText="Phone (xxx) xxx-xxxx" />
+                           <Button text="Update" />
+                         </VBox>
+                        </content>
+                     </TitledPane>
+                  </children>
+               </AnchorPane>
+               <AnchorPane>
+                  <children>
+                   <VBox prefHeight="82.4" prefWidth="740.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <padding>
+                       <Insets bottom="10" left="10" right="10" top="10" />
+                     </padding>
+                     <TextField promptText="Username" />
+                     <Button text="Delete" />
+                   </VBox>
+                  </children>
+               </AnchorPane>
+               <AnchorPane>
+                  <children>
+                   <VBox prefHeight="285.6" prefWidth="741.6" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <padding>
+                       <Insets bottom="10" left="10" right="10" top="10" />
+                     </padding>
+                        <ScrollPane>
+                           <content>
+                           <TableView prefHeight="227.0" prefWidth="516.0">
+                             <columns>
+                               <TableColumn text="Username" />
+                               <TableColumn text="Name" />
+                               <TableColumn prefWidth="109.60000610351562" text="Phone" />
+                               <TableColumn prefWidth="145.60003662109375" text="Address" />
+                               <TableColumn minWidth="0.0" prefWidth="100.79995727539062" text="Loyalty Points" />
+                             </columns>
+                           </TableView>
+                           </content>
+                        </ScrollPane>
+                     <Button text="Refresh" />
+                   </VBox>
+                  </children>
+               </AnchorPane>
+            </VBox>
+         </children>
+      </AnchorPane>
+   </content>
+</ScrollPane>
