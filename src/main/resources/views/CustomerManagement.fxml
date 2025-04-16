@@ -12,87 +12,81 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<ScrollPane fitToHeight="true" fitToWidth="true" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ca.mcgill.ecse.grocerymanagementsystem.view.CustomerPageController">
    <content>
       <AnchorPane prefHeight="842.0" prefWidth="590.0">
          <children>
             
-                  <VBox prefHeight="922.0" prefWidth="780.0" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-             <padding>
-               <Insets bottom="20" left="20" right="20" top="20" />
-             </padding>
+                  <VBox layoutY="-16.8" prefHeight="1012.0" prefWidth="590.4" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             
                    <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Customer Management" />
-               <AnchorPane>
-                  <children>
-                  
+            
                          <!-- Register Section -->
-                   <TitledPane expanded="true" prefHeight="182.4" prefWidth="740.0" text="Register New Customer" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <VBox prefHeight="156.0" prefWidth="662.0" spacing="10.0">
-                       <padding>
-                         <Insets bottom="10" left="10" right="10" top="10" />
-                       </padding>
-                       <TextField promptText="Username" />
-                       <PasswordField promptText="Password" />
-                       <TextField promptText="Address" />
-                       <Button text="Register" />
+             <TitledPane expanded="true" text="Register New Customer" VBox.vgrow="NEVER">
+               <VBox prefHeight="156.0" prefWidth="662.0" spacing="10.0">
+                 <padding>
+                   <Insets bottom="10" left="10" right="10" top="10" />
+                 </padding>
+                 <TextField fx:id="registerUsernameField" promptText="Username" />
+                 <PasswordField fx:id="registerPasswordField" promptText="Password" />
+                 <TextField fx:id="registerAddressField" promptText="Address" />
+                 <Button onAction="#handleRegisterCustomer" text="Register" />
+               </VBox>
+             </TitledPane>
+               <TitledPane text="Update Current Customer Info">
+                  <content>
+                   <VBox spacing="10.0">
+                     <padding>
+                       <Insets bottom="10" left="10" right="10" top="10" />
+                     </padding>
+                     <TextField fx:id="updateUsernameField" promptText="Username" />
+                     <PasswordField fx:id="updatePasswordField" promptText="New Password" />
+                     <TextField fx:id="updateAddressField" promptText="New Address" />
+                     <TextField fx:id="updateNameField" promptText="New Name" />
+                     <TextField fx:id="updatePhoneField" promptText="Phone (xxx) xxx-xxxx" />
+                     <Button onAction="#handleUpdateCustomer" text="Update" />
+                   </VBox>
+                  </content>
+               </TitledPane>
+               <TitledPane text="Delete Customer">
+                  <content>
+                     <VBox spacing="10.0">
+                        <children>
+                        <TextField fx:id="deleteUsernameField" promptText="Username" />
+                        <Button onAction="#handleDeleteCustomer" text="Delete" />
+                        </children>
+                        <padding>
+                           <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                        </padding>
                      </VBox>
-                   </TitledPane>
-                  </children>
-               </AnchorPane>
-               <AnchorPane>
-                  <children>
-                     <TitledPane prefHeight="253.6" prefWidth="740.0" text="Update Current Customer Info" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <content>
-                         <VBox spacing="10.0">
-                           <padding>
-                             <Insets bottom="10" left="10" right="10" top="10" />
-                           </padding>
-                           <TextField promptText="Username" />
-                           <PasswordField promptText="New Password" />
-                           <TextField promptText="New Address" />
-                           <TextField promptText="New Name" />
-                           <TextField promptText="Phone (xxx) xxx-xxxx" />
-                           <Button text="Update" />
-                         </VBox>
-                        </content>
-                     </TitledPane>
-                  </children>
-               </AnchorPane>
-               <AnchorPane>
-                  <children>
-                   <VBox prefHeight="82.4" prefWidth="740.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <padding>
-                       <Insets bottom="10" left="10" right="10" top="10" />
-                     </padding>
-                     <TextField promptText="Username" />
-                     <Button text="Delete" />
-                   </VBox>
-                  </children>
-               </AnchorPane>
-               <AnchorPane>
-                  <children>
-                   <VBox prefHeight="285.6" prefWidth="741.6" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <padding>
-                       <Insets bottom="10" left="10" right="10" top="10" />
-                     </padding>
-                        <ScrollPane>
-                           <content>
-                           <TableView prefHeight="227.0" prefWidth="516.0">
-                             <columns>
-                               <TableColumn text="Username" />
-                               <TableColumn text="Name" />
-                               <TableColumn prefWidth="109.60000610351562" text="Phone" />
-                               <TableColumn prefWidth="145.60003662109375" text="Address" />
-                               <TableColumn minWidth="0.0" prefWidth="100.79995727539062" text="Loyalty Points" />
-                             </columns>
-                           </TableView>
-                           </content>
-                        </ScrollPane>
-                     <Button text="Refresh" />
-                   </VBox>
-                  </children>
-               </AnchorPane>
+                  </content>
+                  <VBox.margin>
+                     <Insets />
+                  </VBox.margin>
+               </TitledPane>
+               <Label fx:id="statusLabel" />
+               <Label prefHeight="18.0" prefWidth="503.0" text="Please minimize the drop-downs above for a bigger view table." textAlignment="CENTER" underline="true" VBox.vgrow="NEVER" />
+             <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="140.0" prefWidth="550.0" spacing="10.0" VBox.vgrow="ALWAYS">
+               <padding>
+                 <Insets bottom="10" left="10" right="10" top="10" />
+               </padding>
+                  <ScrollPane fitToHeight="true" fitToWidth="true">
+                     <content>
+                     <TableView fx:id="customerTable">
+                       <columns>
+                         <TableColumn fx:id="usernameCol" text="Username" />
+                         <TableColumn fx:id="nameCol" text="Name" />
+                         <TableColumn fx:id="phoneCol" prefWidth="109.60000610351562" text="Phone" />
+                         <TableColumn fx:id="addressCol" prefWidth="145.60003662109375" text="Address" />
+                         <TableColumn fx:id="loyaltyCol" minWidth="0.0" prefWidth="100.79995727539062" text="Loyalty Points" />
+                       </columns>
+                     </TableView>
+                     </content>
+                  </ScrollPane>
+             </VBox>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
             </VBox>
          </children>
       </AnchorPane>

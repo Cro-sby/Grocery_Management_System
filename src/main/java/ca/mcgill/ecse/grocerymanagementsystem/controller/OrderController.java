@@ -3,6 +3,7 @@ package ca.mcgill.ecse.grocerymanagementsystem.controller;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Order.DeliveryDeadline;
 import ca.mcgill.ecse.grocerymanagementsystem.model.*; // Import all model classes
 
+import java.util.List;
 import java.util.Objects;
 
 import static ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryManagementSystemController.getGroceryManagementSystem;
@@ -167,4 +168,9 @@ public class OrderController {
 			new OrderItem(newQuantity, system, order, item);
 		}
 	}
+
+	public static List<TOOrder> getAllOrders() {
+		//TODO
+        return List.of();
+    }
 }

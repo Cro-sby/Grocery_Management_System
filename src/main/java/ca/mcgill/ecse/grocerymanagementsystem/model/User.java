@@ -13,7 +13,7 @@ public class User
   // STATIC VARIABLES
   //------------------------
 
-  private static Map<String, User> usersByUsername = new HashMap<String, User>();
+  public static Map<String, User> usersByUsername = new HashMap<String, User>();
 
   //------------------------
   // MEMBER VARIABLES

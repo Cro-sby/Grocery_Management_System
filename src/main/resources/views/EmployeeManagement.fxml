@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToHeight="true" fitToWidth="true" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ca.mcgill.ecse.grocerymanagementsystem.view.EmployeePageController">
+    <content>
+        <AnchorPane>
+            <children>
+                <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+
+                    <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Employee Management" />
+                      <TitledPane expanded="true" text="Register New Employee">
+                          <VBox prefHeight="156.0" prefWidth="662.0" spacing="10.0">
+                              <padding>
+                                  <Insets bottom="10" left="10" right="10" top="10" />
+                              </padding>
+                              <TextField fx:id="registerUsernameField" promptText="Username" VBox.vgrow="NEVER" />
+                              <Button onAction="#handleRegisterEmployee" text="Register" VBox.vgrow="NEVER" />
+                          </VBox>
+                      </TitledPane>
+                      <TitledPane text="Update Current Employee Info">
+                          <content>
+                              <VBox spacing="10.0">
+                                  <padding>
+                                      <Insets bottom="10" left="10" right="10" top="10" />
+                                  </padding>
+                                  <TextField fx:id="updateUsernameField" promptText="Username" VBox.vgrow="NEVER" />
+                                  <TextField fx:id="updateNameField" promptText="Name" VBox.vgrow="NEVER" />
+                                  <TextField fx:id="updatePhoneField" promptText="Phone (xxx) xxx-xxxx" VBox.vgrow="NEVER" />
+                                  <Button onAction="#handleUpdateEmployee" text="Update" VBox.vgrow="NEVER" />
+                              </VBox>
+                          </content>
+                      </TitledPane>
+
+                    <!-- Delete Section -->
+                    <TextField fx:id="deleteUsernameField" promptText="Username to delete" VBox.vgrow="NEVER" />
+                    <Button onAction="#handleDeleteEmployee" text="Delete" VBox.vgrow="NEVER" />
+
+                    <!-- Status Label -->
+                    <Label fx:id="statusLabel" style="-fx-text-fill: green; -fx-font-weight: bold;" text="" VBox.vgrow="NEVER" />
+               <Label text="Please minimize the drop-downs above for a bigger view table." underline="true" />
+
+                    <!-- Table + Refresh -->
+                    <AnchorPane VBox.vgrow="ALWAYS">
+                        <children>
+                            <VBox prefHeight="287.2" prefWidth="550.4" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <padding>
+                                    <Insets bottom="10" left="10" right="10" top="10" />
+                                </padding>
+                                <ScrollPane fitToHeight="true" fitToWidth="true">
+                                    <content>
+                                        <TableView fx:id="employeeTable" prefHeight="534.0" prefWidth="527.0">
+                                            <columns>
+                                                <TableColumn fx:id="usernameCol" prefWidth="159.0" text="Username" />
+                                                <TableColumn fx:id="nameCol" prefWidth="202.0" text="Name" />
+                                                <TableColumn fx:id="phoneCol" prefWidth="169.0" text="Phone" />
+                                            </columns>
+                                        </TableView>
+                                    </content>
+                                </ScrollPane>
+                            </VBox>
+                        </children>
+                    </AnchorPane>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+                </VBox>
+            </children>
+        </AnchorPane>
+    </content>
+</ScrollPane>

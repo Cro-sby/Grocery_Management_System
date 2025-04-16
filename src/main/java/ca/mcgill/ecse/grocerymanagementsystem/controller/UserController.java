@@ -1,5 +1,7 @@
 package ca.mcgill.ecse.grocerymanagementsystem.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import ca.mcgill.ecse.grocerymanagementsystem.model.Customer;
@@ -7,6 +9,7 @@ import ca.mcgill.ecse.grocerymanagementsystem.model.Employee;
 import ca.mcgill.ecse.grocerymanagementsystem.model.GroceryManagementSystem;
 import ca.mcgill.ecse.grocerymanagementsystem.model.User;
 import ca.mcgill.ecse.grocerymanagementsystem.model.UserRole;
+import ca.mcgill.ecse.grocerymanagementsystem.view.CustomerView;
 
 /**
  * Controller for user-related operations.
@@ -224,5 +227,30 @@ public class UserController {
 					String.format("phone number does not match expected format \"%s\"", PHONE_NUMBER_FORMAT_EXPLANATION));
 		}
 		return phoneNumber;
+	}
+	public static List<CustomerView> getAllCustomers() {
+		List<CustomerView> customerDtos = new ArrayList<>();
+
+		// Loop through all users
+		for (User user : User.usersByUsername.values()) {
+			// Check if the user has the Customer role
+			for (UserRole role : user.getRoles()) {
+				if (role instanceof Customer) { // Check if the role is of type Customer
+					Customer customer = (Customer) role;  // Safely cast to Customer
+
+					// Convert Customer data into CustomerDto for display
+					customerDtos.add(new CustomerView(
+							customer.getUser().getUsername(), // Get the username from the User
+							customer.getUser().getName(),
+							customer.getUser().getPhoneNumber(),
+							customer.getAddress(),           // Now we can access the address
+							customer.getNumberOfPoints()     // Now we can access the loyalty points
+					));
+					break; // Once we've found the Customer role, no need to check further roles
+				}
+			}
+		}
+
+		return customerDtos;
 	}
 }
