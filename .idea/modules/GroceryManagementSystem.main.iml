@@ -7,11 +7,11 @@
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/resources" type="java-resource" />
     </content>
-    <orderEntry type="jdk" jdkName="21" jdkType="JavaSDK" />
+    <orderEntry type="jdk" jdkName="temurin-21" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Gradle: org.openjfx:javafx-fxml:mac:21.0.6" level="project" />
-    <orderEntry type="library" name="Gradle: org.openjfx:javafx-controls:mac:21.0.6" level="project" />
-    <orderEntry type="library" name="Gradle: org.openjfx:javafx-graphics:mac:21.0.6" level="project" />
-    <orderEntry type="library" name="Gradle: org.openjfx:javafx-base:mac:21.0.6" level="project" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-fxml:mac-aarch64:21.0.6" level="project" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-controls:mac-aarch64:21.0.6" level="project" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-graphics:mac-aarch64:21.0.6" level="project" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-base:mac-aarch64:21.0.6" level="project" />
   </component>
 </module>
