@@ -59,14 +59,10 @@ public class TOOrder {
         canSetTotalCost = true;
         canSetPricePaid = true;
         orderNumber = nextOrderNumber++;
+        orderPlacer = aOrderPlacer;
         orderItems = new ArrayList<OrderItem>();
         groceryManagementSystem = aGroceryManagementSystem;
-        setStatus(Status.under_construction);
-    }
-
-    private void setStatus(Status aStatus)
-    {
-        status = aStatus;
+        status = Status.under_construction;
     }
 
     public int getDeliveryDelay()

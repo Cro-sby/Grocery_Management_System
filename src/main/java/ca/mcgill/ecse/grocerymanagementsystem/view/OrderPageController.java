@@ -8,6 +8,7 @@ import ca.mcgill.ecse.grocerymanagementsystem.model.Employee;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Order;
 
 import ca.mcgill.ecse.grocerymanagementsystem.model.TOOrder;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -51,7 +52,7 @@ public class OrderPageController {
     @FXML
     private TableColumn<TOOrder, Integer> OrderNumCol;
     @FXML
-    private TableColumn<TOOrder, Customer> CustomerCol;
+    private TableColumn<TOOrder, String> CustomerCol;
     @FXML
     private TableColumn<TOOrder, Integer> TotalAmountCol;
     @FXML
@@ -65,7 +66,11 @@ public class OrderPageController {
     private void initialize() {
         // Explain how the table should populate the cells given a TOFlight
         OrderNumCol.setCellValueFactory(new PropertyValueFactory<>("OrderNumber"));
-        CustomerCol.setCellValueFactory(new PropertyValueFactory<>("OrderPlacer"));
+        CustomerCol.setCellValueFactory(cellData -> {
+            Customer customer = cellData.getValue().getOrderPlacer();
+            String username = (customer != null) ? customer.getUser().getUsername() : "Unknown";
+            return new ReadOnlyStringWrapper(username);
+        });
         TotalAmountCol.setCellValueFactory(new PropertyValueFactory<>("TotalCost"));
         DeadlineCol.setCellValueFactory(new PropertyValueFactory<>("Deadline"));
         StatusCol.setCellValueFactory(new PropertyValueFactory<>("Status"));
