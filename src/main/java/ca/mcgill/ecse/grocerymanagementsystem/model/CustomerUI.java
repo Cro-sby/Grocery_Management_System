@@ -37,6 +37,8 @@ public class CustomerUI
         loyaltyPoints = aLoyaltyPoints;
     }
 
+
+
     //------------------------
     // INTERFACE
     //------------------------

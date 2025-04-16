@@ -4,12 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import ca.mcgill.ecse.grocerymanagementsystem.model.Customer;
-import ca.mcgill.ecse.grocerymanagementsystem.model.Employee;
-import ca.mcgill.ecse.grocerymanagementsystem.model.GroceryManagementSystem;
-import ca.mcgill.ecse.grocerymanagementsystem.model.User;
-import ca.mcgill.ecse.grocerymanagementsystem.model.UserRole;
-import ca.mcgill.ecse.grocerymanagementsystem.view.CustomerView;
+import ca.mcgill.ecse.grocerymanagementsystem.model.*;
 
 /**
  * Controller for user-related operations.
@@ -228,8 +223,8 @@ public class UserController {
 		}
 		return phoneNumber;
 	}
-	public static List<CustomerView> getAllCustomers() {
-		List<CustomerView> customerDtos = new ArrayList<>();
+	public static List<CustomerUI> getAllCustomers() {
+		List<CustomerUI> customerDtos = new ArrayList<>();
 
 		// Loop through all users
 		for (User user : User.usersByUsername.values()) {
@@ -239,8 +234,9 @@ public class UserController {
 					Customer customer = (Customer) role;  // Safely cast to Customer
 
 					// Convert Customer data into CustomerDto for display
-					customerDtos.add(new CustomerView(
-							customer.getUser().getUsername(), // Get the username from the User
+					customerDtos.add(new CustomerUI(
+							customer.getUser().getUsername(),
+							customer.getUser().getPassword(),// Get the username from the User
 							customer.getUser().getName(),
 							customer.getUser().getPhoneNumber(),
 							customer.getAddress(),           // Now we can access the address

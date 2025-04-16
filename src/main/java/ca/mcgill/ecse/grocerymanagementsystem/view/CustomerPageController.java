@@ -1,5 +1,6 @@
 package ca.mcgill.ecse.grocerymanagementsystem.view;
 
+import ca.mcgill.ecse.grocerymanagementsystem.controller.UserController;
 import ca.mcgill.ecse.grocerymanagementsystem.model.CustomerUI;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -7,50 +8,48 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CustomerPageController {
 
-    @FXML private TableView<CustomerView> customerTable;
-    @FXML private TableColumn<CustomerView, String> usernameCol;
-    @FXML private TableColumn<CustomerView, String> nameCol;
-    @FXML private TableColumn<CustomerView, String> phoneCol;
-    @FXML private TableColumn<CustomerView, String> addressCol;
-    @FXML private TableColumn<CustomerView, Number> loyaltyCol;
+    @FXML private TableColumn<CustomerUI, String> nameCol;
+    @FXML private TableColumn<CustomerUI, String> usernameCol;
+    @FXML private TableColumn<CustomerUI, String> phoneCol;
+    @FXML private TableColumn<CustomerUI, String> addressCol;
+    @FXML private TableColumn<CustomerUI, Integer> loyaltyCol;
 
-    // Register fields
+    // TableView itself
+    @FXML private TableView<CustomerUI> customerTable;
+
+    // Other FXML fields (like TextFields, Labels, etc.)
     @FXML private TextField registerUsernameField;
     @FXML private PasswordField registerPasswordField;
     @FXML private TextField registerAddressField;
 
-    // Update fields
     @FXML private TextField updateUsernameField;
-    @FXML private TextField updateNameField;
-    @FXML private TextField updatePhoneField;
     @FXML private PasswordField updatePasswordField;
     @FXML private TextField updateAddressField;
+    @FXML private TextField updateNameField;
+    @FXML private TextField updatePhoneField;
 
-    // Delete field
     @FXML private TextField deleteUsernameField;
 
-    // Status message
     @FXML private Label statusLabel;
 
-    // In-memory "database" of customers
-    private final List<CustomerUI> customerList = new ArrayList<>();
 
     @FXML
-    private void initialize() {
-        usernameCol.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getUsername()));
-        nameCol.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getName()));
-        phoneCol.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getPhone()));
-        addressCol.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getAddress()));
-        loyaltyCol.setCellValueFactory(cell -> new SimpleIntegerProperty(cell.getValue().getLoyaltyPoints()));
+    public void initialize() {
+        usernameCol.setCellValueFactory(new PropertyValueFactory<>("username"));
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        phoneCol.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
+        addressCol.setCellValueFactory(new PropertyValueFactory<>("address"));
+        loyaltyCol.setCellValueFactory(new PropertyValueFactory<>("loyaltyPoints"));
 
         refreshCustomerTable();
     }
+
 
     @FXML
     private void handleRegisterCustomer() {
@@ -58,23 +57,20 @@ public class CustomerPageController {
         String password = registerPasswordField.getText();
         String address = registerAddressField.getText();
 
-        if (getCustomerByUsername(username) != null) {
-            setStatus("Username already exists.", true);
-            return;
+        try {
+            UserController.registerNewCustomer(username, password, address);
+            refreshCustomerTable();
+            statusLabel.setText("Customer registered.");
+        } catch (Exception e) {
+            statusLabel.setText("Error: " + e.getMessage());
         }
-
-        CustomerUI newCustomer = new CustomerUI(username, password, "", "", address, 0);
-        customerList.add(newCustomer);
-
-        setStatus("Customer registered successfully!", false);
-        clearRegisterFields();
-        refreshCustomerTable();
     }
+
 
     @FXML
     private void handleUpdateCustomer() {
         String username = updateUsernameField.getText();
-        CustomerUI customer = getCustomerByUsername(username);
+        CustomerUI customer = getCustomerUIByUsername(username);  // Use the newly created method to find customer
 
         if (customer == null) {
             setStatus("Customer not found.", true);
@@ -82,15 +78,15 @@ public class CustomerPageController {
         }
 
         if (!updatePasswordField.getText().isBlank()) {
-            customer.setPassword(updatePasswordField.getText());
+            UserController.updatePassword(username, updatePasswordField.getText());
         }
 
         if (!updateAddressField.getText().isBlank()) {
-            customer.setAddress(updateAddressField.getText());
+            UserController.updateAddress(username, updateAddressField.getText());
         }
 
         if (!updateNameField.getText().isBlank()) {
-            customer.setName(updateNameField.getText());
+            UserController.updateName(username, updateNameField.getText());
         }
 
         String phoneInput = updatePhoneField.getText();
@@ -99,7 +95,7 @@ public class CustomerPageController {
                 setStatus("Phone number must be in format (xxx) xxx-xxxx", true);
                 return;
             }
-            customer.setPhoneNumber(phoneInput);
+            UserController.updatePhoneNumber(username, phoneInput);
         }
 
         setStatus("Customer info updated successfully!", false);
@@ -108,48 +104,48 @@ public class CustomerPageController {
     }
 
 
+
     @FXML
     private void handleDeleteCustomer() {
         String username = deleteUsernameField.getText();
-        CustomerUI customer = getCustomerByUsername(username);
+        CustomerUI customer = getCustomerUIByUsername(username);  // Use the newly created method to find customer
 
         if (customer == null) {
             setStatus("Customer not found.", true);
             return;
         }
 
-        customerList.remove(customer);
+        try {
+            // Call UserController to delete customer
+            UserController.deleteCustomer(username);
 
-        setStatus("Customer deleted successfully.", false);
-        deleteUsernameField.clear();
-        refreshCustomerTable();
+            setStatus("Customer deleted successfully.", false);
+            deleteUsernameField.clear();
+            refreshCustomerTable();
+        } catch (Exception e) {
+            setStatus("Error deleting customer: " + e.getMessage(), true);
+        }
     }
+
 
     private void refreshCustomerTable() {
-        List<CustomerView> views = new ArrayList<>();
-
-        for (CustomerUI customer : customerList) {
-            views.add(new CustomerView(
-                    customer.getUsername(),
-                    customer.getName(),
-                    customer.getPhoneNumber(),
-                    customer.getAddress(),
-                    customer.getLoyaltyPoints()
-            ));
-        }
-
-        ObservableList<CustomerView> observableList = FXCollections.observableArrayList(views);
-        customerTable.setItems(observableList);
+        List<CustomerUI> customerList = UserController.getAllCustomers(); // Make sure you're using UserController here
+        ObservableList<CustomerUI> observable = FXCollections.observableArrayList(customerList);
+        customerTable.setItems(observable); // This will refresh the table view with the latest data
     }
 
-    private CustomerUI getCustomerByUsername(String username) {
-        for (CustomerUI customer : customerList) {
+
+
+    private CustomerUI getCustomerUIByUsername(String username) {
+        List<CustomerUI> customers = UserController.getAllCustomers();
+        for (CustomerUI customer : customers) {
             if (customer.getUsername().equals(username)) {
                 return customer;
             }
         }
-        return null;
+        return null;  // Return null if no matching customer is found
     }
+
 
     private void setStatus(String message, boolean isError) {
         statusLabel.setText(message);

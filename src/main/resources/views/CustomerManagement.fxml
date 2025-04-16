@@ -74,11 +74,11 @@
                      <content>
                      <TableView fx:id="customerTable">
                        <columns>
-                         <TableColumn fx:id="usernameCol" text="Username" />
-                         <TableColumn fx:id="nameCol" text="Name" />
-                         <TableColumn fx:id="phoneCol" prefWidth="109.60000610351562" text="Phone" />
-                         <TableColumn fx:id="addressCol" prefWidth="145.60003662109375" text="Address" />
-                         <TableColumn fx:id="loyaltyCol" minWidth="0.0" prefWidth="100.79995727539062" text="Loyalty Points" />
+                           <TableColumn fx:id="usernameCol" text="Username" />
+                           <TableColumn fx:id="nameCol" text="Name" />
+                           <TableColumn fx:id="phoneCol" text="Phone" />
+                           <TableColumn fx:id="addressCol" text="Address" />
+                           <TableColumn fx:id="loyaltyCol" text="Loyalty Points" />
                        </columns>
                      </TableView>
                      </content>
