@@ -3,6 +3,7 @@ package ca.mcgill.ecse.grocerymanagementsystem.controller;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Order.DeliveryDeadline;
 import ca.mcgill.ecse.grocerymanagementsystem.model.*; // Import all model classes
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -170,7 +171,16 @@ public class OrderController {
 	}
 
 	public static List<TOOrder> getAllOrders() {
-		//TODO
-        return List.of();
-    }
+		List<TOOrder> orders = new ArrayList<>();
+		for (Order o : getGroceryManagementSystem().getOrders()) {
+			orders.add(TOConverter.convert(o));
+		}
+		return orders;
+	}
+
+	public class TOConverter {
+		public static TOOrder convert(Order o) {
+			return new TOOrder(o.getDatePlaced(), ca.mcgill.ecse.grocerymanagementsystem.model.TOOrder.DeliveryDeadline.valueOf(String.valueOf(o.getDeadline())), o.getGroceryManagementSystem(),o.getOrderPlacer());
+		}
+	}
 }
