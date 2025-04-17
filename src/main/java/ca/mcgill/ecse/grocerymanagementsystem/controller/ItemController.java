@@ -2,8 +2,44 @@ package ca.mcgill.ecse.grocerymanagementsystem.controller;
 
 import ca.mcgill.ecse.grocerymanagementsystem.model.GroceryManagementSystem; // Import the system
 import ca.mcgill.ecse.grocerymanagementsystem.model.Item;
+import ca.mcgill.ecse.grocerymanagementsystem.controller.TOs.TOItem;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ItemController {
+
+
+
+	// --- Conversion Method (Now inside ItemController) ---
+	public static TOItem toTOItem(Item item) {
+		if (item == null) {
+			return null;
+		}
+		// Ensure the TOItem constructor matches the order and types of parameters
+		return new TOItem(
+				item.getName(),
+				item.getQuantityInInventory(),
+				item.getPrice(),
+				item.getIsPerishable(),
+				item.getNumberOfPoints()
+		);
+	}
+
+	// --- Existing Controller Methods ---
+
+	public static List<TOItem> getAllItems() throws GroceryStoreException {
+		GroceryManagementSystem system = GroceryManagementSystemController.getGroceryManagementSystem();
+		if (system == null) {
+			throw new GroceryStoreException("GroceryManagementSystem instance is null.");
+		}
+
+		List<TOItem> items = new ArrayList<>();
+		for (Item item : system.getItems()) {
+			items.add(toTOItem(item)); // Call the local conversion method
+		}
+		return items;
+	}
 
 	public static void create(String name, boolean isPerishable, int points, int price) throws GroceryStoreException {
 		if (name == null || name.trim().isEmpty()) {

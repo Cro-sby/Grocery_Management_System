@@ -98,7 +98,7 @@
                                  <content>
                                     <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                        <children>
-                                          <fx:include source="ItemManagement.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="16.0" AnchorPane.topAnchor="0.0" />
+                                          <fx:include source="RandomItem.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.7999999999999545" AnchorPane.topAnchor="0.0" />
                                        </children>
                                     </AnchorPane>
                                  </content></Tab>
