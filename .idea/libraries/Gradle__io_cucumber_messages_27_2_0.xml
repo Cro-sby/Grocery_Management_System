@@ -2,9 +2,13 @@
   <library name="Gradle: io.cucumber:messages:27.2.0" type="java-imported" external-system-id="GRADLE">
     <properties groupId="io.cucumber" artifactId="messages" version="27.2.0" />
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.cucumber/messages/27.2.0/eb0063e66198cc08b7b1f826c79a5b9bd1c749ba/messages-27.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/messages/27.2.0/eb0063e66198cc08b7b1f826c79a5b9bd1c749ba/messages-27.2.0.jar!/" />
     </CLASSES>
-    <JAVADOC />
-    <SOURCES />
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/messages/27.2.0/46896a0ed02a21d0d150b95145fe7bf2a43db1f3/messages-27.2.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/messages/27.2.0/cbfdc377d5fafb877ab1862d9cd527a383312027/messages-27.2.0-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

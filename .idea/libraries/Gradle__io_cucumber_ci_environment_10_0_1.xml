@@ -2,9 +2,13 @@
   <library name="Gradle: io.cucumber:ci-environment:10.0.1" type="java-imported" external-system-id="GRADLE">
     <properties groupId="io.cucumber" artifactId="ci-environment" version="10.0.1" />
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.cucumber/ci-environment/10.0.1/222cecc535529f093d3364856bfe5f8d343c4248/ci-environment-10.0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/ci-environment/10.0.1/222cecc535529f093d3364856bfe5f8d343c4248/ci-environment-10.0.1.jar!/" />
     </CLASSES>
-    <JAVADOC />
-    <SOURCES />
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/ci-environment/10.0.1/329bc49f40063043c3ee7f3a579762b4e226bd6d/ci-environment-10.0.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/ci-environment/10.0.1/dd5ecd38190c6619f01d9dd00bfb9e0b6adae0ee/ci-environment-10.0.1-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

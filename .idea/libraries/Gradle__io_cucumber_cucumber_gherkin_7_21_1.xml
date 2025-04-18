@@ -2,9 +2,13 @@
   <library name="Gradle: io.cucumber:cucumber-gherkin:7.21.1" type="java-imported" external-system-id="GRADLE">
     <properties groupId="io.cucumber" artifactId="cucumber-gherkin" version="7.21.1" />
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.cucumber/cucumber-gherkin/7.21.1/96f6d18da7c4a80c3f1d99fc09f21c1c0e8695ab/cucumber-gherkin-7.21.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/cucumber-gherkin/7.21.1/96f6d18da7c4a80c3f1d99fc09f21c1c0e8695ab/cucumber-gherkin-7.21.1.jar!/" />
     </CLASSES>
-    <JAVADOC />
-    <SOURCES />
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/cucumber-gherkin/7.21.1/1a48beddfd536379bde4c3e02d7c7985fb6cf327/cucumber-gherkin-7.21.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/cucumber-gherkin/7.21.1/8189dde164606c9b4f076acfbe1fdea3f96a5a5a/cucumber-gherkin-7.21.1-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

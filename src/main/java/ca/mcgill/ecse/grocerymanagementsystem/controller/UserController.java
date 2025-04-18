@@ -249,4 +249,29 @@ public class UserController {
 
 		return customerDtos;
 	}
+
+	public static List<EmployeeUI> getAllEmployees() {
+		List<EmployeeUI> employeeUIs = new ArrayList<>();
+
+		// Loop through all users
+		for (User user : User.usersByUsername.values()) {
+			// Check if the user has the Employee role
+			for (UserRole role : user.getRoles()) {
+				if (role instanceof Employee) {
+					Employee employee = (Employee) role;
+
+					// Convert Employee data into EmployeeUI for display
+					employeeUIs.add(new EmployeeUI(
+							employee.getUser().getUsername(),
+							employee.getUser().getName(),
+							employee.getUser().getPhoneNumber()
+					));
+					break; // No need to check other roles once found
+				}
+			}
+		}
+
+		return employeeUIs;
+	}
+
 }

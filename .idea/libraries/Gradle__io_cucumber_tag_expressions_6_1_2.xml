@@ -2,9 +2,13 @@
   <library name="Gradle: io.cucumber:tag-expressions:6.1.2" type="java-imported" external-system-id="GRADLE">
     <properties groupId="io.cucumber" artifactId="tag-expressions" version="6.1.2" />
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.cucumber/tag-expressions/6.1.2/bae142d395be75805a7a078d4634b9833be3c4a/tag-expressions-6.1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/tag-expressions/6.1.2/bae142d395be75805a7a078d4634b9833be3c4a/tag-expressions-6.1.2.jar!/" />
     </CLASSES>
-    <JAVADOC />
-    <SOURCES />
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/tag-expressions/6.1.2/c4beef94e682a1bd9d0d39feeccdaa60a6462d16/tag-expressions-6.1.2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/tag-expressions/6.1.2/d723f0b6796810c01458f8c7dd0418e7ad6e7dba/tag-expressions-6.1.2-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>
