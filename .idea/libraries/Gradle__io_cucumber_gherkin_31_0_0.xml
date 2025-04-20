@@ -2,7 +2,7 @@
   <library name="Gradle: io.cucumber:gherkin:31.0.0" type="java-imported" external-system-id="GRADLE">
     <properties groupId="io.cucumber" artifactId="gherkin" version="31.0.0" />
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/gherkin/31.0.0/7ecae393058a91a6278f8f78c544f33d5994ddae/gherkin-31.0.0.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.cucumber/gherkin/31.0.0/7ecae393058a91a6278f8f78c544f33d5994ddae/gherkin-31.0.0.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/io.cucumber/gherkin/31.0.0/341e62475b4e991ab8b561d784e2b785568a2ea8/gherkin-31.0.0-javadoc.jar!/" />

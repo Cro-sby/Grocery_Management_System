@@ -4,18 +4,11 @@
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
 package ca.mcgill.ecse.grocerymanagementsystem.controller.TOs;
-import java.util.*;
 
-// line 4 "../../../../../../../model.ump"
-// line 20 "../../../../../../../model.ump"
+// line 3 "../../../../../../../model.ump"
+// line 13 "../../../../../../../model.ump"
 public class TOItem
 {
-
-    //------------------------
-    // STATIC VARIABLES
-    //------------------------
-
-    private static Map<String, TOItem> toitemsByName = new HashMap<String, TOItem>();
 
     //------------------------
     // MEMBER VARIABLES
@@ -28,48 +21,60 @@ public class TOItem
     private boolean isPerishable;
     private int numberOfPoints;
 
-    //Helper Variables
-    private boolean canSetName;
-
     //------------------------
     // CONSTRUCTOR
     //------------------------
 
     public TOItem(String aName, int aQuantityInInventory, int aPrice, boolean aIsPerishable, int aNumberOfPoints)
     {
-        canSetName = true;
+        name = aName;
         quantityInInventory = aQuantityInInventory;
         price = aPrice;
         isPerishable = aIsPerishable;
         numberOfPoints = aNumberOfPoints;
-        if (!setName(aName))
-        {
-            throw new RuntimeException("Cannot create due to duplicate name. See https://manual.umple.org?RE003ViolationofUniqueness.html");
-        }
     }
 
     //------------------------
     // INTERFACE
     //------------------------
-    /* Code from template attribute_SetImmutable */
+
     public boolean setName(String aName)
     {
         boolean wasSet = false;
-        if (!canSetName) { return false; }
-        String anOldName = getName();
-        if (anOldName != null && anOldName.equals(aName)) {
-            return true;
-        }
-        if (hasWithName(aName)) {
-            return wasSet;
-        }
-        canSetName = false;
         name = aName;
         wasSet = true;
-        if (anOldName != null) {
-            toitemsByName.remove(anOldName);
-        }
-        toitemsByName.put(aName, this);
+        return wasSet;
+    }
+
+    public boolean setQuantityInInventory(int aQuantityInInventory)
+    {
+        boolean wasSet = false;
+        quantityInInventory = aQuantityInInventory;
+        wasSet = true;
+        return wasSet;
+    }
+
+    public boolean setPrice(int aPrice)
+    {
+        boolean wasSet = false;
+        price = aPrice;
+        wasSet = true;
+        return wasSet;
+    }
+
+    public boolean setIsPerishable(boolean aIsPerishable)
+    {
+        boolean wasSet = false;
+        isPerishable = aIsPerishable;
+        wasSet = true;
+        return wasSet;
+    }
+
+    public boolean setNumberOfPoints(int aNumberOfPoints)
+    {
+        boolean wasSet = false;
+        numberOfPoints = aNumberOfPoints;
+        wasSet = true;
         return wasSet;
     }
 
@@ -77,25 +82,12 @@ public class TOItem
     {
         return name;
     }
-    /* Code from template attribute_GetUnique */
-    public static TOItem getWithName(String aName)
-    {
-        return toitemsByName.get(aName);
-    }
-    /* Code from template attribute_HasUnique */
-    public static boolean hasWithName(String aName)
-    {
-        return getWithName(aName) != null;
-    }
 
     public int getQuantityInInventory()
     {
         return quantityInInventory;
     }
 
-    /**
-     * in cents
-     */
     public int getPrice()
     {
         return price;
@@ -117,9 +109,7 @@ public class TOItem
     }
 
     public void delete()
-    {
-        toitemsByName.remove(getName());
-    }
+    {}
 
 
     public String toString()

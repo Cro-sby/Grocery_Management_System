@@ -2,7 +2,7 @@
   <library name="Gradle: org.openjfx:javafx-controls:win:21.0.6" type="java-imported" external-system-id="GRADLE">
     <properties groupId="org.openjfx" artifactId="javafx-controls" version="21.0.6" />
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-controls/21.0.6/4ee4d509d5c67b8b9626e1432fbe11448cfce3d3/javafx-controls-21.0.6-win.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.openjfx/javafx-controls/21.0.6/4ee4d509d5c67b8b9626e1432fbe11448cfce3d3/javafx-controls-21.0.6-win.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -2,7 +2,7 @@
   <library name="Gradle: org.junit.platform:junit-platform-suite-commons:1.11.4" type="java-imported" external-system-id="GRADLE">
     <properties groupId="org.junit.platform" artifactId="junit-platform-suite-commons" version="1.11.4" />
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-suite-commons/1.11.4/b381d0e04bd2721c4bf348d5be61d2b4768df305/junit-platform-suite-commons-1.11.4.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-suite-commons/1.11.4/b381d0e04bd2721c4bf348d5be61d2b4768df305/junit-platform-suite-commons-1.11.4.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$PROJECT_DIR$/../.gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-suite-commons/1.11.4/e9cec952f75d27be99bda8beceda0429b0cf2bd7/junit-platform-suite-commons-1.11.4-javadoc.jar!/" />
