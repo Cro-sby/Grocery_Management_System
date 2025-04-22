@@ -4,6 +4,10 @@ import ca.mcgill.ecse.grocerymanagementsystem.model.GroceryManagementSystem;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Item;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Shipment;
 import ca.mcgill.ecse.grocerymanagementsystem.model.ShipmentItem;
+import java.util.ArrayList;
+import java.util.List;
+import ca.mcgill.ecse.grocerymanagementsystem.controller.TOs.TOShipment;
+import ca.mcgill.ecse.grocerymanagementsystem.controller.TOs.TOShipmentItem;
 
 import java.text.SimpleDateFormat;
 
@@ -108,4 +112,39 @@ public class ShipmentController {
 			new ShipmentItem(newQuantity, system, shipment, item);
 		}
 	}
+
+
+	public static List<TOShipment> getAllShipments() {
+    GroceryManagementSystem system = getGroceryManagementSystem();
+    List<TOShipment> result = new ArrayList<>();
+    
+    for (Shipment shipment : system.getShipments()) {
+        TOShipment toShipment = new TOShipment(
+            shipment.getShipmentNumber(),
+            shipment.getDateOrdered()
+        );
+        result.add(toShipment);
+    }
+    
+    return result;
 }
+
+public static List<TOShipmentItem> getShipmentItems(int shipmentNumber) throws GroceryStoreException {
+    Shipment shipment = findShipmentByShipmentNumber(shipmentNumber);
+    if (shipment == null) {
+        throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
+    }
+    
+    List<TOShipmentItem> result = new ArrayList<>();
+    for (ShipmentItem item : shipment.getShipmentItems()) {
+        TOShipmentItem toItem = new TOShipmentItem(
+            item.getItem().getName(),
+            item.getQuantity(),
+            shipmentNumber
+        );
+        result.add(toItem);
+    }
+    
+    return result;
+}
+
