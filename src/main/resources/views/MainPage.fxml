@@ -94,20 +94,14 @@
                      <children>
                         <TabPane prefHeight="692.8" prefWidth="631.2" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <tabs>
-                              <Tab text="Create Item">
+                              <Tab text="Item Management">
                                  <content>
                                     <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                        <children>
-                                          <fx:include source="RandomItem.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.7999999999999545" AnchorPane.topAnchor="0.0" />
+                                          <fx:include source="ItemManagement.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.7999999999999545" AnchorPane.topAnchor="0.0" />
                                        </children>
                                     </AnchorPane>
                                  </content></Tab>
-                              <Tab text="Update Item " />
-                              <Tab text="Delete Item">
-                                <content>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                                </content>
-                              </Tab>
                            </tabs>
                         </TabPane>
                      </children>

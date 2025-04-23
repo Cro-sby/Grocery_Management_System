@@ -11,79 +11,66 @@
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.VBox?>
 
-<!-- Added CheckBox import -->
-<!-- Root ScrollPane for potentially long content -->
 
-
-<ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="996.0" prefWidth="635.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="747.0" prefWidth="635.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ca.mcgill.ecse.grocerymanagementsystem.view.ItemManagementPageController">
    <content>
-        <!-- VBox directly inside ScrollPane content -->
         <VBox prefHeight="708.0" prefWidth="634.0" spacing="20.0">
             <padding>
                 <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
             </padding>
-      
-            <!-- Main Title -->
-            <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Item Management" /> <!-- CHANGED TITLE -->
-      
-            <!-- Add Item Section -->
-            <TitledPane expanded="true" text="Add New Item"> <!-- CHANGED TEXT -->
+
+            <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Item Management" />
+
+            <TitledPane expanded="true" text="Add New Item">
                 <content>
                     <VBox spacing="10.0">
                         <padding>
                             <Insets bottom="10" left="10" right="10" top="10" />
                         </padding>
-                        <TextField promptText="Item Name" /> <!-- CHANGED fx:id and prompt -->
-                        <TextField promptText="Price (in cents)" /> <!-- CHANGED fx:id and prompt -->
-                        <TextField promptText="Initial Quantity" /> <!-- ADDED Field -->
-                        <CheckBox text="Is Perishable?" /> <!-- ADDED Field -->
-                        <TextField promptText="Loyalty Points (e.g., 1-5)" /> <!-- ADDED Field -->
-                        <Button text="Add Item" /> <!-- CHANGED onAction and text -->
+                        <TextField fx:id="addItemNameInput" promptText="Item Name" />
+                        <TextField fx:id="addItemPriceInput" promptText="Price (in cents)" />
+                        <CheckBox fx:id="addItemIsPerishableInput" text="Is Perishable?" />
+                        <TextField fx:id="addItemPointsInput" promptText="Loyalty Points (e.g., 1-5)" />
+                        <Button fx:id="addItemButton" onAction="#handleAddItemClicked" text="Add Item" />
                     </VBox>
                 </content>
             </TitledPane>
-      
-            <!-- Update Item Section -->
-            <TitledPane text="Update Item Info"> <!-- CHANGED TEXT -->
+
+            <TitledPane text="Update Item Info">
                 <content>
                     <VBox spacing="10.0">
                         <padding>
                             <Insets bottom="10" left="10" right="10" top="10" />
                         </padding>
-                        <TextField promptText="Item Name to Update" /> <!-- CHANGED fx:id and prompt -->
-                        <TextField promptText="New Price (in cents)" /> <!-- ADDED Field -->
-                        <TextField promptText="New Quantity" /> <!-- ADDED Field -->
-                        <CheckBox text="Is Perishable?" /> <!-- ADDED Field -->
-                        <TextField promptText="New Loyalty Points (e.g., 1-5)" /> <!-- ADDED Field -->
-                        <Button text="Update Item" /> <!-- CHANGED onAction and text -->
+                        <TextField fx:id="updateItemNameInput" promptText="Item Name to Update" />
+                        <TextField fx:id="updateItemPriceInput" promptText="New Price (in cents)" />
+                        <TextField fx:id="updateItemPointsInput" promptText="New Loyalty Points (e.g., 1-5)" />
+                        <Button fx:id="updateItemButton" onAction="#handleUpdateItemClicked" text="Update Item" />
                     </VBox>
                 </content>
             </TitledPane>
-      
-            <!-- Delete Item Section -->
-            <TitledPane text="Delete Item"> <!-- CHANGED TEXT -->
+
+            <TitledPane text="Delete Item">
                 <content>
                     <VBox spacing="10.0">
                         <padding>
                             <Insets bottom="10" left="10" right="10" top="10" />
                         </padding>
-                        <TextField promptText="Item Name to Delete" /> <!-- CHANGED fx:id and prompt -->
-                        <Button text="Delete Item" /> <!-- CHANGED onAction and text -->
+                        <TextField fx:id="deleteItemNameInput" promptText="Item Name to Delete" />
+                        <Button fx:id="deleteItemButton" onAction="#handleDeleteItemClicked" text="Delete Item" />
                     </VBox>
                 </content>
             </TitledPane>
-      
-            <!-- Table Section - Make this container grow -->
-            <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS"> <!-- Keep VBox.vgrow -->
+
+            <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
                 <content>
-                    <TableView> <!-- CHANGED fx:id -->
+                    <TableView fx:id="itemTableView">
                         <columns>
-                            <!-- CHANGED COLUMNS -->
-                            <TableColumn prefWidth="150.0" text="Name" />
-                            <TableColumn prefWidth="75.20001220703125" text="Price" />
-                            <TableColumn prefWidth="118.39999389648438" text="Inventory Quantity" />
-                            <TableColumn prefWidth="140.79998779296875" text="Perishable" />
-                            <TableColumn prefWidth="100.0" text="Points" />
+                            <TableColumn fx:id="itemNameColumn" prefWidth="150.0" text="Name" />
+                            <TableColumn fx:id="itemPriceColumn" prefWidth="75.20001220703125" text="Price" />
+                            <TableColumn fx:id="itemQuantityColumn" prefWidth="118.39999389648438" text="Inventory Quantity" />
+                            <TableColumn fx:id="itemPerishableColumn" prefWidth="140.79998779296875" text="Perishable" />
+                            <TableColumn fx:id="itemPointsColumn" prefWidth="100.0" text="Points" />
                         </columns>
                         <columnResizePolicy>
                             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -91,11 +78,9 @@
                     </TableView>
                 </content>
             </ScrollPane>
-      
-            <!-- Refresh Button -->
-            <Button text="Refresh Table" /> <!-- CHANGED onAction -->
-      
-            <!-- Status Label -->
+
+            <Button fx:id="refreshButton" onAction="#handleRefreshClicked" text="Refresh Table" />
+
             <Label fx:id="statusLabel" text="" />
         </VBox>
    </content>
