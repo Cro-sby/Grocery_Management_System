@@ -1,15 +1,11 @@
 package ca.mcgill.ecse.grocerymanagementsystem.view;
 
-import ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryStoreException;
-import ca.mcgill.ecse.grocerymanagementsystem.controller.ShipmentController;
-import ca.mcgill.ecse.grocerymanagementsystem.controller.ShipmentProcessingController;
-import ca.mcgill.ecse.grocerymanagementsystem.controller.ItemController;
+import ca.mcgill.ecse.grocerymanagementsystem.controller.*;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Shipment;
 import ca.mcgill.ecse.grocerymanagementsystem.model.ShipmentItem;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Item;
 import ca.mcgill.ecse.grocerymanagementsystem.controller.TOs.TOItem;
 import ca.mcgill.ecse.grocerymanagementsystem.controller.TOs.TOShipment;
-import ca.mcgill.ecse.grocerymanagementsystem.controller.TOs.TOShipmentItem;
 
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -38,52 +34,39 @@ public class ShipmentManagementPageController {
     public TextField receiveShipmentNumberInput;
     public ComboBox<String> itemDropdown;
 
+
     @FXML
     private TableView<TOShipment> shipmentTableView;
     @FXML
-    private TableColumn<TOShipment, Integer> shipmentNumberColumn;
+    private TableColumn<TOShipment, String> shipmentNumberColumn;
     @FXML
     private TableColumn<TOShipment, String> shipmentDateOrderedColumn;
-    @FXML
-    private TableView<TOShipmentItem> shipmentItemTableView;
-    @FXML
-    private TableColumn<TOShipmentItem, String> shipmentItemNameColumn;
-    @FXML
-    private TableColumn<TOShipmentItem, Integer> shipmentItemQuantityColumn;
 
     @FXML
     private void initialize() {
-        // Configure Table Columns
-        shipmentNumberColumn.setCellValueFactory(new PropertyValueFactory<>("shipmentNumber"));
-        shipmentDateOrderedColumn.setCellValueFactory(new PropertyValueFactory<>("dateOrdered"));
-        shipmentItemNameColumn.setCellValueFactory(new PropertyValueFactory<>("itemName"));
-        shipmentItemQuantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        shipmentNumberColumn.setCellValueFactory(cellData ->
+                new ReadOnlyStringWrapper(cellData.getValue().getShipmentNumber()));
 
-        // Populate the item dropdown for easier selection
-        populateItemDropdown();
-
-        // Set up table selection listener to show shipment items when a shipment is selected
-        shipmentTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                loadShipmentItems(newSelection.getShipmentNumber());
-            } else {
-                shipmentItemTableView.getItems().clear();
-            }
+        shipmentDateOrderedColumn.setCellValueFactory(cellData -> {
+            java.sql.Date date = cellData.getValue().getDateOrdered();
+            String formattedDate = (date != null) ? date.toString() : "";
+            return new ReadOnlyStringWrapper(formattedDate);
         });
 
-        // Handle refresh events
+        // Refresh setup
         shipmentTableView.addEventHandler(GroceryStoreView.REFRESH, e -> {
-            List<TOShipment> shipments = ShipmentController.getAllShipments();
+            List<TOShipment> shipments = ShipmentController.getShipments();
             shipmentTableView.setItems(FXCollections.observableList(shipments));
         });
         GroceryStoreView.registerRefreshableNode(shipmentTableView);
     }
 
+
     public void handleCreateShipmentClick() {
         try {
             // Backend call
             ShipmentController.createShipment();
-            
+
             // Success Actions
             GroceryStoreView.refresh();
         } catch (GroceryStoreException e) {
@@ -94,10 +77,10 @@ public class ShipmentManagementPageController {
     public void handleDeleteShipmentClick() {
         try {
             int shipmentNumber = Integer.parseInt(deleteShipmentNumberInput.getText());
-            
+
             // Backend call
             ShipmentController.deleteShipment(shipmentNumber);
-            
+
             // Success Actions
             deleteShipmentNumberInput.setText("");
             GroceryStoreView.refresh();
@@ -112,10 +95,10 @@ public class ShipmentManagementPageController {
         try {
             int shipmentNumber = Integer.parseInt(addItemShipmentNumberInput.getText());
             String itemName = addItemNameInput.getText();
-            
+
             // Backend call
             ShipmentController.addItemToShipment(shipmentNumber, itemName);
-            
+
             // Success Actions
             addItemNameInput.setText("");
             GroceryStoreView.refresh();
@@ -131,10 +114,10 @@ public class ShipmentManagementPageController {
             int shipmentNumber = Integer.parseInt(updateQuantityShipmentNumberInput.getText());
             String itemName = updateQuantityItemNameInput.getText();
             int quantity = Integer.parseInt(updateQuantityInput.getText());
-            
+
             // Backend call
             ShipmentController.updateQuantityInShipment(shipmentNumber, itemName, quantity);
-            
+
             // Success Actions
             updateQuantityInput.setText("");
             GroceryStoreView.refresh();
@@ -148,10 +131,10 @@ public class ShipmentManagementPageController {
     public void handleReceiveShipmentClick() {
         try {
             int shipmentNumber = Integer.parseInt(receiveShipmentNumberInput.getText());
-            
+
             // Backend call
             ShipmentProcessingController.receiveShipment(shipmentNumber);
-            
+
             // Success Actions
             receiveShipmentNumberInput.setText("");
             GroceryStoreView.refresh();
@@ -162,43 +145,6 @@ public class ShipmentManagementPageController {
         }
     }
 
-    public void handleItemDropdownSelection() {
-        String selectedItem = itemDropdown.getSelectionModel().getSelectedItem();
-        if (selectedItem != null) {
-            // Set the selected item to the appropriate input field
-            if (!isNullOrBlank(addItemShipmentNumberInput.getText())) {
-                addItemNameInput.setText(selectedItem);
-            } else if (!isNullOrBlank(updateQuantityShipmentNumberInput.getText())) {
-                updateQuantityItemNameInput.setText(selectedItem);
-            }
-        }
-    }
-
-    /**
-     * Loads shipment items for a specific shipment.
-     */
-    private void loadShipmentItems(int shipmentNumber) {
-        try {
-            // Get shipment items for the selected shipment
-            List<TOShipmentItem> shipmentItemsList = ShipmentController.getShipmentItems(shipmentNumber);
-            shipmentItemTableView.setItems(FXCollections.observableList(shipmentItemsList));
-            shipmentItemTableView.refresh();
-        } catch (Exception e) {
-            ViewUtils.showErrorMessage("Error loading shipment items: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Populates the item dropdown with all available items.
-     */
-    private void populateItemDropdown() {
-        List<TOItem> items = ItemController.getAllItems();
-        ObservableList<String> itemNames = FXCollections.observableArrayList();
-        for (TOItem item : items) {
-            itemNames.add(item.getName());
-        }
-        itemDropdown.setItems(itemNames);
-    }
 
     /**
      * Utility method to check for null or blank strings.

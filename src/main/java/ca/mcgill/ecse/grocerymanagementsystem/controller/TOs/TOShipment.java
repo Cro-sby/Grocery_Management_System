@@ -1,0 +1,71 @@
+package ca.mcgill.ecse.grocerymanagementsystem.controller.TOs;
+
+import java.sql.Date;
+
+/**
+
+ Shipment Transfer Object*/
+// line 3 "model.ump"
+// line 11 "model.ump"
+public class TOShipment
+{
+
+    //------------------------
+    // MEMBER VARIABLES
+    //------------------------
+
+    //TOShipment Attributes
+    private String shipmentNumber;
+    private Date dateOrdered;
+
+    //------------------------
+    // CONSTRUCTOR
+    //------------------------
+
+    public TOShipment(String aShipmentNumber, Date aDateOrdered)
+    {
+        shipmentNumber = aShipmentNumber;
+        dateOrdered = aDateOrdered;
+    }
+
+    //------------------------
+    // INTERFACE
+    //------------------------
+
+    public boolean setShipmentNumber(String aShipmentNumber)
+    {
+        boolean wasSet = false;
+        shipmentNumber = aShipmentNumber;
+        wasSet = true;
+        return wasSet;
+    }
+
+    public boolean setDateOrdered(Date aDateOrdered)
+    {
+        boolean wasSet = false;
+        dateOrdered = aDateOrdered;
+        wasSet = true;
+        return wasSet;
+    }
+
+    public String getShipmentNumber()
+    {
+        return shipmentNumber;
+    }
+
+    public Date getDateOrdered()
+    {
+        return dateOrdered;
+    }
+
+    public void delete()
+    {}
+
+
+    public String toString()
+    {
+        return super.toString() + "["+
+                "shipmentNumber" + ":" + getShipmentNumber()+ "]" + System.getProperties().getProperty("line.separator") +
+                "  " + "dateOrdered" + "=" + (getDateOrdered() != null ? !getDateOrdered().equals(this)  ? getDateOrdered().toString().replaceAll("  ","    ") : "this" : "null");
+    }
+}

@@ -1,15 +1,16 @@
 package ca.mcgill.ecse.grocerymanagementsystem.controller;
 
+import ca.mcgill.ecse.grocerymanagementsystem.controller.TOs.TOShipment;
 import ca.mcgill.ecse.grocerymanagementsystem.model.GroceryManagementSystem;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Item;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Shipment;
 import ca.mcgill.ecse.grocerymanagementsystem.model.ShipmentItem;
-import java.util.ArrayList;
-import java.util.List;
-import ca.mcgill.ecse.grocerymanagementsystem.controller.TOs.TOShipment;
-import ca.mcgill.ecse.grocerymanagementsystem.controller.TOs.TOShipmentItem;
 
 import java.text.SimpleDateFormat;
+
+import java.util.ArrayList;
+import java.sql.Date;
+import java.util.List;
 
 import static ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryManagementSystemController.getGroceryManagementSystem;
 
@@ -71,6 +72,19 @@ public class ShipmentController {
 		new ShipmentItem(1, system, shipment, item);
 	}
 
+	public static List<TOShipment> getShipments() {
+		GroceryManagementSystem system = getGroceryManagementSystem();
+		List<TOShipment> result = new ArrayList<>();
+
+		for (Shipment shipment : system.getShipments()) {
+			String numberStr = String.valueOf(shipment.getShipmentNumber());
+			Date dateOrdered = shipment.getDateOrdered(); // may be null
+			result.add(new TOShipment(numberStr, dateOrdered));
+		}
+
+		return result;
+	}
+
 
 	public static void updateQuantityInShipment(int shipmentNumber, String itemName, int newQuantity) throws GroceryStoreException {
 		if (newQuantity < 0) {
@@ -112,39 +126,4 @@ public class ShipmentController {
 			new ShipmentItem(newQuantity, system, shipment, item);
 		}
 	}
-
-
-	public static List<TOShipment> getAllShipments() {
-    GroceryManagementSystem system = getGroceryManagementSystem();
-    List<TOShipment> result = new ArrayList<>();
-    
-    for (Shipment shipment : system.getShipments()) {
-        TOShipment toShipment = new TOShipment(
-            shipment.getShipmentNumber(),
-            shipment.getDateOrdered()
-        );
-        result.add(toShipment);
-    }
-    
-    return result;
 }
-
-public static List<TOShipmentItem> getShipmentItems(int shipmentNumber) throws GroceryStoreException {
-    Shipment shipment = findShipmentByShipmentNumber(shipmentNumber);
-    if (shipment == null) {
-        throw new GroceryStoreException("there is no shipment with number \"" + shipmentNumber + "\"");
-    }
-    
-    List<TOShipmentItem> result = new ArrayList<>();
-    for (ShipmentItem item : shipment.getShipmentItems()) {
-        TOShipmentItem toItem = new TOShipmentItem(
-            item.getItem().getName(),
-            item.getQuantity(),
-            shipmentNumber
-        );
-        result.add(toItem);
-    }
-    
-    return result;
-}
-
