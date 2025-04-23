@@ -77,9 +77,15 @@ public class ShipmentController {
 		List<TOShipment> result = new ArrayList<>();
 
 		for (Shipment shipment : system.getShipments()) {
-			String numberStr = String.valueOf(shipment.getShipmentNumber());
-			Date dateOrdered = shipment.getDateOrdered(); // may be null
-			result.add(new TOShipment(numberStr, dateOrdered));
+			java.sql.Date dateToDisplay = shipment.getDateOrdered();
+			if (dateToDisplay == null) {
+				dateToDisplay = new java.sql.Date(System.currentTimeMillis());
+			}
+			TOShipment toShipment = new TOShipment(
+					"" + shipment.getShipmentNumber(),
+					dateToDisplay
+			);
+			result.add(toShipment);
 		}
 
 		return result;
