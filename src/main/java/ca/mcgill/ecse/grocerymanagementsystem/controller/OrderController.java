@@ -100,7 +100,7 @@ public class OrderController {
 			throw new GroceryStoreException("there is no item called \"" + itemName + "\"");
 		}
 
-		if (item.numberOfOrderItems() <= 0) {
+		if (item.getQuantityInInventory() <= 0) {
 			throw new GroceryStoreException("item \"" + itemName + "\" is out of stock");
 		}
 

@@ -163,6 +163,7 @@ public class OrderPageController {
         int ordernum = Integer.parseInt(OrderNumberCheck.getText());
         try {
             OrderProcessingController.checkOut(ordernum);
+            GroceryStoreView.refresh();
             OrderNumberCheck.setText("");
         } catch (GroceryStoreException e) {
             ViewUtils.showErrorMessage(String.valueOf(e));
@@ -179,6 +180,7 @@ public class OrderPageController {
         }
         try {
             OrderProcessingController.payForOrder(ordernum, UsingPoints);
+            GroceryStoreView.refresh();
             OrderNumberPay.setText("");
             UsePoints.setText("");
         } catch (GroceryStoreException e) {
@@ -191,6 +193,7 @@ public class OrderPageController {
         String employee = EmployeeUsername.getText();
         try {
             OrderProcessingController.assignOrderToEmployee(ordernum, employee);
+            GroceryStoreView.refresh();
             OrderNumberAss.setText("");
             EmployeeUsername.setText("");
         } catch (GroceryStoreException e) {
@@ -202,6 +205,7 @@ public class OrderPageController {
         int ordernum = Integer.parseInt(OrderNumberFinish.getText());
         try {
             OrderProcessingController.finishOrderAssembly(ordernum);
+            GroceryStoreView.refresh();
             OrderNumberFinish.setText("");
         } catch (GroceryStoreException e) {
             ViewUtils.showErrorMessage(String.valueOf(e));
@@ -212,6 +216,7 @@ public class OrderPageController {
         int ordernum = Integer.parseInt(OrderNumberDeliver.getText());
         try {
             OrderProcessingController.deliverOrder(ordernum);
+            GroceryStoreView.refresh();
             OrderNumberDeliver.setText("");
         } catch (GroceryStoreException e) {
             ViewUtils.showErrorMessage(String.valueOf(e));
@@ -222,6 +227,7 @@ public class OrderPageController {
         int ordernum = Integer.parseInt(OrderNumberCancel.getText());
         try {
             OrderProcessingController.cancelOrder(ordernum);
+            GroceryStoreView.refresh();
             OrderNumberCancel.setText("");
         } catch (GroceryStoreException e) {
             ViewUtils.showErrorMessage(String.valueOf(e));
