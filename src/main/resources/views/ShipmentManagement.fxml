@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="813.0" prefWidth="645.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ca.mcgill.ecse.grocerymanagementsystem.view.ShipmentManagementPageController">
+  <tabs>
+    <Tab text="Shipment Management">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <VBox spacing="10.0">
+                     <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                     </padding>
+                     <children>
+                        <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Shipment Management" />
+                        <TitledPane text="Create Shipment">
+                           <content>
+                              <VBox prefHeight="40.0" prefWidth="595.0" spacing="10.0">
+                                 <padding>
+                                    <Insets bottom="10" left="10" right="10" top="10" />
+                                 </padding>
+                                 <children>
+                                    <Button onAction="#handleCreateShipmentClick" text="Create" VBox.vgrow="NEVER" />
+                                 </children>
+                              </VBox>
+                           </content>
+                        </TitledPane>
+                        <TitledPane text="Delete Shipment">
+                           <content>
+                              <VBox spacing="10.0">
+                                 <padding>
+                                    <Insets bottom="10" left="10" right="10" top="10" />
+                                 </padding>
+                                 <children>
+                                    <TextField fx:id="deleteShipmentNumberInput" promptText="Shipment Number" VBox.vgrow="NEVER" />
+                                    <Button onAction="#handleDeleteShipmentClick" text="Delete" VBox.vgrow="NEVER" />
+                                 </children>
+                              </VBox>
+                           </content>
+                        </TitledPane>
+                        <TitledPane text="Receive Shipment">
+                           <content>
+                              <VBox spacing="10.0">
+                                 <padding>
+                                    <Insets bottom="10" left="10" right="10" top="10" />
+                                 </padding>
+                                 <children>
+                                    <TextField fx:id="receiveShipmentNumberInput" promptText="Shipment Number" VBox.vgrow="NEVER" />
+                                    <Button onAction="#handleReceiveShipmentClick" text="Receive Shipment" VBox.vgrow="NEVER" />
+                                 </children>
+                              </VBox>
+                           </content>
+                        </TitledPane>
+                        <Label fx:id="statusLabel" style="-fx-text-fill: green; -fx-font-weight: bold;" text="" VBox.vgrow="NEVER" />
+                        <Label text="Please minimize the drop-downs above for a bigger view table." underline="true" />
+                        <AnchorPane VBox.vgrow="ALWAYS">
+                           <children>
+                              <VBox prefHeight="287.2" prefWidth="550.4" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <padding>
+                                    <Insets bottom="10" left="10" right="10" top="10" />
+                                 </padding>
+                                 <children>
+                                    <ScrollPane fitToHeight="true" fitToWidth="true">
+                                       <content>
+                                          <TableView fx:id="shipmentTableView" prefHeight="534.0" prefWidth="527.0">
+                                             <columns>
+                                                <TableColumn fx:id="shipmentNumberColumn" prefWidth="284.80007857084274" text="Shipment Number" />
+                                                <TableColumn fx:id="shipmentDateOrderedColumn" prefWidth="288.7999450683594" text="Date Ordered" />
+                                             </columns>
+                                          </TableView>
+                                       </content>
+                                    </ScrollPane>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </VBox>
+               </children></AnchorPane>
+      </content>
+    </Tab>
+    <Tab text="Shipment Item Management">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="805.0" prefWidth="646.0">
+               <children>
+                  <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="996.0" prefWidth="635.0">
+                     <content>
+                        <VBox prefHeight="994.0" prefWidth="601.0" spacing="20.0">
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                           </padding>
+                           <children>
+                              <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Shipment-Item Management" />
+                              <TitledPane text="Add Item to Shipment">
+                                 <content>
+                                    <VBox spacing="10.0">
+                                       <padding>
+                                          <Insets bottom="10" left="10" right="10" top="10" />
+                                       </padding>
+                                       <children>
+                                          <TextField fx:id="addItemShipmentNumberInput" promptText="Shipment Number" />
+                                          <TextField fx:id="addItemNameInput" promptText="Item Name" />
+                                          <Button onAction="#handleAddItemToShipmentClick" text="Add Item" />
+                                       </children>
+                                    </VBox>
+                                 </content>
+                              </TitledPane>
+                              <TitledPane text="Update Item Quantity in Shipment ">
+                                 <content>
+                                    <VBox spacing="10.0">
+                                       <padding>
+                                          <Insets bottom="10" left="10" right="10" top="10" />
+                                       </padding>
+                                       <children>
+                                          <TextField fx:id="updateQuantityShipmentNumberInput" promptText="Shipment Number" />
+                                          <TextField fx:id="updateQuantityItemNameInput" promptText="Item Name" />
+                                          <TextField fx:id="updateQuantityInput" promptText="New Quantity" />
+                                          <Button onAction="#handleUpdateQuantityClick" text="Update Quantity" />
+                                       </children>
+                                    </VBox>
+                                 </content>
+                              </TitledPane>
+                              <Label fx:id="statusLabel1" text="" />
+                           </children>
+                        </VBox>
+                     </content>
+                  </ScrollPane>
+               </children></AnchorPane>
+      </content>
+    </Tab>
+  </tabs>
+</TabPane>

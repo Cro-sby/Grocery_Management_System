@@ -1,11 +1,16 @@
 package ca.mcgill.ecse.grocerymanagementsystem.controller;
 
+import ca.mcgill.ecse.grocerymanagementsystem.controller.TOs.TOShipment;
 import ca.mcgill.ecse.grocerymanagementsystem.model.GroceryManagementSystem;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Item;
 import ca.mcgill.ecse.grocerymanagementsystem.model.Shipment;
 import ca.mcgill.ecse.grocerymanagementsystem.model.ShipmentItem;
 
 import java.text.SimpleDateFormat;
+
+import java.util.ArrayList;
+import java.sql.Date;
+import java.util.List;
 
 import static ca.mcgill.ecse.grocerymanagementsystem.controller.GroceryManagementSystemController.getGroceryManagementSystem;
 
@@ -65,6 +70,19 @@ public class ShipmentController {
 		}
 
 		new ShipmentItem(1, system, shipment, item);
+	}
+
+	public static List<TOShipment> getShipments() {
+		GroceryManagementSystem system = getGroceryManagementSystem();
+		List<TOShipment> result = new ArrayList<>();
+
+		for (Shipment shipment : system.getShipments()) {
+			String numberStr = String.valueOf(shipment.getShipmentNumber());
+			Date dateOrdered = shipment.getDateOrdered(); // may be null
+			result.add(new TOShipment(numberStr, dateOrdered));
+		}
+
+		return result;
 	}
 
 

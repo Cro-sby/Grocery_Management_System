@@ -1,0 +1,90 @@
+//%% NEW FILE TOShipmentItem BEGINS HERE %%
+
+/*PLEASE DO NOT EDIT THIS CODE*/
+/*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
+
+
+
+/**
+ * ShipmentItem Transfer Object
+ */
+// line 3 "model.ump"
+// line 11 "model.ump"
+public class TOShipmentItem
+{
+
+  //------------------------
+  // MEMBER VARIABLES
+  //------------------------
+
+  //TOShipmentItem Attributes
+  private String itemName;
+  private String quantity;
+  private String shipmentNumber;
+
+  //------------------------
+  // CONSTRUCTOR
+  //------------------------
+
+  public TOShipmentItem(String aItemName, String aQuantity, String aShipmentNumber)
+  {
+    itemName = aItemName;
+    quantity = aQuantity;
+    shipmentNumber = aShipmentNumber;
+  }
+
+  //------------------------
+  // INTERFACE
+  //------------------------
+
+  public boolean setItemName(String aItemName)
+  {
+    boolean wasSet = false;
+    itemName = aItemName;
+    wasSet = true;
+    return wasSet;
+  }
+
+  public boolean setQuantity(String aQuantity)
+  {
+    boolean wasSet = false;
+    quantity = aQuantity;
+    wasSet = true;
+    return wasSet;
+  }
+
+  public boolean setShipmentNumber(String aShipmentNumber)
+  {
+    boolean wasSet = false;
+    shipmentNumber = aShipmentNumber;
+    wasSet = true;
+    return wasSet;
+  }
+
+  public String getItemName()
+  {
+    return itemName;
+  }
+
+  public String getQuantity()
+  {
+    return quantity;
+  }
+
+  public String getShipmentNumber()
+  {
+    return shipmentNumber;
+  }
+
+  public void delete()
+  {}
+
+
+  public String toString()
+  {
+    return super.toString() + "["+
+            "itemName" + ":" + getItemName()+ "," +
+            "quantity" + ":" + getQuantity()+ "," +
+            "shipmentNumber" + ":" + getShipmentNumber()+ "]";
+  }
+}
